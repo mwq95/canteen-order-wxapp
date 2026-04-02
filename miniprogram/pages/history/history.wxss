@@ -1,0 +1,117 @@
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.order-list {
+  padding-bottom: 20rpx;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.order-date {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-dishes {
+  margin-bottom: 20rpx;
+}
+
+.dish-item {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  gap: 12rpx;
+}
+
+.dish-tag {
+  background: #f0f0f0;
+  color: #666;
+  font-size: 22rpx;
+}
+
+.dish-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.dish-price {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.order-total {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.price {
+  font-size: 36rpx;
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+.order-actions {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.action-btn {
+  padding: 12rpx 32rpx;
+  border-radius: 48rpx;
+  font-size: 24rpx;
+  line-height: 1;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.delete-btn {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.evaluate-btn {
+  background: #1890FF;
+  color: #fff;
+}
+
+.evaluated-text {
+  color: #52c41a;
+  font-size: 24rpx;
+}

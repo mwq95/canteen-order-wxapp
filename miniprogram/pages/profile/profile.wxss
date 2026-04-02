@@ -1,0 +1,79 @@
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+}
+
+.user-card {
+  background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+  border-radius: 20rpx;
+  padding: 60rpx 40rpx;
+  margin-bottom: 30rpx;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.user-detail {
+  flex: 1;
+}
+
+.nickname {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.login-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 16rpx 48rpx;
+}
+
+.login-btn::after {
+  border: none;
+}
+
+.menu-list {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  margin-right: 20rpx;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+}
+
+.menu-arrow {
+  font-size: 40rpx;
+  color: #ccc;
+}

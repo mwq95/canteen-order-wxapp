@@ -1,0 +1,102 @@
+page {
+  background: #f6f6f6;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary {
+  background: #1890FF;
+  color: #fff;
+  border-radius: 48rpx;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border-radius: 48rpx;
+}
+
+.text-primary {
+  color: #1890FF;
+}
+
+.text-gray {
+  color: #999;
+}
+
+.text-success {
+  color: #52c41a;
+}
+
+.text-warning {
+  color: #faad14;
+}
+
+.text-danger {
+  color: #ff4d4f;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-20 {
+  margin-top: 20rpx;
+}
+
+.mb-20 {
+  margin-bottom: 20rpx;
+}
+
+.p-20 {
+  padding: 20rpx;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.tag-primary {
+  background: #e6f7ff;
+  color: #1890FF;
+}
+
+.tag-success {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.tag-warning {
+  background: #fffbe6;
+  color: #faad14;
+}

@@ -1,0 +1,166 @@
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+}
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.nav-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 36rpx;
+  color: #666;
+}
+
+.date-display {
+  font-size: 32rpx;
+  color: #1890FF;
+  font-weight: bold;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.order-tip {
+  background: #fffbe6;
+  border: 2rpx solid #faad14;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.tip-text {
+  color: #faad14;
+  font-size: 26rpx;
+}
+
+.menu-content {
+  margin-bottom: 140rpx;
+}
+
+.meal-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.meal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.dish-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.dish-item {
+  background: #f8f9fa;
+  border: 2rpx solid transparent;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 45%;
+  max-width: 48%;
+  transition: all 0.3s;
+}
+
+.dish-item.selected {
+  background: #e6f7ff;
+  border-color: #1890FF;
+}
+
+.dish-info {
+  flex: 1;
+}
+
+.dish-name {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.dish-price {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
+.check-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background: #1890FF;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  margin-left: 16rpx;
+}
+
+.submit-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 20rpx 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.total-price {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.price {
+  font-size: 36rpx;
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+.submit-btn {
+  background: #1890FF;
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 20rpx 50rpx;
+  line-height: 1;
+}
+
+.submit-btn::after {
+  border: none;
+}

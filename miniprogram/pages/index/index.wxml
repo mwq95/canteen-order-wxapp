@@ -1,0 +1,41 @@
+<view class="container">
+  <view wx:if="{{showInitButton}}" class="init-card">
+    <view class="init-title">首次使用，请初始化数据库</view>
+    <view class="init-desc">点击下方按钮创建所需的数据库集合</view>
+    <button class="init-btn" bindtap="initDatabase">初始化数据库</button>
+  </view>
+
+  <view class="date-nav">
+    <view class="nav-btn" bindtap="prevDay">
+      <text>&lt;</text>
+    </view>
+    <view class="date-display">{{currentDateStr}}</view>
+    <view class="nav-btn" bindtap="nextDay">
+      <text>&gt;</text>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{!menuData}}" class="empty">
+    <text>该日期菜单尚未发布</text>
+  </view>
+
+  <view wx:else class="menu-content">
+    <view class="meal-section" wx:for="{{menuData.meals}}" wx:key="type">
+      <view class="meal-title">{{item.type}}</view>
+      <view class="dish-list">
+        <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name">
+          <view class="dish-name">{{dish.name}}</view>
+          <view class="dish-price" wx:if="{{dish.price}}">¥{{dish.price}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="order-btn-wrapper" wx:if="{{!loading && menuData}}">
+    <button class="order-btn" bindtap="goToOrder">立即订餐</button>
+  </view>
+</view>

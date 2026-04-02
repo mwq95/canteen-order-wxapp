@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="header">
+    <view class="title">管理后台</view>
+  </view>
+
+  <view class="menu-grid">
+    <view class="menu-item" bindtap="goToMenu">
+      <view class="menu-icon">📋</view>
+      <view class="menu-text">菜单管理</view>
+    </view>
+    <view class="menu-item" bindtap="goToOrderList">
+      <view class="menu-icon">📝</view>
+      <view class="menu-text">订餐名单</view>
+    </view>
+    <view class="menu-item" bindtap="goToStatistics">
+      <view class="menu-icon">📊</view>
+      <view class="menu-text">数据分析</view>
+    </view>
+  </view>
+</view>

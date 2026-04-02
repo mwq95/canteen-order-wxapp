@@ -1,0 +1,50 @@
+<view class="container">
+  <view class="date-picker">
+    <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+      <view class="picker-text">{{selectedDate}}</view>
+    </picker>
+  </view>
+
+  <view class="meal-section" wx:for="{{meals}}" wx:key="type" wx:for-index="mealIndex">
+    <view class="meal-header">
+      <view class="meal-title">{{item.type}}</view>
+      <button class="add-btn" data-index="{{mealIndex}}" bindtap="showAddDish">+ 添加菜品</button>
+    </view>
+    
+    <view wx:if="{{item.dishes.length === 0}}" class="empty-dishes">
+      <text>暂无菜品</text>
+    </view>
+    
+    <view wx:else class="dish-list">
+      <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name" wx:for-index="dishIndex">
+        <view class="dish-info">
+          <text class="dish-name">{{dish.name}}</text>
+          <text wx:if="{{dish.price}}" class="dish-price">¥{{dish.price}}</text>
+        </view>
+        <view class="delete-btn" data-meal-index="{{mealIndex}}" data-dish-index="{{dishIndex}}" bindtap="deleteDish">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="save-btn-wrapper">
+    <button class="save-btn" bindtap="saveMenu">保存菜单</button>
+  </view>
+
+  <view wx:if="{{showAddDishModal}}" class="modal-mask" bindtap="cancelAddDish">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-title">添加菜品</view>
+      <view class="modal-input-group">
+        <text class="label">菜品名称</text>
+        <input class="input" placeholder="请输入菜品名称" value="{{newDishName}}" bindinput="onDishNameInput" />
+      </view>
+      <view class="modal-input-group">
+        <text class="label">价格（可选）</text>
+        <input class="input" type="digit" placeholder="请输入价格" value="{{newDishPrice}}" bindinput="onDishPriceInput" />
+      </view>
+      <view class="modal-actions">
+        <button class="modal-btn cancel-btn" bindtap="cancelAddDish">取消</button>
+        <button class="modal-btn confirm-btn" bindtap="addDish">确定</button>
+      </view>
+    </view>
+  </view>
+</view>
