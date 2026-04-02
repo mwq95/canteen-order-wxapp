@@ -1,0 +1,139 @@
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+}
+
+.init-card {
+  background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+  border-radius: 20rpx;
+  padding: 50rpx 40rpx;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.init-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 16rpx;
+}
+
+.init-desc {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 30rpx;
+}
+
+.init-btn {
+  background: #fff;
+  color: #1890FF;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 20rpx 60rpx;
+  display: inline-block;
+}
+
+.init-btn::after {
+  border: none;
+}
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.nav-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 36rpx;
+  color: #666;
+}
+
+.date-display {
+  font-size: 32rpx;
+  color: #1890FF;
+  font-weight: bold;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.menu-content {
+  margin-bottom: 120rpx;
+}
+
+.meal-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.meal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.dish-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.dish-item {
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.dish-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.dish-price {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
+.order-btn-wrapper {
+  position: fixed;
+  bottom: 40rpx;
+  left: 20rpx;
+  right: 20rpx;
+}
+
+.order-btn {
+  background: #1890FF;
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  padding: 24rpx 0;
+}
+
+.order-btn::after {
+  border: none;
+}

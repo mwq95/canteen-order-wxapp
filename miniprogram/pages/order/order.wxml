@@ -1,0 +1,54 @@
+<view class="container">
+  <view class="date-nav">
+    <view class="nav-btn" bindtap="prevDay">
+      <text>&lt;</text>
+    </view>
+    <view class="date-display">{{selectedDateStr}}</view>
+    <view class="nav-btn" bindtap="nextDay">
+      <text>&gt;</text>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{!menuData}}" class="empty">
+    <text>该日期菜单尚未发布</text>
+  </view>
+
+  <view wx:else class="menu-content">
+    <view wx:if="{{existingOrder}}" class="order-tip">
+      <text class="tip-text">您已订餐，可修改菜品</text>
+    </view>
+
+    <view class="meal-section" wx:for="{{menuData.meals}}" wx:key="type">
+      <view class="meal-title">{{item.type}}</view>
+      <view class="dish-list">
+        <view 
+          class="dish-item {{selectedDishes[item.type + '-' + dish.name] ? 'selected' : ''}}" 
+          wx:for="{{item.dishes}}" 
+          wx:for-item="dish" 
+          wx:key="name"
+          data-meal-type="{{item.type}}"
+          data-dish-name="{{dish.name}}"
+          data-price="{{dish.price}}"
+          bindtap="toggleDish"
+        >
+          <view class="dish-info">
+            <view class="dish-name">{{dish.name}}</view>
+            <view class="dish-price" wx:if="{{dish.price}}">¥{{dish.price}}</view>
+          </view>
+          <view class="check-icon" wx:if="{{selectedDishes[item.type + '-' + dish.name]}}">✓</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="submit-bar" wx:if="{{!loading && menuData}}">
+    <view class="total-price">总计：<text class="price">¥{{totalPrice}}</text></view>
+    <button class="submit-btn" bindtap="submitOrder">
+      {{existingOrder ? '修改订单' : '提交订单'}}
+    </button>
+  </view>
+</view>

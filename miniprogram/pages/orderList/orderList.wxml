@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="date-picker">
+    <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+      <view class="picker-text">{{selectedDate}}</view>
+    </picker>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{orderList.length === 0}}" class="empty">
+    <text>暂无订餐记录</text>
+  </view>
+
+  <view wx:else class="order-list">
+    <view class="summary-card">
+      <text class="summary-text">订餐人数：<text class="summary-count">{{orderList.length}}</text> 人</text>
+    </view>
+    
+    <view class="order-card" wx:for="{{orderList}}" wx:key="_id">
+      <view class="order-header">
+        <view class="order-id">订单 #{{index + 1}}</view>
+        <view class="order-status tag {{item.status === 'completed' ? 'tag-success' : 'tag-primary'}}">
+          {{item.status === 'completed' ? '已完成' : '待用餐'}}
+        </view>
+      </view>
+      
+      <view class="order-dishes">
+        <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name">
+          <text class="dish-tag tag">{{dish.mealType}}</text>
+          <text class="dish-name">{{dish.name}}</text>
+        </view>
+      </view>
+      
+      <view class="order-footer" wx:if="{{item.status !== 'completed'}}">
+        <button class="action-btn" data-id="{{item._id}}" bindtap="markAsCompleted">标记完成</button>
+      </view>
+    </view>
+  </view>
+</view>

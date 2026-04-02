@@ -1,0 +1,194 @@
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+  padding-bottom: 140rpx;
+}
+
+.date-picker {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.picker-text {
+  font-size: 32rpx;
+  color: #1890FF;
+  font-weight: bold;
+}
+
+.meal-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.meal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.add-btn {
+  background: #1890FF;
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 24rpx;
+  padding: 12rpx 24rpx;
+  line-height: 1;
+}
+
+.add-btn::after {
+  border: none;
+}
+
+.empty-dishes {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.dish-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.dish-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+}
+
+.dish-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.dish-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.dish-price {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
+.delete-btn {
+  font-size: 24rpx;
+  color: #ff4d4f;
+  padding: 8rpx 16rpx;
+}
+
+.save-btn-wrapper {
+  position: fixed;
+  bottom: 40rpx;
+  left: 20rpx;
+  right: 20rpx;
+}
+
+.save-btn {
+  background: #1890FF;
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  padding: 24rpx 0;
+}
+
+.save-btn::after {
+  border: none;
+}
+
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 20rpx;
+  width: 80%;
+  padding: 40rpx;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.modal-input-group {
+  margin-bottom: 30rpx;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.input {
+  width: 100%;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 40rpx;
+}
+
+.modal-btn {
+  flex: 1;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 20rpx 0;
+}
+
+.modal-btn::after {
+  border: none;
+}
+
+.cancel-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.confirm-btn {
+  background: #1890FF;
+  color: #fff;
+}

@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="date-picker">
+    <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+      <view class="picker-text">{{selectedDate}}</view>
+    </picker>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{!statistics}}" class="empty">
+    <text>暂无数据</text>
+  </view>
+
+  <view wx:else>
+    <view class="stat-card">
+      <view class="stat-title">订餐人数</view>
+      <view class="stat-value">{{statistics.totalOrders}} 人</view>
+    </view>
+
+    <view class="stat-card">
+      <view class="stat-title">菜品受欢迎程度</view>
+      <view class="dish-rank">
+        <view class="dish-item" wx:for="{{statistics.dishStats}}" wx:key="name">
+          <view class="dish-rank">{{index + 1}}</view>
+          <view class="dish-info">
+            <text class="dish-tag tag">{{item.mealType}}</text>
+            <text class="dish-name">{{item.name}}</text>
+          </view>
+          <view class="dish-count">{{item.count}} 份</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

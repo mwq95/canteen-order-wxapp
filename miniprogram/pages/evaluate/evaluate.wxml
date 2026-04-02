@@ -1,0 +1,46 @@
+<view class="container">
+  <view wx:if="{{orderData}}" class="order-info">
+    <view class="order-date">{{orderData.date}}</view>
+  </view>
+
+  <view wx:if="{{orderData}}" class="evaluate-list">
+    <view class="evaluate-item" wx:for="{{orderData.dishes}}" wx:key="name" wx:for-index="index">
+      <view class="dish-header">
+        <text class="dish-tag tag">{{item.mealType}}</text>
+        <text class="dish-name">{{item.name}}</text>
+      </view>
+      
+      <view class="rating-section">
+        <text class="rating-label">评分：</text>
+        <view class="stars">
+          <view 
+            wx:for="{{[1,2,3,4,5]}}" 
+            wx:for-item="star" 
+            wx:key="*this"
+            class="star {{ratings[index] >= star ? 'active' : ''}}"
+            data-index="{{index}}"
+            data-star="{{star}}"
+            bindtap="setRating"
+          >
+            ★
+          </view>
+        </view>
+      </view>
+
+      <view class="comment-section">
+        <text class="comment-label">评价：</text>
+        <textarea 
+          class="comment-input" 
+          placeholder="请输入您的评价（可选）"
+          value="{{comments[index]}}"
+          data-index="{{index}}"
+          bindinput="onCommentInput"
+        ></textarea>
+      </view>
+    </view>
+  </view>
+
+  <view class="submit-wrapper">
+    <button class="submit-btn" bindtap="submitEvaluation">提交评价</button>
+  </view>
+</view>
