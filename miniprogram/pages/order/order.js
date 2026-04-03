@@ -225,6 +225,11 @@ Page({
     return `${month}月${day}日`;
   },
 
+  isDishSelected(mealType, dishName) {
+    const dishes = this.data.selectedDishes[mealType] || [];
+    return dishes.indexOf(dishName) !== -1;
+  },
+
   toggleDish(e) {
     const { mealType, dishName } = e.currentTarget.dataset;
     
@@ -249,7 +254,7 @@ Page({
     selectedDishes[mealType] = dishes;
     this.setData({ selectedDishes });
   },
-
+  
   submitOrder(e) {
     const mealType = e.currentTarget.dataset.mealType;
     const dishes = this.data.selectedDishes[mealType];
