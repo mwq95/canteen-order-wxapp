@@ -32,6 +32,19 @@
   font-weight: bold;
 }
 
+.deadline-info {
+  background: #f0f0f0;
+  border-radius: 8rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.deadline-info text {
+  font-size: 24rpx;
+  color: #666;
+}
+
 .loading, .empty {
   text-align: center;
   padding: 100rpx 0;
@@ -65,13 +78,48 @@
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
+.meal-section.disabled {
+  opacity: 0.6;
+}
+
+.meal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
 .meal-title {
   font-size: 32rpx;
   font-weight: bold;
   color: #333;
-  margin-bottom: 20rpx;
-  padding-bottom: 16rpx;
-  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.meal-deadline {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
+.meal-ordered {
+  font-size: 24rpx;
+  color: #52c41a;
+}
+
+.meal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.ordered-dishes {
+  flex: 1;
+  font-size: 24rpx;
+  color: #666;
 }
 
 .dish-list {
@@ -97,6 +145,11 @@
 .dish-item.selected {
   background: #e6f7ff;
   border-color: #1890FF;
+}
+
+.dish-item.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .dish-info {
@@ -157,8 +210,13 @@
   color: #fff;
   border-radius: 48rpx;
   font-size: 28rpx;
-  padding: 20rpx 50rpx;
+  padding: 16rpx 40rpx;
   line-height: 1;
+}
+
+.submit-btn.disabled {
+  background: #d9d9d9;
+  color: #999;
 }
 
 .submit-btn::after {

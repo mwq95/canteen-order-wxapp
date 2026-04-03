@@ -28,13 +28,46 @@ Page({
     this.loadOrders();
   },
 
+  calculateStatus(order) {
+    const now = new Date();
+    const orderDate = new Date(order.date);
+    const deadlineMap = {
+      '早餐': '09:00',
+      '午餐': '13:00',
+      '晚餐': '19:00'
+    };
+    
+    if (order.status === 'completed') {
+      return 'completed';
+    }
+    
+    const deadline = deadlineMap[order.mealType];
+    if (!deadline) return order.status;
+    
+    const [deadlineHour, deadlineMinute] = deadline.split(':').map(Number);
+    const deadlineTime = new Date(orderDate);
+    deadlineTime.setHours(deadlineHour, deadlineMinute, 0, 0);
+    
+    if (now > deadlineTime) {
+      return 'completed';
+    }
+    return 'pending';
+  },
+
   loadOrders() {
     const db = wx.cloud.database();
     const date = this.data.selectedDate;
     
-    db.collection('orders').where({ date }).get().then(res => {
+    db.collection('orders').where({ 
+      date,
+      status: db.command.neq('cancelled')
+    }).get().then(res => {
+      const ordersWithStatus = res.data.map(order => ({
+        ...order,
+        displayStatus: this.calculateStatus(order)
+      }));
       this.setData({
-        orderList: res.data,
+        orderList: ordersWithStatus,
         loading: false
       });
     }).catch(err => {
@@ -44,36 +77,6 @@ Page({
         title: '加载失败',
         icon: 'none'
       });
-    });
-  },
-
-  markAsCompleted(e) {
-    const orderId = e.currentTarget.dataset.id;
-    wx.showModal({
-      title: '提示',
-      content: '确定要标记为已完成吗？',
-      success: res => {
-        if (res.confirm) {
-          const db = wx.cloud.database();
-          db.collection('orders').doc(orderId).update({
-            data: {
-              status: 'completed',
-              updateTime: new Date()
-            }
-          }).then(() => {
-            wx.showToast({
-              title: '操作成功',
-              icon: 'success'
-            });
-            this.loadOrders();
-          }).catch(err => {
-            wx.showToast({
-              title: '操作失败',
-              icon: 'none'
-            });
-          });
-        }
-      }
     });
   }
 });

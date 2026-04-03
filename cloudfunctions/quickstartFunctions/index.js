@@ -30,48 +30,29 @@ const getMiniProgramCode = async () => {
   return upload.fileID;
 };
 
-// 创建集合
-const createCollection = async () => {
+// 创建食堂相关集合
+const createCanteenCollections = async () => {
   try {
-    // 创建集合
-    await db.createCollection("sales");
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
+    await db.createCollection("menus");
+    await db.createCollection("orders");
+    await db.createCollection("evaluations");
+    await db.createCollection("users");
+    await db.createCollection("configs");
+    
+    await db.collection("configs").add({
       data: {
-        region: "华东",
-        city: "上海",
-        sales: 11,
-      },
+        key: "order_deadline",
+        breakfast_deadline: "08:00",
+        lunch_deadline: "12:00",
+        dinner_deadline: "17:00",
+        updateTime: new Date()
+      }
     });
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
-      data: {
-        region: "华东",
-        city: "南京",
-        sales: 11,
-      },
-    });
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
-      data: {
-        region: "华南",
-        city: "广州",
-        sales: 22,
-      },
-    });
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
-      data: {
-        region: "华南",
-        city: "深圳",
-        sales: 22,
-      },
-    });
+    
     return {
       success: true,
     };
   } catch (e) {
-    // 这里catch到的是该collection已经存在，从业务逻辑上来说是运行成功的，所以catch返回success给前端，避免工具在前端抛出异常
     return {
       success: true,
       data: "create collection success",
@@ -171,8 +152,8 @@ exports.main = async (event, context) => {
       return await getOpenId();
     case "getMiniProgramCode":
       return await getMiniProgramCode();
-    case "createCollection":
-      return await createCollection();
+    case "createCanteenCollections":
+      return await createCanteenCollections();
     case "selectRecord":
       return await selectRecord();
     case "updateRecord":

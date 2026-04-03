@@ -1,14 +1,22 @@
 <view class="container">
-  <view class="date-picker">
-    <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
-      <view class="picker-text">{{selectedDate}}</view>
-    </picker>
+  <view class="date-nav">
+    <view class="nav-btn" bindtap="prevDay">
+      <text>←</text>
+    </view>
+    <view class="date-display">{{selectedDateStr}}</view>
+    <view class="nav-btn" bindtap="nextDay">
+      <text>→</text>
+    </view>
+  </view>
+
+  <view wx:if="{{isPast}}" class="past-tip">
+    <text>过去的日期不能修改菜单</text>
   </view>
 
   <view class="meal-section" wx:for="{{meals}}" wx:key="type" wx:for-index="mealIndex">
     <view class="meal-header">
       <view class="meal-title">{{item.type}}</view>
-      <button class="add-btn" data-index="{{mealIndex}}" bindtap="showAddDish">+ 添加菜品</button>
+      <button wx:if="{{!isPast}}" class="add-btn" data-index="{{mealIndex}}" bindtap="showAddDish">+ 添加菜品</button>
     </view>
     
     <view wx:if="{{item.dishes.length === 0}}" class="empty-dishes">
@@ -19,9 +27,8 @@
       <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name" wx:for-index="dishIndex">
         <view class="dish-info">
           <text class="dish-name">{{dish.name}}</text>
-          <text wx:if="{{dish.price}}" class="dish-price">¥{{dish.price}}</text>
         </view>
-        <view class="delete-btn" data-meal-index="{{mealIndex}}" data-dish-index="{{dishIndex}}" bindtap="deleteDish">删除</view>
+        <view wx:if="{{!isPast}}" class="delete-btn" data-meal-index="{{mealIndex}}" data-dish-index="{{dishIndex}}" bindtap="deleteDish">删除</view>
       </view>
     </view>
   </view>
@@ -36,10 +43,6 @@
       <view class="modal-input-group">
         <text class="label">菜品名称</text>
         <input class="input" placeholder="请输入菜品名称" value="{{newDishName}}" bindinput="onDishNameInput" />
-      </view>
-      <view class="modal-input-group">
-        <text class="label">价格（可选）</text>
-        <input class="input" type="digit" placeholder="请输入价格" value="{{newDishPrice}}" bindinput="onDishPriceInput" />
       </view>
       <view class="modal-actions">
         <button class="modal-btn cancel-btn" bindtap="cancelAddDish">取消</button>

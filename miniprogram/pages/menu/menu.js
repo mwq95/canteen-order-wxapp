@@ -1,6 +1,8 @@
 Page({
   data: {
     selectedDate: '',
+    selectedDateStr: '',
+    isPast: false,
     meals: [
       { type: '早餐', dishes: [] },
       { type: '午餐', dishes: [] },
@@ -8,7 +10,6 @@ Page({
     ],
     existingMenuId: null,
     newDishName: '',
-    newDishPrice: '',
     currentMealIndex: 0,
     showAddDishModal: false
   },
@@ -19,20 +20,65 @@ Page({
 
   initDate() {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
     this.setData({
-      selectedDate: `${year}-${month}-${day}`
+      selectedDate: this.formatDate(now),
+      selectedDateStr: this.formatDateChinese(now),
+      isPast: false
     });
     this.loadMenu();
   },
 
-  onDateChange(e) {
+  prevDay() {
+    const current = new Date(this.data.selectedDate);
+    current.setDate(current.getDate() - 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isPast = current < today;
+    
     this.setData({
-      selectedDate: e.detail.value
+      selectedDate: this.formatDate(current),
+      selectedDateStr: this.formatDateChinese(current),
+      isPast: isPast
     });
     this.loadMenu();
+  },
+
+  nextDay() {
+    const current = new Date(this.data.selectedDate);
+    current.setDate(current.getDate() + 1);
+    this.setData({
+      selectedDate: this.formatDate(current),
+      selectedDateStr: this.formatDateChinese(current),
+      isPast: false
+    });
+    this.loadMenu();
+  },
+
+  formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  },
+
+  formatDateChinese(date) {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const d = this.formatDate(date);
+    const t = this.formatDate(today);
+    const tm = this.formatDate(tomorrow);
+    const y = this.formatDate(yesterday);
+    
+    if (d === t) return `今天 ${month}月${day}日`;
+    if (d === tm) return `明天 ${month}月${day}日`;
+    if (d === y) return `昨天 ${month}月${day}日`;
+    return `${month}月${day}日`;
   },
 
   loadMenu() {
@@ -61,21 +107,24 @@ Page({
   },
 
   showAddDish(e) {
+    if (this.data.isPast) {
+      wx.showToast({
+        title: '过去的日期不能修改',
+        icon: 'none'
+      });
+      return;
+    }
+    
     const mealIndex = e.currentTarget.dataset.index;
     this.setData({
       currentMealIndex: mealIndex,
       showAddDishModal: true,
-      newDishName: '',
-      newDishPrice: ''
+      newDishName: ''
     });
   },
 
   onDishNameInput(e) {
     this.setData({ newDishName: e.detail.value });
-  },
-
-  onDishPriceInput(e) {
-    this.setData({ newDishPrice: e.detail.value });
   },
 
   addDish() {
@@ -89,20 +138,26 @@ Page({
 
     const meals = [...this.data.meals];
     const dish = {
-      name: this.data.newDishName.trim(),
-      price: this.data.newDishPrice || null
+      name: this.data.newDishName.trim()
     };
     meals[this.data.currentMealIndex].dishes.push(dish);
 
     this.setData({
       meals,
       showAddDishModal: false,
-      newDishName: '',
-      newDishPrice: ''
+      newDishName: ''
     });
   },
 
   deleteDish(e) {
+    if (this.data.isPast) {
+      wx.showToast({
+        title: '过去的日期不能修改',
+        icon: 'none'
+      });
+      return;
+    }
+    
     const { mealIndex, dishIndex } = e.currentTarget.dataset;
     wx.showModal({
       title: '提示',
@@ -120,8 +175,7 @@ Page({
   cancelAddDish() {
     this.setData({
       showAddDishModal: false,
-      newDishName: '',
-      newDishPrice: ''
+      newDishName: ''
     });
   },
 

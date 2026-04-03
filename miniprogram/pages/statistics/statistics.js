@@ -32,14 +32,17 @@ Page({
     const db = wx.cloud.database();
     const date = this.data.selectedDate;
     
-    db.collection('orders').where({ date }).get().then(res => {
+    db.collection('orders').where({ 
+      date,
+      status: db.command.neq('cancelled')
+    }).get().then(res => {
       const orders = res.data;
       const totalOrders = orders.length;
       
       let dishCount = {};
       orders.forEach(order => {
         order.dishes.forEach(dish => {
-          const key = `${dish.mealType}-${dish.name}`;
+          const key = `${order.mealType}-${dish.name}`;
           dishCount[key] = (dishCount[key] || 0) + 1;
         });
       });

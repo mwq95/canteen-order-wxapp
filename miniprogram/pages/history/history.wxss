@@ -60,28 +60,12 @@
   color: #333;
 }
 
-.dish-price {
-  font-size: 24rpx;
-  color: #ff4d4f;
-}
-
 .order-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding-top: 20rpx;
   border-top: 2rpx solid #f0f0f0;
-}
-
-.order-total {
-  font-size: 28rpx;
-  color: #333;
-}
-
-.price {
-  font-size: 36rpx;
-  color: #ff4d4f;
-  font-weight: bold;
 }
 
 .order-actions {
@@ -101,7 +85,7 @@
   border: none;
 }
 
-.delete-btn {
+.cancel-btn {
   background: #fff1f0;
   color: #ff4d4f;
 }

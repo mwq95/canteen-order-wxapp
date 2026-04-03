@@ -113,10 +113,10 @@ Page({
     const tm = this.formatDate(tomorrow);
     const y = this.formatDate(yesterday);
     
-    if (d === t) return '今天';
-    if (d === tm) return '明天';
-    if (d === y) return '昨天';
-    return `${year}年${month}月${day}日`;
+    if (d === t) return `今天 ${month}月${day}日`;
+    if (d === tm) return `明天 ${month}月${day}日`;
+    if (d === y) return `昨天 ${month}月${day}日`;
+    return `${month}月${day}日`;
   },
 
   goToOrder() {
