@@ -44,8 +44,15 @@ Page({
 
   saveUserInfo(userInfo) {
     const db = wx.cloud.database();
+    const openid = app.globalData.openid;
+    
+    if (!openid) {
+      console.error('openid未获取');
+      return;
+    }
+    
     db.collection('users').where({
-      _openid: '{openid}'
+      _openid: openid
     }).get().then(res => {
       if (res.data.length > 0) {
         db.collection('users').doc(res.data[0]._id).update({

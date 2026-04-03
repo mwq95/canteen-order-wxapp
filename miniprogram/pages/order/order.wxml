@@ -1,12 +1,16 @@
 <view class="container">
   <view class="date-nav">
     <view class="nav-btn" bindtap="prevDay">
-      <text>&lt;</text>
+      <text>←</text>
     </view>
     <view class="date-display">{{selectedDateStr}}</view>
     <view class="nav-btn" bindtap="nextDay">
-      <text>&gt;</text>
+      <text>→</text>
     </view>
+  </view>
+
+  <view class="deadline-info">
+    <text>早餐{{breakfastDeadline}}截止 | 午餐{{lunchDeadline}}截止 | 晚餐{{dinnerDeadline}}截止</text>
   </view>
 
   <view wx:if="{{loading}}" class="loading">
@@ -18,37 +22,41 @@
   </view>
 
   <view wx:else class="menu-content">
-    <view wx:if="{{existingOrder}}" class="order-tip">
-      <text class="tip-text">您已订餐，可修改菜品</text>
-    </view>
-
-    <view class="meal-section" wx:for="{{menuData.meals}}" wx:key="type">
-      <view class="meal-title">{{item.type}}</view>
+    <view class="meal-section {{disabledMeals[item.type] ? 'disabled' : ''}}" wx:for="{{menuData.meals}}" wx:key="type">
+      <view class="meal-header">
+        <view class="meal-title">{{item.type}}</view>
+        <view class="meal-deadline" wx:if="{{disabledMeals[item.type]}}">已截止</view>
+        <view wx:elif="{{existingOrders[item.type]}}" class="meal-ordered">已订</view>
+      </view>
       <view class="dish-list">
         <view 
-          class="dish-item {{selectedDishes[item.type + '-' + dish.name] ? 'selected' : ''}}" 
+          class="dish-item {{selectedDishes[item.type].indexOf(dish.name) > -1 ? 'selected' : ''}} {{disabledMeals[item.type] ? 'disabled' : ''}}" 
           wx:for="{{item.dishes}}" 
           wx:for-item="dish" 
           wx:key="name"
           data-meal-type="{{item.type}}"
           data-dish-name="{{dish.name}}"
-          data-price="{{dish.price}}"
           bindtap="toggleDish"
         >
           <view class="dish-info">
             <view class="dish-name">{{dish.name}}</view>
-            <view class="dish-price" wx:if="{{dish.price}}">¥{{dish.price}}</view>
           </view>
-          <view class="check-icon" wx:if="{{selectedDishes[item.type + '-' + dish.name]}}">✓</view>
+          <view class="check-icon" wx:if="{{selectedDishes[item.type].indexOf(dish.name) > -1}}">✓</view>
         </view>
       </view>
+      <view class="meal-footer">
+        <view class="ordered-dishes" wx:if="{{selectedDishes[item.type].length > 0}}">
+          <text>已选：{{selectedDishes[item.type].join('、')}}</text>
+        </view>
+        <button 
+          wx:if="{{!disabledMeals[item.type]}}" 
+          class="submit-btn {{selectedDishes[item.type].length === 0 ? 'disabled' : ''}}" 
+          data-meal-type="{{item.type}}"
+          bindtap="submitOrder"
+        >
+          {{existingOrders[item.type] ? '修改' : '订餐'}}
+        </button>
+      </view>
     </view>
-  </view>
-
-  <view class="submit-bar" wx:if="{{!loading && menuData}}">
-    <view class="total-price">总计：<text class="price">¥{{totalPrice}}</text></view>
-    <button class="submit-btn" bindtap="submitOrder">
-      {{existingOrder ? '修改订单' : '提交订单'}}
-    </button>
   </view>
 </view>

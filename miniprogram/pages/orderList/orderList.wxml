@@ -20,21 +20,16 @@
     
     <view class="order-card" wx:for="{{orderList}}" wx:key="_id">
       <view class="order-header">
-        <view class="order-id">订单 #{{index + 1}}</view>
-        <view class="order-status tag {{item.status === 'completed' ? 'tag-success' : 'tag-primary'}}">
-          {{item.status === 'completed' ? '已完成' : '待用餐'}}
+        <view class="order-id">{{item.mealType}} #{{index + 1}}</view>
+        <view class="order-status tag {{item.displayStatus === 'completed' ? 'tag-success' : 'tag-primary'}}">
+          {{item.displayStatus === 'completed' ? '已完成' : '待用餐'}}
         </view>
       </view>
       
       <view class="order-dishes">
         <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name">
-          <text class="dish-tag tag">{{dish.mealType}}</text>
           <text class="dish-name">{{dish.name}}</text>
         </view>
-      </view>
-      
-      <view class="order-footer" wx:if="{{item.status !== 'completed'}}">
-        <button class="action-btn" data-id="{{item._id}}" bindtap="markAsCompleted">标记完成</button>
       </view>
     </view>
   </view>

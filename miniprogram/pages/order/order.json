@@ -1,3 +1,4 @@
 {
-  "navigationBarTitleText": "我要订餐"
+  "navigationBarTitleText": "我要订餐",
+  "enablePullDownRefresh": true
 }

@@ -1,0 +1,39 @@
+<view class="container">
+  <view class="header">
+    <view class="title">订餐设置</view>
+    <view class="subtitle">设置每天各餐的截止订餐时间</view>
+  </view>
+
+  <view class="settings-card">
+    <view class="setting-item">
+      <view class="setting-label">早餐截止时间</view>
+      <picker mode="time" value="{{breakfastDeadline}}" bindchange="onBreakfastChange">
+        <view class="picker-text">{{breakfastDeadline || '请选择'}}</view>
+      </picker>
+    </view>
+
+    <view class="setting-item">
+      <view class="setting-label">午餐截止时间</view>
+      <picker mode="time" value="{{lunchDeadline}}" bindchange="onLunchChange">
+        <view class="picker-text">{{lunchDeadline || '请选择'}}</view>
+      </picker>
+    </view>
+
+    <view class="setting-item">
+      <view class="setting-label">晚餐截止时间</view>
+      <picker mode="time" value="{{dinnerDeadline}}" bindchange="onDinnerChange">
+        <view class="picker-text">{{dinnerDeadline || '请选择'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="info-card">
+    <view class="info-title">说明</view>
+    <view class="info-text">超过截止时间后，该餐将无法再订餐。</view>
+    <view class="info-text">例如：早餐截止时间设为08:00，则当天08:00后无法再订早餐。</view>
+  </view>
+
+  <view class="save-btn-wrapper">
+    <button class="save-btn" bindtap="saveConfig">保存设置</button>
+  </view>
+</view>

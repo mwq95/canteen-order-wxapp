@@ -1,19 +1,53 @@
 const config = require('../../config.js');
 
+const app = getApp();
+
 Page({
   data: {
     selectedDate: '',
     selectedDateStr: '',
     menuData: null,
-    selectedDishes: {},
-    totalPrice: 0,
+    selectedDishes: {
+      '早餐': [],
+      '午餐': [],
+      '晚餐': []
+    },
+    existingOrders: {
+      '早餐': null,
+      '午餐': null,
+      '晚餐': null
+    },
     loading: true,
-    existingOrder: null
+    breakfastDeadline: '08:00',
+    lunchDeadline: '12:00',
+    dinnerDeadline: '17:00',
+    disabledMeals: {
+      '早餐': false,
+      '午餐': false,
+      '晚餐': false
+    }
   },
 
   onLoad() {
     this.initDate();
-    this.loadMenu();
+    this.loadSettings();
+    this.waitForOpenid();
+  },
+
+  onShow() {
+    if (app.globalData.openid) {
+      this.loadMenu();
+    }
+  },
+
+  waitForOpenid() {
+    if (app.globalData.openid) {
+      this.loadMenu();
+    } else {
+      setTimeout(() => {
+        this.waitForOpenid();
+      }, 100);
+    }
   },
 
   initDate() {
@@ -24,34 +58,114 @@ Page({
     });
   },
 
+  loadSettings() {
+    const db = wx.cloud.database();
+    db.collection('configs').where({ key: 'order_deadline' }).get().then(res => {
+      if (res.data.length > 0) {
+        const cfg = res.data[0];
+        this.setData({
+          breakfastDeadline: cfg.breakfast_deadline || '08:00',
+          lunchDeadline: cfg.lunch_deadline || '12:00',
+          dinnerDeadline: cfg.dinner_deadline || '17:00'
+        });
+        this.checkDisabledMeals();
+      }
+    }).catch(err => {
+      console.error('加载设置失败', err);
+    });
+  },
+
+  checkDisabledMeals() {
+    const now = new Date();
+    const selectedDateStr = this.data.selectedDate;
+    const todayStr = this.formatDate(now);
+    const yesterdayStr = this.formatDate(new Date(now.getTime() - 24 * 60 * 60 * 1000));
+    
+    const disabledMeals = {
+      '早餐': false,
+      '午餐': false,
+      '晚餐': false
+    };
+    
+    if (selectedDateStr < todayStr) {
+      disabledMeals['早餐'] = true;
+      disabledMeals['午餐'] = true;
+      disabledMeals['晚餐'] = true;
+    } else if (selectedDateStr === yesterdayStr) {
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      if (currentTime >= this.data.breakfastDeadline) {
+        disabledMeals['早餐'] = true;
+      }
+      if (currentTime >= this.data.lunchDeadline) {
+        disabledMeals['午餐'] = true;
+      }
+      if (currentTime >= this.data.dinnerDeadline) {
+        disabledMeals['晚餐'] = true;
+      }
+    } else if (selectedDateStr === todayStr) {
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      if (currentTime >= this.data.breakfastDeadline) {
+        disabledMeals['早餐'] = true;
+      }
+      if (currentTime >= this.data.lunchDeadline) {
+        disabledMeals['午餐'] = true;
+      }
+      if (currentTime >= this.data.dinnerDeadline) {
+        disabledMeals['晚餐'] = true;
+      }
+    }
+    
+    this.setData({ disabledMeals });
+  },
+
   loadMenu() {
     const db = wx.cloud.database();
     const date = this.data.selectedDate;
+    const openid = app.globalData.openid;
     
-    Promise.all([
-      db.collection('menus').where({ date }).get(),
-      db.collection('orders').where({ 
-        date,
-        _openid: '{openid}'
-      }).get()
-    ]).then(([menuRes, orderRes]) => {
+    if (!openid) {
+      this.setData({ loading: false });
+      return;
+    }
+    
+    this.checkDisabledMeals();
+    
+    db.collection('menus').where({ date }).get().then(menuRes => {
       const menuData = menuRes.data[0] || null;
-      const existingOrder = orderRes.data[0] || null;
       
-      let selectedDishes = {};
-      if (existingOrder) {
-        existingOrder.dishes.forEach(dish => {
-          selectedDishes[`${dish.mealType}-${dish.name}`] = true;
-        });
-      }
-      
-      this.setData({
-        menuData,
-        existingOrder,
-        selectedDishes,
-        loading: false
+      const mealTypes = ['早餐', '午餐', '晚餐'];
+      const promises = mealTypes.map(mealType => {
+        return db.collection('orders').where({
+          date,
+          mealType,
+          _openid: openid
+        }).get();
       });
-      this.calculateTotal();
+      
+      return Promise.all(promises).then(orderResults => {
+        const existingOrders = { '早餐': null, '午餐': null, '晚餐': null };
+        const selectedDishes = { '早餐': [], '午餐': [], '晚餐': [] };
+        
+        orderResults.forEach((orderRes, index) => {
+          const mealType = mealTypes[index];
+          const validOrders = orderRes.data.filter(o => o.status !== 'cancelled');
+          const cancelledOrders = orderRes.data.filter(o => o.status === 'cancelled');
+          
+          if (validOrders.length > 0) {
+            existingOrders[mealType] = validOrders[0];
+            selectedDishes[mealType] = validOrders[0].dishes.map(d => d.name);
+          } else if (cancelledOrders.length > 0) {
+            existingOrders[mealType] = cancelledOrders[0];
+          }
+        });
+        
+        this.setData({
+          menuData,
+          existingOrders,
+          selectedDishes,
+          loading: false
+        });
+      });
     }).catch(err => {
       console.error('加载数据失败', err);
       this.setData({ loading: false });
@@ -92,7 +206,6 @@ Page({
   },
 
   formatDateChinese(date) {
-    const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
     const today = new Date();
@@ -106,42 +219,44 @@ Page({
     const tm = this.formatDate(tomorrow);
     const y = this.formatDate(yesterday);
     
-    if (d === t) return '今天';
-    if (d === tm) return '明天';
-    if (d === y) return '昨天';
-    return `${year}年${month}月${day}日`;
+    if (d === t) return `今天 ${month}月${day}日`;
+    if (d === tm) return `明天 ${month}月${day}日`;
+    if (d === y) return `昨天 ${month}月${day}日`;
+    return `${month}月${day}日`;
   },
 
   toggleDish(e) {
-    const { mealType, dishName, price } = e.currentTarget.dataset;
-    const key = `${mealType}-${dishName}`;
-    const selectedDishes = { ...this.data.selectedDishes };
+    const { mealType, dishName } = e.currentTarget.dataset;
     
-    if (selectedDishes[key]) {
-      delete selectedDishes[key];
-    } else {
-      selectedDishes[key] = { mealType, dishName, price };
+    if (this.data.disabledMeals[mealType]) {
+      wx.showToast({
+        title: `${mealType}已过截止时间`,
+        icon: 'none'
+      });
+      return;
     }
     
+    const selectedDishes = { ...this.data.selectedDishes };
+    const dishes = [...selectedDishes[mealType]];
+    const index = dishes.indexOf(dishName);
+    
+    if (index > -1) {
+      dishes.splice(index, 1);
+    } else {
+      dishes.push(dishName);
+    }
+    
+    selectedDishes[mealType] = dishes;
     this.setData({ selectedDishes });
-    this.calculateTotal();
   },
 
-  calculateTotal() {
-    let total = 0;
-    Object.values(this.data.selectedDishes).forEach(dish => {
-      if (dish.price) {
-        total += parseFloat(dish.price);
-      }
-    });
-    this.setData({ totalPrice: total.toFixed(2) });
-  },
-
-  submitOrder() {
-    const selectedDishes = Object.values(this.data.selectedDishes);
-    if (selectedDishes.length === 0) {
+  submitOrder(e) {
+    const mealType = e.currentTarget.dataset.mealType;
+    const dishes = this.data.selectedDishes[mealType];
+    
+    if (dishes.length === 0) {
       wx.showToast({
-        title: '请至少选择一道菜',
+        title: `请选择${mealType}菜品`,
         icon: 'none'
       });
       return;
@@ -149,46 +264,43 @@ Page({
 
     const templateId = config.getSubscribeMessageTemplateId();
     if (templateId && templateId !== '您的订阅消息模板ID') {
-      this.requestSubscribeMessageAndSubmit(selectedDishes);
+      this.requestSubscribeMessageAndSubmit(mealType, dishes);
     } else {
-      this.doSubmitOrder(selectedDishes);
+      this.doSubmitOrder(mealType, dishes);
     }
   },
 
-  requestSubscribeMessageAndSubmit(selectedDishes) {
+  requestSubscribeMessageAndSubmit(mealType, dishes) {
     const templateId = config.getSubscribeMessageTemplateId();
     wx.requestSubscribeMessage({
       tmplIds: [templateId],
       success: (res) => {
         console.log('订阅消息授权', res);
-        this.doSubmitOrder(selectedDishes, true);
+        this.doSubmitOrder(mealType, dishes, true);
       },
       fail: (err) => {
         console.log('订阅消息授权失败', err);
-        this.doSubmitOrder(selectedDishes, false);
+        this.doSubmitOrder(mealType, dishes, false);
       }
     });
   },
 
-  doSubmitOrder(selectedDishes, hasSubscribed = false) {
+  doSubmitOrder(mealType, dishes, hasSubscribed = false) {
     wx.showLoading({ title: '提交中...' });
 
     const db = wx.cloud.database();
     const orderData = {
       date: this.data.selectedDate,
-      dishes: selectedDishes.map(d => ({
-        mealType: d.mealType,
-        name: d.dishName,
-        price: d.price
-      })),
-      totalPrice: this.data.totalPrice,
+      mealType,
+      dishes: dishes.map(name => ({ name })),
       status: 'pending',
       createTime: new Date(),
       updateTime: new Date()
     };
 
-    const submitPromise = this.data.existingOrder 
-      ? db.collection('orders').doc(this.data.existingOrder._id).update({
+    const existingOrder = this.data.existingOrders[mealType];
+    const submitPromise = existingOrder 
+      ? db.collection('orders').doc(existingOrder._id).update({
           data: {
             ...orderData,
             updateTime: new Date()
@@ -199,12 +311,12 @@ Page({
     submitPromise.then(() => {
       wx.hideLoading();
       wx.showToast({
-        title: this.data.existingOrder ? '订单已更新' : '订餐成功',
+        title: existingOrder ? `${mealType}已更新` : `${mealType}订餐成功`,
         icon: 'success'
       });
       
-      if (hasSubscribed && !this.data.existingOrder) {
-        this.sendSubscribeMessage(selectedDishes);
+      if (hasSubscribed && !existingOrder) {
+        this.sendSubscribeMessage(mealType, dishes);
       }
       
       this.loadMenu();
@@ -217,16 +329,16 @@ Page({
     });
   },
 
-  sendSubscribeMessage(selectedDishes) {
+  sendSubscribeMessage(mealType, dishes) {
     const templateId = config.getSubscribeMessageTemplateId();
-    const dishNames = selectedDishes.map(d => d.dishName).join('、');
+    const dishNames = dishes.join('、');
     
     wx.cloud.callFunction({
       name: 'sendSubscribeMessage',
       data: {
         templateId: templateId,
         data: {
-          thing1: { value: this.data.selectedDate },
+          thing1: { value: `${this.data.selectedDate} ${mealType}` },
           thing2: { value: dishNames },
           thing3: { value: '请按时用餐' }
         }
@@ -236,5 +348,13 @@ Page({
     }).catch(err => {
       console.error('发送订阅消息失败', err);
     });
+  },
+
+  onPullDownRefresh() {
+    this.loadSettings();
+    this.loadMenu();
+    setTimeout(() => {
+      wx.stopPullDownRefresh();
+    }, 1000);
   }
 });

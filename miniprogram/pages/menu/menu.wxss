@@ -4,19 +4,47 @@
   padding-bottom: 140rpx;
 }
 
-.date-picker {
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #fff;
   border-radius: 16rpx;
   padding: 30rpx;
   margin-bottom: 20rpx;
-  text-align: center;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
-.picker-text {
+.nav-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 36rpx;
+  color: #666;
+}
+
+.date-display {
   font-size: 32rpx;
   color: #1890FF;
   font-weight: bold;
+}
+
+.past-tip {
+  background: #fff2f0;
+  border: 2rpx solid #ffccc7;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.past-tip text {
+  font-size: 26rpx;
+  color: #ff4d4f;
 }
 
 .meal-section {
@@ -86,11 +114,6 @@
 .dish-name {
   font-size: 28rpx;
   color: #333;
-}
-
-.dish-price {
-  font-size: 24rpx;
-  color: #ff4d4f;
 }
 
 .delete-btn {

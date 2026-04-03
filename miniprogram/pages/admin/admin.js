@@ -17,5 +17,11 @@ Page({
     wx.navigateTo({
       url: '/pages/orderList/orderList'
     });
+  },
+
+  goToSettings() {
+    wx.navigateTo({
+      url: '/pages/settings/settings'
+    });
   }
 });
