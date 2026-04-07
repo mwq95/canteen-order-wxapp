@@ -1,6 +1,9 @@
+const dateUtil = require('../../utils/dateUtil.js');
+
 Page({
   data: {
     selectedDate: '',
+    selectedDateStr: '',
     statistics: null,
     loading: true
   },
@@ -12,17 +15,27 @@ Page({
 
   initDate() {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
     this.setData({
-      selectedDate: `${year}-${month}-${day}`
+      selectedDate: dateUtil.formatDate(now),
+      selectedDateStr: dateUtil.formatDateChinese(now)
     });
   },
 
-  onDateChange(e) {
+  prevDay() {
+    const current = dateUtil.prevDay(this.data.selectedDate);
     this.setData({
-      selectedDate: e.detail.value,
+      selectedDate: dateUtil.formatDate(current),
+      selectedDateStr: dateUtil.formatDateChinese(current),
+      loading: true
+    });
+    this.loadStatistics();
+  },
+
+  nextDay() {
+    const current = dateUtil.nextDay(this.data.selectedDate);
+    this.setData({
+      selectedDate: dateUtil.formatDate(current),
+      selectedDateStr: dateUtil.formatDateChinese(current),
       loading: true
     });
     this.loadStatistics();

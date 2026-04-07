@@ -1,36 +1,55 @@
 <view class="container">
-  <view class="date-picker">
-    <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
-      <view class="picker-text">{{selectedDate}}</view>
-    </picker>
+  <view class="date-nav">
+    <view class="nav-btn" bindtap="prevDay">
+      <text>←</text>
+    </view>
+    <view class="date-display">{{selectedDateStr}}</view>
+    <view class="nav-btn" bindtap="nextDay">
+      <text>→</text>
+    </view>
   </view>
 
   <view wx:if="{{loading}}" class="loading">
     <text>加载中...</text>
   </view>
 
-  <view wx:elif="{{orderList.length === 0}}" class="empty">
-    <text>暂无订餐记录</text>
-  </view>
-
-  <view wx:else class="order-list">
-    <view class="summary-card">
-      <text class="summary-text">订餐人数：<text class="summary-count">{{orderList.length}}</text> 人</text>
+  <view wx:elif="{{showDetail}}" class="detail-view">
+    <view class="detail-header" bindtap="backToStats">
+      <view class="back-btn">← 返回</view>
+      <view class="detail-title">{{selectedMealType}}订单明细</view>
     </view>
     
-    <view class="order-card" wx:for="{{orderList}}" wx:key="_id">
-      <view class="order-header">
-        <view class="order-id">{{item.mealType}} #{{index + 1}}</view>
-        <view class="order-status tag {{item.displayStatus === 'completed' ? 'tag-success' : 'tag-primary'}}">
-          {{item.displayStatus === 'completed' ? '已完成' : '待用餐'}}
+    <view wx:if="{{mealStats[selectedMealType].orders.length === 0}}" class="empty">
+      <text>暂无订餐记录</text>
+    </view>
+    
+    <view wx:else class="order-list">
+      <view class="order-card" wx:for="{{mealStats[selectedMealType].orders}}" wx:key="_id">
+        <view class="order-dishes">
+          <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name">
+            <text class="dish-name">{{dish.name}}</text>
+          </view>
         </view>
       </view>
-      
-      <view class="order-dishes">
-        <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name">
-          <text class="dish-name">{{dish.name}}</text>
+    </view>
+  </view>
+
+  <view wx:else class="stats-view">
+    <view class="meal-card" wx:for="{{['早餐', '午餐', '晚餐']}}" wx:key="*this" bindtap="showMealDetail" data-meal-type="{{item}}">
+      <view class="meal-header">
+        <view class="meal-title">{{item}}</view>
+        <view class="meal-count">{{mealStats[item].orders.length}} 单</view>
+      </view>
+      <view class="dish-stats" wx:if="{{mealStats[item].dishes.length > 0}}">
+        <view class="dish-stat" wx:for="{{mealStats[item].dishes}}" wx:for-item="dish" wx:key="name">
+          <view class="dish-stat-name">{{dish.name}}</view>
+          <view class="dish-stat-count">× {{dish.count}}</view>
         </view>
       </view>
+      <view wx:else class="empty-meal">
+        <text>暂无订餐</text>
+      </view>
+      <view class="view-detail">查看详情 →</view>
     </view>
   </view>
 </view>

@@ -1,8 +1,12 @@
 <view class="container">
-  <view class="date-picker">
-    <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
-      <view class="picker-text">{{selectedDate}}</view>
-    </picker>
+  <view class="date-nav">
+    <view class="nav-btn" bindtap="prevDay">
+      <text>←</text>
+    </view>
+    <view class="date-display">{{selectedDateStr}}</view>
+    <view class="nav-btn" bindtap="nextDay">
+      <text>→</text>
+    </view>
   </view>
 
   <view wx:if="{{loading}}" class="loading">
