@@ -10,7 +10,7 @@
   </view>
 
   <view class="deadline-info">
-    <text>早餐{{breakfastDeadline}}截止 | 午餐{{lunchDeadline}}截止 | 晚餐{{dinnerDeadline}}截止</text>
+    <text>早餐{{deadlines.breakfast}}截止 | 午餐{{deadlines.lunch}}截止 | 晚餐{{deadlines.dinner}}截止</text>
   </view>
 
   <view wx:if="{{loading}}" class="loading">
@@ -26,7 +26,7 @@
       <view class="meal-header">
         <view class="meal-title">{{item.type}}</view>
         <view class="meal-deadline" wx:if="{{disabledMeals[item.type]}}">已截止</view>
-        <view wx:elif="{{existingOrders[item.type]}}" class="meal-ordered">已订</view>
+        <view wx:elif="{{orders[item.type].status === 'ordered'}}" class="meal-ordered">已订</view>
       </view>
       <view class="dish-list">
         <view 
@@ -45,16 +45,16 @@
         </view>
       </view>
       <view class="meal-footer">
-        <view class="ordered-dishes" wx:if="{{selectedDishes[item.type].length > 0}}">
-          <text>已选：{{selectedDishes[item.type].join('、')}}</text>
+        <view class="ordered-dishes" wx:if="{{userSelections[item.type].length > 0}}">
+          <text>已选：{{userSelections[item.type].join('、')}}</text>
         </view>
         <button 
           wx:if="{{!disabledMeals[item.type]}}" 
-          class="submit-btn {{selectedDishes[item.type].length === 0 ? 'disabled' : ''}}" 
+          class="submit-btn {{userSelections[item.type].length === 0 ? 'disabled' : ''}}" 
           data-meal-type="{{item.type}}"
           bindtap="submitOrder"
         >
-          {{existingOrders[item.type] ? '修改' : '订餐'}}
+          {{orders[item.type].status === 'ordered' ? '修改' : '订餐'}}
         </button>
       </view>
     </view>

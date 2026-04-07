@@ -33,18 +33,6 @@
   color: #fff;
 }
 
-.login-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-radius: 48rpx;
-  font-size: 28rpx;
-  padding: 16rpx 48rpx;
-}
-
-.login-btn::after {
-  border: none;
-}
-
 .menu-list {
   background: #fff;
   border-radius: 16rpx;

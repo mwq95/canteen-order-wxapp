@@ -1,3 +1,5 @@
+const dateUtil = require('../../utils/dateUtil.js');
+
 Page({
   data: {
     currentDate: '',
@@ -19,8 +21,8 @@ Page({
   initDate() {
     const now = new Date();
     this.setData({
-      currentDate: this.formatDate(now),
-      currentDateStr: this.formatDateChinese(now)
+      currentDate: dateUtil.formatDate(now),
+      currentDateStr: dateUtil.formatDateChinese(now)
     });
   },
 
@@ -44,22 +46,20 @@ Page({
   },
 
   prevDay() {
-    const current = new Date(this.data.currentDate);
-    current.setDate(current.getDate() - 1);
+    const current = dateUtil.prevDay(this.data.currentDate);
     this.setData({
-      currentDate: this.formatDate(current),
-      currentDateStr: this.formatDateChinese(current),
+      currentDate: dateUtil.formatDate(current),
+      currentDateStr: dateUtil.formatDateChinese(current),
       loading: true
     });
     this.loadMenu();
   },
 
   nextDay() {
-    const current = new Date(this.data.currentDate);
-    current.setDate(current.getDate() + 1);
+    const current = dateUtil.nextDay(this.data.currentDate);
     this.setData({
-      currentDate: this.formatDate(current),
-      currentDateStr: this.formatDateChinese(current),
+      currentDate: dateUtil.formatDate(current),
+      currentDateStr: dateUtil.formatDateChinese(current),
       loading: true
     });
     this.loadMenu();
@@ -89,34 +89,6 @@ Page({
         icon: 'none'
       });
     });
-  },
-
-  formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  },
-
-  formatDateChinese(date) {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    const d = this.formatDate(date);
-    const t = this.formatDate(today);
-    const tm = this.formatDate(tomorrow);
-    const y = this.formatDate(yesterday);
-    
-    if (d === t) return `今天 ${month}月${day}日`;
-    if (d === tm) return `明天 ${month}月${day}日`;
-    if (d === y) return `昨天 ${month}月${day}日`;
-    return `${month}月${day}日`;
   },
 
   goToOrder() {

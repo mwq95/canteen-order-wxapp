@@ -1,14 +1,10 @@
 <view class="container">
   <view class="user-card">
-    <view wx:if="{{userInfo}}" class="user-info">
-      <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
+    <view class="user-info">
+      <image class="avatar" src="{{userInfo && userInfo.avatarUrl ? userInfo.avatarUrl : '/images/avatar.png'}}"></image>
       <view class="user-detail">
-        <view class="nickname">{{userInfo.nickName}}</view>
+        <view class="nickname">{{userInfo && userInfo.nickName ? userInfo.nickName : '未设置昵称'}}</view>
       </view>
-    </view>
-    <view wx:else class="user-info">
-      <image class="avatar" src="/images/avatar.png"></image>
-      <button class="login-btn" bindtap="getUserProfile">登录</button>
     </view>
   </view>
 

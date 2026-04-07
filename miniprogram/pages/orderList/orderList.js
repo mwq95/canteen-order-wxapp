@@ -1,7 +1,16 @@
+const dateUtil = require('../../utils/dateUtil.js');
+
 Page({
   data: {
     selectedDate: '',
-    orderList: [],
+    selectedDateStr: '',
+    showDetail: false,
+    selectedMealType: '',
+    mealStats: {
+      '早餐': { dishes: [], orders: [] },
+      '午餐': { dishes: [], orders: [] },
+      '晚餐': { dishes: [], orders: [] }
+    },
     loading: true
   },
 
@@ -12,46 +21,32 @@ Page({
 
   initDate() {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
     this.setData({
-      selectedDate: `${year}-${month}-${day}`
+      selectedDate: dateUtil.formatDate(now),
+      selectedDateStr: dateUtil.formatDateChinese(now)
     });
   },
 
-  onDateChange(e) {
+  prevDay() {
+    const current = dateUtil.prevDay(this.data.selectedDate);
     this.setData({
-      selectedDate: e.detail.value,
-      loading: true
+      selectedDate: dateUtil.formatDate(current),
+      selectedDateStr: dateUtil.formatDateChinese(current),
+      loading: true,
+      showDetail: false
     });
     this.loadOrders();
   },
 
-  calculateStatus(order) {
-    const now = new Date();
-    const orderDate = new Date(order.date);
-    const deadlineMap = {
-      '早餐': '09:00',
-      '午餐': '13:00',
-      '晚餐': '19:00'
-    };
-    
-    if (order.status === 'completed') {
-      return 'completed';
-    }
-    
-    const deadline = deadlineMap[order.mealType];
-    if (!deadline) return order.status;
-    
-    const [deadlineHour, deadlineMinute] = deadline.split(':').map(Number);
-    const deadlineTime = new Date(orderDate);
-    deadlineTime.setHours(deadlineHour, deadlineMinute, 0, 0);
-    
-    if (now > deadlineTime) {
-      return 'completed';
-    }
-    return 'pending';
+  nextDay() {
+    const current = dateUtil.nextDay(this.data.selectedDate);
+    this.setData({
+      selectedDate: dateUtil.formatDate(current),
+      selectedDateStr: dateUtil.formatDateChinese(current),
+      loading: true,
+      showDetail: false
+    });
+    this.loadOrders();
   },
 
   loadOrders() {
@@ -62,12 +57,42 @@ Page({
       date,
       status: db.command.neq('cancelled')
     }).get().then(res => {
-      const ordersWithStatus = res.data.map(order => ({
-        ...order,
-        displayStatus: this.calculateStatus(order)
-      }));
+      const mealStats = {
+        '早餐': { dishes: [], orders: [] },
+        '午餐': { dishes: [], orders: [] },
+        '晚餐': { dishes: [], orders: [] }
+      };
+      
+      const dishCounts = {
+        '早餐': {},
+        '午餐': {},
+        '晚餐': {}
+      };
+      
+      res.data.forEach(order => {
+        const mealType = order.mealType;
+        
+        mealStats[mealType].orders.push(order);
+        
+        order.dishes.forEach(dish => {
+          if (!dishCounts[mealType][dish.name]) {
+            dishCounts[mealType][dish.name] = 0;
+          }
+          dishCounts[mealType][dish.name]++;
+        });
+      });
+      
+      for (const mealType in dishCounts) {
+        for (const dishName in dishCounts[mealType]) {
+          mealStats[mealType].dishes.push({
+            name: dishName,
+            count: dishCounts[mealType][dishName]
+          });
+        }
+      }
+      
       this.setData({
-        orderList: ordersWithStatus,
+        mealStats,
         loading: false
       });
     }).catch(err => {
@@ -77,6 +102,20 @@ Page({
         title: '加载失败',
         icon: 'none'
       });
+    });
+  },
+
+  showMealDetail(e) {
+    const { mealType } = e.currentTarget.dataset;
+    this.setData({
+      showDetail: true,
+      selectedMealType: mealType
+    });
+  },
+
+  backToStats() {
+    this.setData({
+      showDetail: false
     });
   }
 });
