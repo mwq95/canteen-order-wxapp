@@ -331,20 +331,31 @@ Page({
       return;
     }
     
-    // 更新用户选择
-    const userSelections = { ...this.data.userSelections };
-    const selections = [...userSelections[mealType]];
-    const index = selections.indexOf(dishName);
+    // 创建新的用户选择对象，确保触发视图更新
+    const newUserSelections = {};
+    const currentSelections = this.data.userSelections[mealType] || [];
     
-    // 如果已选中则取消，未选中则添加
+    // 复制其他餐次的选择
+    Object.keys(this.data.userSelections).forEach(key => {
+      if (key !== mealType) {
+        newUserSelections[key] = this.data.userSelections[key];
+      }
+    });
+    
+    // 更新当前餐次的选择（创建新数组）
+    const index = currentSelections.indexOf(dishName);
     if (index > -1) {
-      selections.splice(index, 1);
+      // 取消选择：过滤掉该菜品
+      newUserSelections[mealType] = currentSelections.filter(name => name !== dishName);
     } else {
-      selections.push(dishName);
+      // 添加选择：创建新数组并添加该菜品
+      newUserSelections[mealType] = [...currentSelections, dishName];
     }
     
-    userSelections[mealType] = selections;
-    this.setData({ userSelections });
+    // 立即更新视图
+    this.setData({
+      userSelections: newUserSelections
+    });
   },
 
   /**
