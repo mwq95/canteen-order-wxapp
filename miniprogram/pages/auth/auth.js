@@ -25,7 +25,7 @@ Page({
 
     if (app.globalData.isVerified) {
       wx.switchTab({
-        url: '/pages/index/index'
+        url: '/pages/order/order'
       });
       return;
     }
@@ -171,7 +171,7 @@ Page({
     
     setTimeout(() => {
       wx.switchTab({
-        url: '/pages/index/index'
+        url: '/pages/order/order'
       });
     }, 1500);
   }

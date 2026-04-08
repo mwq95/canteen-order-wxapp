@@ -43,7 +43,7 @@ const auth = {
       });
       setTimeout(() => {
         wx.switchTab({
-          url: '/pages/index/index'
+          url: '/pages/order/order'
         });
       }, 2000);
       return false;

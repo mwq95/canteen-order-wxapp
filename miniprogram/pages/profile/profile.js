@@ -1,4 +1,5 @@
 const auth = require('../../utils/auth.js');
+const initUtil = require('../../utils/initUtil.js');
 const app = getApp();
 
 Page({
@@ -8,13 +9,18 @@ Page({
   },
 
   onLoad() {
-    this.checkAdminAccess();
-    this.getUserInfo();
+    this.initPage();
   },
 
   onShow() {
     auth.checkPageAccess('tabbar');
     this.checkAdminAccess();
+  },
+
+  async initPage() {
+    await initUtil.waitForAppInit();
+    this.checkAdminAccess();
+    this.getUserInfo();
   },
 
   checkAdminAccess() {

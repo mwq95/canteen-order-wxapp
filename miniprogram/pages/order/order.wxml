@@ -1,62 +1,111 @@
+<!--
+  订餐页面 - 统一页面（合并首页和订餐页）
+  页面结构：
+  - 顶部：日期导航栏
+  - 中部：菜单展示区（早中晚三餐）
+  - 底部：数据库初始化按钮（仅在需要时显示）
+-->
+
 <view class="container">
+  
+  <!-- ==================== 日期导航区 ==================== -->
   <view class="date-nav">
-    <view class="nav-btn" bindtap="prevDay">
-      <text>←</text>
+    <view class="date-nav-btn" bindtap="prevDay">
+      <text class="date-nav-arrow">←</text>
     </view>
-    <view class="date-display">{{selectedDateStr}}</view>
-    <view class="nav-btn" bindtap="nextDay">
-      <text>→</text>
+    <view class="date-nav-text">
+      <text>{{selectedDateStr}}</text>
+    </view>
+    <view class="date-nav-btn" bindtap="nextDay">
+      <text class="date-nav-arrow">→</text>
     </view>
   </view>
 
-  <view class="deadline-info">
-    <text>早餐{{deadlines.breakfast}}截止 | 午餐{{deadlines.lunch}}截止 | 晚餐{{deadlines.dinner}}截止</text>
+  <!-- ==================== 加载状态提示 ==================== -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <text class="loading-text">加载中...</text>
   </view>
 
-  <view wx:if="{{loading}}" class="loading">
-    <text>加载中...</text>
-  </view>
+  <!-- ==================== 无菜单数据提示 ==================== -->
+  <block wx:elif="{{!menuData && !showInitButton}}">
+    <view class="empty-container">
+      <text class="empty-text">暂无菜单数据</text>
+    </view>
+  </block>
 
-  <view wx:elif="{{!menuData}}" class="empty">
-    <text>该日期菜单尚未发布</text>
-  </view>
-
-  <view wx:else class="menu-content">
-    <view class="meal-section {{disabledMeals[item.type] ? 'disabled' : ''}}" wx:for="{{menuData.meals}}" wx:key="type">
+  <!-- ==================== 菜单展示区 ==================== -->
+  <block wx:elif="{{menuData}}">
+    
+    <!-- 遍历三餐：早餐、午餐、晚餐 -->
+    <view 
+      wx:for="{{menuData.meals}}" 
+      wx:key="type" 
+      class="meal-section"
+    >
+      
+      <!-- 餐次标题行 -->
       <view class="meal-header">
         <view class="meal-title">{{item.type}}</view>
-        <view class="meal-deadline" wx:if="{{disabledMeals[item.type]}}">已截止</view>
-        <view wx:elif="{{orders[item.type].status === 'ordered'}}" class="meal-ordered">已订</view>
+        
+        <!-- 已订标签（仅当已订餐时显示） -->
+        <view wx:if="{{orders[item.type].status === 'ordered'}}" class="ordered-tag">
+          已订
+        </view>
+        
+        <!-- 禁用标签（当超过截止时间时显示） -->
+        <view wx:if="{{disabledMeals[item.type]}}" class="disabled-tag">
+          已截止
+        </view>
       </view>
-      <view class="dish-list">
+
+      <!-- 菜品列表 -->
+      <view class="dishes-list">
+        
+        <!-- 遍历每个菜品 -->
         <view 
-          class="dish-item {{isDishSelected(item.type, dish.name) ? 'selected' : ''}} {{disabledMeals[item.type] ? 'disabled' : ''}}" 
           wx:for="{{item.dishes}}" 
-          wx:for-item="dish" 
-          wx:key="name"
+          wx:key="name" 
+          wx:for-item="dish"
+          class="dish-item {{isDishSelected(item.type, dish.name) ? 'selected' : ''}} {{disabledMeals[item.type] ? 'disabled' : ''}}"
           data-meal-type="{{item.type}}"
           data-dish-name="{{dish.name}}"
           bindtap="toggleDish"
         >
-          <view class="dish-info">
-            <view class="dish-name">{{dish.name}}</view>
+          
+          <!-- 菜品名称 -->
+          <text class="dish-name">{{dish.name}}</text>
+          
+          <!-- 选中标记 -->
+          <view wx:if="{{isDishSelected(item.type, dish.name)}}" class="check-mark">
+            ✓
           </view>
-          <view class="check-icon" wx:if="{{isDishSelected(item.type, dish.name)}}">✓</view>
         </view>
       </view>
-      <view class="meal-footer">
-        <view class="ordered-dishes" wx:if="{{userSelections[item.type].length > 0}}">
-          <text>已选：{{userSelections[item.type].join('、')}}</text>
-        </view>
-        <button 
-          wx:if="{{!disabledMeals[item.type]}}" 
-          class="submit-btn {{userSelections[item.type].length === 0 ? 'disabled' : ''}}" 
-          data-meal-type="{{item.type}}"
-          bindtap="submitOrder"
-        >
-          {{orders[item.type].status === 'ordered' ? '修改' : '订餐'}}
-        </button>
+
+      <!-- 已选菜品显示区 -->
+      <view wx:if="{{userSelections[item.type].length > 0}}" class="selected-dishes">
+        <text class="selected-label">已选：</text>
+        <text class="selected-list">{{userSelections[item.type].join('、')}}</text>
       </view>
+
+      <!-- 提交按钮 -->
+      <button 
+        class="submit-btn {{disabledMeals[item.type] ? 'btn-disabled' : ''}}"
+        data-meal-type="{{item.type}}"
+        bindtap="submitOrder"
+        disabled="{{disabledMeals[item.type]}}"
+      >
+        {{orders[item.type].status === 'ordered' ? '修改' : '订餐'}}
+      </button>
     </view>
+  </block>
+
+  <!-- ==================== 数据库初始化按钮 ==================== -->
+  <view wx:if="{{showInitButton}}" class="init-container">
+    <text class="init-text">数据库未初始化，请点击下方按钮初始化</text>
+    <button class="init-btn" bindtap="initDatabase">
+      初始化数据库
+    </button>
   </view>
+
 </view>

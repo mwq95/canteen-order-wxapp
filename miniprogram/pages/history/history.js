@@ -1,4 +1,5 @@
 const auth = require('../../utils/auth.js');
+const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
@@ -7,11 +8,16 @@ Page({
   },
 
   onLoad() {
-    this.loadOrders();
+    this.initPage();
   },
 
   onShow() {
     auth.checkPageAccess('tabbar');
+    this.loadOrders();
+  },
+
+  async initPage() {
+    await initUtil.waitForAppInit();
     this.loadOrders();
   },
 

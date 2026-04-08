@@ -97,6 +97,7 @@
   padding: 0 24rpx;
   font-size: 30rpx;
   color: #333;
+  box-sizing: border-box;
 }
 
 .verify-btn {
