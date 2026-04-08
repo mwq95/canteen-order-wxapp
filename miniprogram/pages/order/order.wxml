@@ -45,16 +45,20 @@
       
       <!-- 餐次标题行 -->
       <view class="meal-header">
-        <view class="meal-title">{{item.type}}</view>
-        
-        <!-- 已订标签（仅当已订餐时显示） -->
-        <view wx:if="{{orders[item.type].status === 'ordered'}}" class="ordered-tag">
-          已订
+        <view class="meal-title-row">
+          <view class="meal-title">{{item.type}}</view>
+          <view class="meal-deadline">截止时间：{{deadlines[item.type === '早餐' ? 'breakfast' : (item.type === '午餐' ? 'lunch' : 'dinner')]}}</view>
         </view>
         
-        <!-- 禁用标签（当超过截止时间时显示） -->
-        <view wx:if="{{disabledMeals[item.type]}}" class="disabled-tag">
-          已截止
+        <!-- 标签容器 -->
+        <view class="meal-tags">
+          <view wx:if="{{orders[item.type].status === 'ordered'}}" class="ordered-tag">
+            已订
+          </view>
+          
+          <view wx:if="{{disabledMeals[item.type]}}" class="disabled-tag">
+            已截止
+          </view>
         </view>
       </view>
 
