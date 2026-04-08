@@ -1,5 +1,6 @@
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
+const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
@@ -12,11 +13,16 @@ Page({
 
   onLoad() {
     this.initDate();
-    this.loadMenu();
+    this.initPage();
   },
 
   onShow() {
     auth.checkPageAccess('tabbar');
+    this.loadMenu();
+  },
+
+  async initPage() {
+    await initUtil.waitForAppInit();
     this.loadMenu();
   },
 
@@ -82,7 +88,7 @@ Page({
           icon: 'success'
         });
         this.setData({ showInitButton: false });
-        this.loadMenus();
+        this.loadMenu();
       }
     }).catch(err => {
       wx.hideLoading();

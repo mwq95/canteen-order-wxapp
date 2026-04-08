@@ -6,15 +6,15 @@ cloud.init({
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const { templateId, data, page } = event;
-  
+
   try {
     const result = await cloud.openapi.subscribeMessage.send({
       touser: wxContext.OPENID,
-      page: page || 'pages/index/index',
+      page: page || 'pages/order/order',
       data: data,
       templateId: templateId,
     });
-    
+
     return {
       success: true,
       result: result

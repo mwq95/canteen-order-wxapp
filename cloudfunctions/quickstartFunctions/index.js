@@ -49,7 +49,7 @@ const addStaff = async (event, openid) => {
   if (!isAdmin) {
     return { success: false, error: '您没有权限操作' };
   }
-  
+
   return await db.collection('staffs').add({
     data: event.data
   });
@@ -60,7 +60,7 @@ const updateStaff = async (event, openid) => {
   if (!isAdmin) {
     return { success: false, error: '您没有权限操作' };
   }
-  
+
   return await db.collection('staffs').doc(event.id).update({
     data: event.data
   });
@@ -71,7 +71,7 @@ const deleteStaff = async (event, openid) => {
   if (!isAdmin) {
     return { success: false, error: '您没有权限操作' };
   }
-  
+
   return await db.collection('staffs').doc(event.id).remove()
   // .update({
   //   data: {
@@ -83,7 +83,7 @@ const deleteStaff = async (event, openid) => {
 
 const getMiniProgramCode = async () => {
   const resp = await cloud.openapi.wxacode.get({
-    path: "pages/index/index",
+    path: "pages/order/order",
   });
   const { buffer } = resp;
   const upload = await cloud.uploadFile({
@@ -101,7 +101,7 @@ const createCanteenCollections = async () => {
     await db.createCollection("users");
     await db.createCollection("configs");
     await db.createCollection("staffs");
-    
+
     await db.collection("configs").add({
       data: {
         key: "order_deadline",
@@ -111,7 +111,7 @@ const createCanteenCollections = async () => {
         updateTime: new Date()
       }
     });
-    
+
     return {
       success: true,
     };
@@ -197,7 +197,7 @@ const deleteRecord = async (event) => {
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
-  
+
   switch (event.type) {
     case "getOpenId":
       return await getOpenId();
