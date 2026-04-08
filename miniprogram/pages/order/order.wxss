@@ -97,10 +97,29 @@
   border-bottom: 2rpx solid #f0f0f0;
 }
 
+.meal-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  flex: 1;
+}
+
 .meal-title {
-  font-size: 34rpx;
+  font-size: 30rpx;
   font-weight: bold;
-  color: #333333;
+  color: #333;
+}
+
+.meal-deadline {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 标签容器 */
+.meal-tags {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
 }
 
 /* 已订标签 */
@@ -229,6 +248,11 @@
   box-shadow: 0 8rpx 20rpx rgba(24, 144, 255, 0.3);
   transition: all 0.3s ease;
   text-align: center;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submit-btn:not(.btn-disabled):active {
