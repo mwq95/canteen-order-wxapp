@@ -1,5 +1,6 @@
 const config = require('../../config.js');
 const dateUtil = require('../../utils/dateUtil.js');
+const auth = require('../../utils/auth.js');
 const app = getApp();
 
 Page({
@@ -37,6 +38,7 @@ Page({
   },
 
   onShow() {
+    auth.checkPageAccess('tabbar');
     if (app.globalData.openid) {
       this.loadData();
     }

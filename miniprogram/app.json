@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/auth/auth",
     "pages/index/index",
     "pages/order/order",
     "pages/history/history",
@@ -9,7 +10,8 @@
     "pages/statistics/statistics",
     "pages/evaluate/evaluate",
     "pages/orderList/orderList",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/userManage/userManage"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",

@@ -1,4 +1,5 @@
 const dateUtil = require('../../utils/dateUtil.js');
+const auth = require('../../utils/auth.js');
 
 Page({
   data: {
@@ -18,6 +19,10 @@ Page({
 
   onLoad() {
     this.initDate();
+  },
+
+  onShow() {
+    auth.checkPageAccess('menu');
   },
 
   initDate() {

@@ -20,5 +20,9 @@
       <view class="menu-icon">⚙️</view>
       <view class="menu-text">订餐设置</view>
     </view>
+    <view wx:if="{{isAdmin}}" class="menu-item" bindtap="goToUserManage">
+      <view class="menu-icon">👥</view>
+      <view class="menu-text">用户管理</view>
+    </view>
   </view>
 </view>
