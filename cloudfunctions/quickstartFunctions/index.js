@@ -4,9 +4,8 @@ cloud.init({
 });
 
 const db = cloud.database();
-// 获取openid
+
 const getOpenId = async () => {
-  // 获取基础信息
   const wxContext = cloud.getWXContext();
   return {
     openid: wxContext.OPENID,
@@ -15,14 +14,78 @@ const getOpenId = async () => {
   };
 };
 
-// 获取小程序二维码
+const getPhoneNumber = async (event) => {
+  try {
+    const result = await cloud.getOpenData({
+      list: [event.code],
+    });
+    return {
+      phoneNumber: result.list[0].data.phoneNumber
+    };
+  } catch (e) {
+    console.error('获取手机号失败', e);
+    return {
+      phoneNumber: null
+    };
+  }
+};
+
+const checkIsAdmin = async (openid) => {
+  const userRes = await db.collection('users').where({
+    _openid: openid
+  }).get();
+  if (userRes.data.length > 0) {
+    return userRes.data[0].role === 'admin';
+  }
+  return false;
+};
+
+const getStaffList = async () => {
+  return await db.collection('staffs').orderBy('createTime', 'desc').get();
+};
+
+const addStaff = async (event, openid) => {
+  const isAdmin = await checkIsAdmin(openid);
+  if (!isAdmin) {
+    return { success: false, error: '您没有权限操作' };
+  }
+  
+  return await db.collection('staffs').add({
+    data: event.data
+  });
+};
+
+const updateStaff = async (event, openid) => {
+  const isAdmin = await checkIsAdmin(openid);
+  if (!isAdmin) {
+    return { success: false, error: '您没有权限操作' };
+  }
+  
+  return await db.collection('staffs').doc(event.id).update({
+    data: event.data
+  });
+};
+
+const deleteStaff = async (event, openid) => {
+  const isAdmin = await checkIsAdmin(openid);
+  if (!isAdmin) {
+    return { success: false, error: '您没有权限操作' };
+  }
+  
+  return await db.collection('staffs').doc(event.id).remove()
+  // .update({
+  //   data: {
+  //     status: 'inactive',
+  //     updateTime: new Date()
+  //   }
+  // });
+};
+
 const getMiniProgramCode = async () => {
-  // 获取小程序二维码的buffer
   const resp = await cloud.openapi.wxacode.get({
     path: "pages/index/index",
   });
   const { buffer } = resp;
-  // 将图片上传云存储空间
   const upload = await cloud.uploadFile({
     cloudPath: "code.png",
     fileContent: buffer,
@@ -30,7 +93,6 @@ const getMiniProgramCode = async () => {
   return upload.fileID;
 };
 
-// 创建食堂相关集合
 const createCanteenCollections = async () => {
   try {
     await db.createCollection("menus");
@@ -38,6 +100,7 @@ const createCanteenCollections = async () => {
     await db.createCollection("evaluations");
     await db.createCollection("users");
     await db.createCollection("configs");
+    await db.createCollection("staffs");
     
     await db.collection("configs").add({
       data: {
@@ -60,16 +123,12 @@ const createCanteenCollections = async () => {
   }
 };
 
-// 查询数据
 const selectRecord = async () => {
-  // 返回数据库查询结果
   return await db.collection("sales").get();
 };
 
-// 更新数据
 const updateRecord = async (event) => {
   try {
-    // 遍历修改数据库信息
     for (let i = 0; i < event.data.length; i++) {
       await db
         .collection("sales")
@@ -94,11 +153,9 @@ const updateRecord = async (event) => {
   }
 };
 
-// 新增数据
 const insertRecord = async (event) => {
   try {
     const insertRecord = event.data;
-    // 插入数据
     await db.collection("sales").add({
       data: {
         region: insertRecord.region,
@@ -118,7 +175,6 @@ const insertRecord = async (event) => {
   }
 };
 
-// 删除数据
 const deleteRecord = async (event) => {
   try {
     await db
@@ -138,18 +194,23 @@ const deleteRecord = async (event) => {
   }
 };
 
-// const getOpenId = require('./getOpenId/index');
-// const getMiniProgramCode = require('./getMiniProgramCode/index');
-// const createCollection = require('./createCollection/index');
-// const selectRecord = require('./selectRecord/index');
-// const updateRecord = require('./updateRecord/index');
-// const fetchGoodsList = require('./fetchGoodsList/index');
-// const genMpQrcode = require('./genMpQrcode/index');
-// 云函数入口函数
 exports.main = async (event, context) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  
   switch (event.type) {
     case "getOpenId":
       return await getOpenId();
+    case "getPhoneNumber":
+      return await getPhoneNumber(event);
+    case "getStaffList":
+      return await getStaffList();
+    case "addStaff":
+      return await addStaff(event, openid);
+    case "updateStaff":
+      return await updateStaff(event, openid);
+    case "deleteStaff":
+      return await deleteStaff(event, openid);
     case "getMiniProgramCode":
       return await getMiniProgramCode();
     case "createCanteenCollections":

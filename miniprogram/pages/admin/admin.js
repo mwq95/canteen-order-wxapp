@@ -1,5 +1,25 @@
+const auth = require('../../utils/auth.js');
+
 Page({
-  data: {},
+  data: {
+    isAdmin: false
+  },
+
+  onLoad() {
+    this.checkRole();
+  },
+
+  onShow() {
+    auth.checkPageAccess('admin');
+    this.checkRole();
+  },
+
+  checkRole() {
+    const role = auth.getRole();
+    this.setData({
+      isAdmin: role === 'admin'
+    });
+  },
 
   goToMenu() {
     wx.navigateTo({
@@ -22,6 +42,12 @@ Page({
   goToSettings() {
     wx.navigateTo({
       url: '/pages/settings/settings'
+    });
+  },
+
+  goToUserManage() {
+    wx.navigateTo({
+      url: '/pages/userManage/userManage'
     });
   }
 });

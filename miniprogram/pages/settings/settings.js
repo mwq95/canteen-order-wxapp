@@ -1,3 +1,5 @@
+const auth = require('../../utils/auth.js');
+
 Page({
   data: {
     breakfastDeadline: '',
@@ -8,6 +10,10 @@ Page({
 
   onLoad() {
     this.loadConfig();
+  },
+
+  onShow() {
+    auth.checkPageAccess('settings');
   },
 
   loadConfig() {

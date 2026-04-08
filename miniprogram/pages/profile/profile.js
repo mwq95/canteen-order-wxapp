@@ -1,21 +1,26 @@
+const auth = require('../../utils/auth.js');
 const app = getApp();
 
 Page({
   data: {
     userInfo: null,
-    isAdmin: false
+    canAccessAdmin: false
   },
 
   onLoad() {
-    this.setData({
-      isAdmin: app.globalData.isAdmin
-    });
+    this.checkAdminAccess();
     this.getUserInfo();
   },
 
   onShow() {
+    auth.checkPageAccess('tabbar');
+    this.checkAdminAccess();
+  },
+
+  checkAdminAccess() {
+    const role = auth.getRole();
     this.setData({
-      isAdmin: app.globalData.isAdmin
+      canAccessAdmin: role === 'admin' || role === 'kitchen'
     });
   },
 

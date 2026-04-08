@@ -1,0 +1,44 @@
+<view class="container">
+  <view wx:if="{{checking}}" class="loading-view">
+    <text>检查中...</text>
+  </view>
+
+  <block wx:else>
+    <view class="header">
+      <view class="title">身份验证</view>
+      <view class="subtitle">请验证您的身份以继续使用</view>
+    </view>
+
+    <view class="content">
+      <view class="section">
+        <view class="section-title">微信手机号验证</view>
+        <button class="phone-btn" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">
+          获取手机号快速验证
+        </button>
+      </view>
+
+      <view class="divider">
+        <view class="divider-line"></view>
+        <view class="divider-text">或</view>
+        <view class="divider-line"></view>
+      </view>
+
+      <view class="section">
+        <view class="section-title">手动输入手机号</view>
+        <view class="input-box">
+          <input 
+            class="phone-input" 
+            type="number" 
+            placeholder="请输入手机号" 
+            value="{{phone}}"
+            bindinput="onPhoneInput"
+            maxlength="11"
+          />
+        </view>
+        <button class="verify-btn" bindtap="onManualVerify">
+          验证
+        </button>
+      </view>
+    </view>
+  </block>
+</view>

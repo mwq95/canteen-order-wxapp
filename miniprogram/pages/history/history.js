@@ -1,3 +1,5 @@
+const auth = require('../../utils/auth.js');
+
 Page({
   data: {
     orderList: [],
@@ -9,6 +11,7 @@ Page({
   },
 
   onShow() {
+    auth.checkPageAccess('tabbar');
     this.loadOrders();
   },
 
@@ -62,8 +65,12 @@ Page({
   },
 
   loadOrders() {
+    const app = getApp();
     const db = wx.cloud.database();
     db.collection('orders')
+      .where({
+        _openid: app.globalData.openid
+      })
       .orderBy('createTime', 'desc')
       .get()
       .then(res => {
@@ -101,8 +108,12 @@ Page({
       content: '确定要取消预约吗？',
       success: res => {
         if (res.confirm) {
+          const app = getApp();
           const db = wx.cloud.database();
-          db.collection('orders').doc(orderId).update({
+          db.collection('orders').where({
+            _id: orderId,
+            _openid: app.globalData.openid
+          }).update({
             data: {
               status: 'cancelled',
               updateTime: new Date()

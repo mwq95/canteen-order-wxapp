@@ -3,7 +3,9 @@ App({
     this.globalData = {
       userInfo: null,
       openid: null,
-      isAdmin: false
+      isVerified: false,
+      role: null,
+      phone: null
     };
     
     if (!wx.cloud) {
@@ -25,23 +27,44 @@ App({
       }
     }).then(res => {
       this.globalData.openid = res.result.openid;
-      this.checkIsAdmin();
+      this.checkUserStatus();
     }).catch(err => {
       console.error('获取openid失败', err);
     });
   },
 
-  checkIsAdmin: function() {
+  checkUserStatus: function() {
     const db = wx.cloud.database();
     db.collection('users').where({
-      _openid: this.globalData.openid,
-      isAdmin: true
+      _openid: this.globalData.openid
     }).get().then(res => {
       if (res.data.length > 0) {
-        this.globalData.isAdmin = true;
+        const user = res.data[0];
+        this.globalData.isVerified = user.isVerified || false;
+        this.globalData.role = user.role || 'staff';
+        this.globalData.phone = user.phone || null;
+        this.globalData.userInfo = user.userInfo || null;
+        
+        if (user.isVerified) {
+          this.checkAndRedirect();
+        }
+      } else {
+        this.checkAndRedirect();
       }
     }).catch(err => {
-      console.error('检查管理员身份失败', err);
+      console.error('检查用户状态失败', err);
+      this.checkAndRedirect();
     });
+  },
+
+  checkAndRedirect: function() {
+    if (!this.globalData.isVerified) {
+      const pages = getCurrentPages();
+      if (pages.length === 0 || pages[pages.length - 1].route !== 'pages/auth/auth') {
+        wx.reLaunch({
+          url: '/pages/auth/auth'
+        });
+      }
+    }
   }
 });

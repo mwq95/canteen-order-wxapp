@@ -1,0 +1,101 @@
+<view class="container">
+  <view class="header">
+    <view class="title">单位人员管理</view>
+    <button class="add-btn" bindtap="onAddStaff">
+      <text class="add-icon">+</text>
+      添加人员
+    </button>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{staffList.length === 0}}" class="empty">
+    <text>暂无人员</text>
+  </view>
+
+  <view wx:else class="staff-list">
+    <view class="staff-card" wx:for="{{staffList}}" wx:key="_id" data-staff="{{item}}">
+      <view class="staff-info">
+        <view class="staff-name">{{item.name}}</view>
+        <view class="staff-detail">
+          <text class="detail-item">{{item.phone}}</text>
+          <text class="detail-item tag">{{item.displayRole}}</text>
+          <text class="detail-item tag {{item.statusClass}}">{{item.displayStatus}}</text>
+        </view>
+      </view>
+      <view class="staff-actions">
+        <view class="action-btn action-edit" bindtap="onEditStaff" data-staff="{{item}}">编辑</view>
+        <view class="action-btn action-delete" bindtap="onDeleteStaff" data-staff="{{item}}">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showModal}}" class="modal-mask" bindtap="onCancelModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">{{isEdit ? '编辑人员' : '添加人员'}}</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">手机号</view>
+          <input 
+            class="form-input" 
+            type="number" 
+            placeholder="请输入手机号"
+            value="{{formData.phone}}"
+            bindinput="onPhoneInput"
+            maxlength="11"
+          />
+        </view>
+        
+        <view class="form-item">
+          <view class="form-label">姓名</view>
+          <input 
+            class="form-input" 
+            placeholder="请输入姓名"
+            value="{{formData.name}}"
+            bindinput="onNameInput"
+          />
+        </view>
+        
+        <view class="form-item">
+          <view class="form-label">角色</view>
+          <picker 
+            mode="selector" 
+            range="{{roleOptions}}" 
+            range-key="label"
+            value="{{roleIndex}}"
+            bindchange="onRoleChange"
+          >
+            <view class="form-picker">
+              {{roleOptions[roleIndex].label}}
+            </view>
+          </picker>
+        </view>
+        
+        <view class="form-item">
+          <view class="form-label">状态</view>
+          <picker 
+            mode="selector" 
+            range="{{statusOptions}}" 
+            range-key="label"
+            value="{{statusIndex}}"
+            bindchange="onStatusChange"
+          >
+            <view class="form-picker">
+              {{statusOptions[statusIndex].label}}
+            </view>
+          </picker>
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" bindtap="onCancelModal">取消</button>
+        <button class="modal-btn modal-btn-confirm" bindtap="onConfirmModal">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

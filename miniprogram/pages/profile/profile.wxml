@@ -9,7 +9,7 @@
   </view>
 
   <view class="menu-list">
-    <view wx:if="{{isAdmin}}" class="menu-item" bindtap="goToAdmin">
+    <view wx:if="{{canAccessAdmin}}" class="menu-item" bindtap="goToAdmin">
       <view class="menu-icon">⚙️</view>
       <view class="menu-text">管理后台</view>
       <view class="menu-arrow">›</view>
