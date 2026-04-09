@@ -87,12 +87,6 @@
         </view>
       </view>
 
-      <!-- 已选菜品显示区 -->
-      <view wx:if="{{userSelections[item.type].length > 0}}" class="selected-dishes">
-        <text class="selected-label">已选：</text>
-        <text class="selected-list">{{userSelections[item.type].join('、')}}</text>
-      </view>
-
       <!-- 提交按钮 -->
       <button 
         class="submit-btn {{disabledMeals[item.type] ? 'btn-disabled' : ''}}"
