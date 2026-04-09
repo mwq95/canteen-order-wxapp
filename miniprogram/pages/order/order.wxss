@@ -21,9 +21,9 @@
   align-items: center;
   padding: 20rpx 0;
   margin-bottom: 30rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
   border-radius: 16rpx;
-  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(24, 144, 255, 0.3);
 }
 
 .date-nav-btn {
@@ -97,10 +97,29 @@
   border-bottom: 2rpx solid #f0f0f0;
 }
 
+.meal-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  flex: 1;
+}
+
 .meal-title {
-  font-size: 34rpx;
+  font-size: 30rpx;
   font-weight: bold;
-  color: #333333;
+  color: #333;
+}
+
+.meal-deadline {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 标签容器 */
+.meal-tags {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
 }
 
 /* 已订标签 */
@@ -143,7 +162,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 /* 菜品项 - 可点击状态（默认） */
@@ -152,11 +172,12 @@
   background: #f0f0f0;
 }
 
-/* 菜品项 - 选中状态 */
+/* 菜品项 - 选中状态 - 使用 !important 确保优先级 */
 .dish-item.selected {
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-  border-color: #1890ff;
-  box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.3);
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%) !important;
+  border-color: #1890ff !important;
+  box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.4);
+  transform: scale(1.02);
 }
 
 /* 菜品名称 */
@@ -164,11 +185,13 @@
   font-size: 26rpx;
   color: #333333;
   white-space: nowrap;
+  transition: color 0.2s ease;
 }
 
+/* 选中状态的菜品名称 - 使用 !important 确保优先级 */
 .dish-item.selected .dish-name {
-  color: #ffffff;
-  font-weight: 500;
+  color: #ffffff !important;
+  font-weight: 600;
 }
 
 /* 菜品项 - 禁用状态 */
@@ -229,6 +252,11 @@
   box-shadow: 0 8rpx 20rpx rgba(24, 144, 255, 0.3);
   transition: all 0.3s ease;
   text-align: center;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submit-btn:not(.btn-disabled):active {
@@ -275,4 +303,3 @@
   border: none;
   box-shadow: 0 8rpx 20rpx rgba(250, 173, 20, 0.3);
 }
-
