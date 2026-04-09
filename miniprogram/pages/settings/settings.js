@@ -5,7 +5,8 @@ Page({
     breakfastDeadline: '',
     lunchDeadline: '',
     dinnerDeadline: '',
-    configId: null
+    configId: null,
+    loading: false
   },
 
   onLoad() {
@@ -22,14 +23,24 @@ Page({
       if (res.data.length > 0) {
         const config = res.data[0];
         this.setData({
-          breakfastDeadline: config.breakfast_deadline,
-          lunchDeadline: config.lunch_deadline,
-          dinnerDeadline: config.dinner_deadline,
+          breakfastDeadline: config.breakfast_deadline || '08:00',
+          lunchDeadline: config.lunch_deadline || '12:00',
+          dinnerDeadline: config.dinner_deadline || '17:00',
           configId: config._id
+        });
+      } else {
+        this.setData({
+          breakfastDeadline: '08:00',
+          lunchDeadline: '12:00',
+          dinnerDeadline: '17:00'
         });
       }
     }).catch(err => {
       console.error('加载设置失败', err);
+      wx.showToast({
+        title: '加载设置失败',
+        icon: 'none'
+      });
     });
   },
 
@@ -45,51 +56,77 @@ Page({
     this.setData({ dinnerDeadline: e.detail.value });
   },
 
-  saveConfig() {
-    const db = wx.cloud.database();
-    const data = {
-      key: 'order_deadline',
-      breakfast_deadline: this.data.breakfastDeadline,
-      lunch_deadline: this.data.lunchDeadline,
-      dinner_deadline: this.data.dinnerDeadline,
-      updateTime: new Date()
-    };
+  validateTimeFormat(time) {
+    if (!time) return false;
+    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(time);
+  },
 
+  saveConfig() {
+    const { breakfastDeadline, lunchDeadline, dinnerDeadline } = this.data;
+
+    if (!breakfastDeadline || !lunchDeadline || !dinnerDeadline) {
+      wx.showToast({
+        title: '请选择所有截止时间',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (!this.validateTimeFormat(breakfastDeadline) || !this.validateTimeFormat(lunchDeadline) || !this.validateTimeFormat(dinnerDeadline)) {
+      wx.showToast({
+        title: '时间格式不正确',
+        icon: 'none'
+      });
+      return;
+    }
+
+    this.setData({ loading: true });
     wx.showLoading({ title: '保存中...' });
 
-    if (this.data.configId) {
-      db.collection('configs').doc(this.data.configId).update({
-        data: data
-      }).then(() => {
-        wx.hideLoading();
+    wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: {
+        type: 'updateDeadlineConfig',
+        data: {
+          breakfast_deadline: breakfastDeadline,
+          lunch_deadline: lunchDeadline,
+          dinner_deadline: dinnerDeadline
+        }
+      }
+    }).then(res => {
+      wx.hideLoading();
+      this.setData({ loading: false });
+
+      if (res.result.success) {
         wx.showToast({
           title: '保存成功',
           icon: 'success'
         });
-      }).catch(err => {
-        wx.hideLoading();
+      } else {
         wx.showToast({
-          title: '保存失败',
-          icon: 'none'
+          title: res.result.error || '保存失败',
+          icon: 'none',
+          duration: 2000
         });
+      }
+    }).catch(err => {
+      wx.hideLoading();
+      this.setData({ loading: false });
+      console.error('保存设置失败', err);
+      
+      let errorMsg = '保存失败';
+      if (err.errCode === -1) {
+        errorMsg = '网络错误，请检查网络连接';
+      } else if (err.errMsg) {
+        errorMsg = err.errMsg;
+      }
+      
+      wx.showToast({
+        title: errorMsg,
+        icon: 'none',
+        duration: 2000
       });
-    } else {
-      db.collection('configs').add({
-        data: data
-      }).then(res => {
-        this.setData({ configId: res._id });
-        wx.hideLoading();
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success'
-        });
-      }).catch(err => {
-        wx.hideLoading();
-        wx.showToast({
-          title: '保存失败',
-          icon: 'none'
-        });
-      });
-    }
+    });
   }
 });
