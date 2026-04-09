@@ -22,8 +22,8 @@ Page({
     selectedDate: '',           // 当前选择的日期 YYYY-MM-DD
     selectedDateStr: '',        // 当前选择的日期中文显示
     
-    // 菜单数据
-    menuData: null,             // 当日菜单数据 { date, meals: [{ type, dishes }] }
+    // 菜单数据（包含选中状态）
+    menuData: null,             // 当日菜单数据 { date, meals: [{ type, dishes: [{ name, selected }] }] }
     
     // 订单数据 - 每顿独立管理
     orders: {
@@ -32,7 +32,7 @@ Page({
       '晚餐': { orderId: null, dishes: [], status: 'none' }
     },
     
-    // 用户选择（未提交的选择）
+    // 用户选择（未提交的选择）- 用于显示已选菜品列表
     userSelections: {
       '早餐': [],
       '午餐': [],
@@ -157,6 +157,19 @@ Page({
   },
 
   /**
+   * 为菜品添加选中状态标记
+   * @param {Array} dishes - 菜品数组 [{ name }]
+   * @param {Array} selections - 已选菜品名称数组
+   * @returns {Array} 带有 selected 属性的菜品数组 [{ name, selected }]
+   */
+  markDishSelections(dishes, selections) {
+    return dishes.map(dish => ({
+      ...dish,
+      selected: selections.indexOf(dish.name) !== -1
+    }));
+  },
+
+  /**
    * 加载菜单数据和用户订单数据
    * 核心方法：整合了首页菜单展示和订餐页订单查询
    */
@@ -172,10 +185,10 @@ Page({
 
     // 查询当日菜单
     db.collection('menus').where({ date }).get().then(menuRes => {
-      const menuData = menuRes.data[0] || null;
+      const rawMenuData = menuRes.data[0] || null;
       
       // 如果没有菜单数据，显示提示
-      if (!menuData) {
+      if (!rawMenuData) {
         this.setData({
           menuData: null,
           loading: false,
@@ -209,12 +222,13 @@ Page({
           '午餐': [],
           '晚餐': []
         };
-        
-        // 处理每餐的订单结果
-        orderResults.forEach((orderRes, index) => {
+
+        // 处理每餐的订单结果，并为菜单数据添加选中状态
+        const processedMeals = rawMenuData.meals.map((meal, index) => {
           const mealType = mealTypes[index];
           
           // 过滤掉已取消的订单，只保留有效订单
+          const orderRes = orderResults[index];
           const validOrders = orderRes.data.filter(o => o.status !== 'cancelled');
           
           if (validOrders.length > 0) {
@@ -236,7 +250,19 @@ Page({
             };
             userSelections[mealType] = [];
           }
+
+          // 为当前餐次的每个菜品添加选中状态
+          return {
+            type: meal.type,
+            dishes: this.markDishSelections(meal.dishes, userSelections[mealType])
+          };
         });
+        
+        // 构建带有选中状态的菜单数据
+        const menuData = {
+          ...rawMenuData,
+          meals: processedMeals
+        };
         
         // 更新页面数据
         this.setData({
@@ -274,9 +300,6 @@ Page({
 
   /**
    * 检查各餐是否可订餐
-   * 规则：
-   * - 过去日期不可订餐
-   * - 今天超过截止时间的餐次不可订餐
    */
   checkDisabledMeals() {
     const now = new Date();
@@ -290,13 +313,11 @@ Page({
       '晚餐': false
     };
     
-    // 如果是过去的日期，全部禁用
     if (selectedDate < todayStr) {
       disabledMeals['早餐'] = true;
       disabledMeals['午餐'] = true;
       disabledMeals['晚餐'] = true;
     } else if (selectedDate === todayStr) {
-      // 如果是今天，根据当前时间和截止时间判断
       const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       
       if (currentTime >= deadlines.breakfast) {
@@ -315,9 +336,8 @@ Page({
 
   /**
    * 切换菜品选择状态
+   * 使用纯数据驱动模式：直接更新 menuData 中菜品的 selected 属性
    * @param {Object} e - 事件对象
-   * @param {string} e.currentTarget.dataset.mealType - 餐次类型
-   * @param {string} e.currentTarget.dataset.dishName - 菜品名称
    */
   toggleDish(e) {
     const { mealType, dishName } = e.currentTarget.dataset;
@@ -330,49 +350,46 @@ Page({
       });
       return;
     }
-    
-    // 创建新的用户选择对象，确保触发视图更新
-    const newUserSelections = {};
-    const currentSelections = this.data.userSelections[mealType] || [];
-    
-    // 复制其他餐次的选择
-    Object.keys(this.data.userSelections).forEach(key => {
-      if (key !== mealType) {
-        newUserSelections[key] = this.data.userSelections[key];
-      }
-    });
-    
-    // 更新当前餐次的选择（创建新数组）
-    const index = currentSelections.indexOf(dishName);
-    if (index > -1) {
-      // 取消选择：过滤掉该菜品
-      newUserSelections[mealType] = currentSelections.filter(name => name !== dishName);
-    } else {
-      // 添加选择：创建新数组并添加该菜品
-      newUserSelections[mealType] = [...currentSelections, dishName];
-    }
-    
-    // 立即更新视图
-    this.setData({
-      userSelections: newUserSelections
-    });
-  },
 
-  /**
-   * 判断菜品是否被选中
-   * @param {string} mealType - 餐次类型
-   * @param {string} dishName - 菜品名称
-   * @returns {boolean} 是否被选中
-   */
-  isDishSelected(mealType, dishName) {
-    const selections = this.data.userSelections[mealType] || [];
-    return selections.indexOf(dishName) !== -1;
+    // 获取当前用户选择
+    const currentSelections = [...(this.data.userSelections[mealType] || [])];
+    const index = currentSelections.indexOf(dishName);
+    
+    // 更新选择列表
+    let newSelections;
+    if (index > -1) {
+      // 取消选择
+      newSelections = currentSelections.filter(name => name !== dishName);
+    } else {
+      // 添加选择
+      newSelections = [...currentSelections, dishName];
+    }
+
+    // 更新 menuData 中对应餐次的菜品选中状态
+    const menuData = { ...this.data.menuData };
+    const meals = menuData.meals.map(meal => {
+      if (meal.type === mealType) {
+        return {
+          type: meal.type,
+          dishes: meal.dishes.map(dish => ({
+            ...dish,
+            selected: newSelections.indexOf(dish.name) !== -1
+          }))
+        };
+      }
+      return meal;
+    });
+
+    // 使用路径更新方式，只更新变化的字段，提高性能
+    this.setData({
+      [`userSelections.${mealType}`]: newSelections,
+      'menuData.meals': meals
+    });
   },
 
   /**
    * 提交订单
    * @param {Object} e - 事件对象
-   * @param {string} e.currentTarget.dataset.mealType - 餐次类型
    */
   submitOrder(e) {
     const { mealType } = e.currentTarget.dataset;
@@ -399,10 +416,8 @@ Page({
     // 检查是否配置了订阅消息模板ID
     const templateId = config.getSubscribeMessageTemplateId();
     if (templateId && templateId !== '您的订阅消息模板ID') {
-      // 有订阅消息配置，先请求授权再提交
       this.requestSubscribeMessageAndSubmit(mealType, selections);
     } else {
-      // 无订阅消息配置，直接提交
       this.doSubmitOrder(mealType, selections);
     }
   },
@@ -438,7 +453,6 @@ Page({
 
     const db = wx.cloud.database();
     
-    // 构建订单数据
     const orderData = {
       date: this.data.selectedDate,
       mealType,
@@ -448,12 +462,10 @@ Page({
       updateTime: new Date()
     };
 
-    // 判断是新增还是更新订单
     const existingOrder = this.data.orders[mealType];
     let submitPromise;
 
     if (existingOrder.orderId) {
-      // 已有订单，执行更新操作
       submitPromise = db.collection('orders').doc(existingOrder.orderId).update({
         data: {
           ...orderData,
@@ -461,21 +473,17 @@ Page({
         }
       });
     } else {
-      // 新订单，执行添加操作
       submitPromise = db.collection('orders').add({ data: orderData });
     }
 
-    // 处理提交结果
     submitPromise.then(() => {
       wx.hideLoading();
       
-      // 显示成功提示
       wx.showToast({
         title: existingOrder.orderId ? `${mealType}已更新` : `${mealType}订餐成功`,
         icon: 'success'
       });
       
-      // 如果是新订单且用户同意了订阅消息，发送通知
       if (hasSubscribed && !existingOrder.orderId) {
         this.sendSubscribeMessage(mealType, selections);
       }

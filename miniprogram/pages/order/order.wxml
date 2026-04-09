@@ -65,22 +65,23 @@
       <!-- 菜品列表 -->
       <view class="dishes-list">
         
-        <!-- 遍历每个菜品 -->
+        <!-- 遍历每个菜品 - 使用数据驱动的 selected 属性 -->
         <view 
           wx:for="{{item.dishes}}" 
           wx:key="name" 
           wx:for-item="dish"
-          class="dish-item {{isDishSelected(item.type, dish.name) ? 'selected' : ''}} {{disabledMeals[item.type] ? 'disabled' : ''}}"
+          class="dish-item {{dish.selected ? 'selected' : ''}} {{disabledMeals[item.type] ? 'disabled' : ''}}"
           data-meal-type="{{item.type}}"
           data-dish-name="{{dish.name}}"
+          data-index="{{index}}"
           bindtap="toggleDish"
         >
           
           <!-- 菜品名称 -->
           <text class="dish-name">{{dish.name}}</text>
           
-          <!-- 选中标记 -->
-          <view wx:if="{{isDishSelected(item.type, dish.name)}}" class="check-mark">
+          <!-- 选中标记 - 数据驱动 -->
+          <view wx:if="{{dish.selected}}" class="check-mark">
             ✓
           </view>
         </view>
