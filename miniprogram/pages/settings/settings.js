@@ -1,4 +1,5 @@
 const auth = require('../../utils/auth.js');
+const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
@@ -16,7 +17,10 @@ Page({
     this.loadConfig();
   },
 
-  onShow() {
+  async onShow() {
+    if (auth.isInitializing()) {
+      await initUtil.waitForAppInit();
+    }
     auth.checkPageAccess('settings');
   },
 
