@@ -160,49 +160,38 @@ Page({
   },
 
   saveMenu() {
-    const db = wx.cloud.database();
-    const menuData = {
-      date: this.data.selectedDate,
-      meals: this.data.meals,
-      updateTime: new Date()
-    };
+    const { selectedDate, meals } = this.data;
 
     wx.showLoading({ title: '保存中...' });
 
-    if (this.data.existingMenuId) {
-      db.collection('menus').doc(this.data.existingMenuId).update({
-        data: menuData
-      }).then(() => {
-        wx.hideLoading();
+    wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: {
+        type: 'saveMenu',
+        date: selectedDate,
+        meals: meals
+      }
+    }).then(res => {
+      wx.hideLoading();
+      
+      if (res.result.success) {
         wx.showToast({
           title: '保存成功',
           icon: 'success'
         });
-      }).catch(err => {
-        wx.hideLoading();
+      } else {
         wx.showToast({
-          title: '保存失败',
+          title: res.result.error || '保存失败',
           icon: 'none'
         });
+      }
+    }).catch(err => {
+      wx.hideLoading();
+      console.error('保存菜单失败', err);
+      wx.showToast({
+        title: '保存失败',
+        icon: 'none'
       });
-    } else {
-      menuData.createTime = new Date();
-      db.collection('menus').add({
-        data: menuData
-      }).then(res => {
-        wx.hideLoading();
-        this.setData({ existingMenuId: res._id });
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success'
-        });
-      }).catch(err => {
-        wx.hideLoading();
-        wx.showToast({
-          title: '保存失败',
-          icon: 'none'
-        });
-      });
-    }
+    });
   }
 });

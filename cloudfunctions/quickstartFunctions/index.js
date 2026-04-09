@@ -124,8 +124,8 @@ const createCanteenCollections = async () => {
 };
 
 const updateDeadlineConfig = async (event, openid) => {
-  const isAdmin = await checkIsAdmin(openid);
-  if (!isAdmin) {
+  const isAuthorized = await checkIsAdminOrKitchen(openid);
+  if (!isAuthorized) {
     return { success: false, error: '您没有权限修改设置' };
   }
 
@@ -393,6 +393,47 @@ const getOrderStats = async (event, openid) => {
   }
 };
 
+const checkIsAdminOrKitchen = async (openid) => {
+  const userRes = await db.collection('users').where({
+    _openid: openid
+  }).get();
+  if (userRes.data.length > 0) {
+    const role = userRes.data[0].role;
+    return role === 'admin' || role === 'kitchen';
+  }
+  return false;
+};
+
+const saveMenu = async (event, openid) => {
+  const isAuthorized = await checkIsAdminOrKitchen(openid);
+  if (!isAuthorized) {
+    return { success: false, error: '您没有权限修改菜单' };
+  }
+
+  const { date, meals } = event;
+
+  if (!date || !meals || !Array.isArray(meals)) {
+    return { success: false, error: '参数错误' };
+  }
+
+  try {
+    const existing = await db.collection('menus').where({ date }).get();
+    if (existing.data.length > 0) {
+      await db.collection('menus').doc(existing.data[0]._id).update({
+        data: { meals, updateTime: new Date() }
+      });
+    } else {
+      await db.collection('menus').add({
+        data: { date, meals, createTime: new Date(), updateTime: new Date() }
+      });
+    }
+    return { success: true };
+  } catch (e) {
+    console.error('保存菜单失败', e);
+    return { success: false, error: '保存失败：' + (e.errMsg || e.message) };
+  }
+};
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
@@ -422,6 +463,8 @@ exports.main = async (event, context) => {
       return await cancelOrder(event, openid);
     case "getOrderStats":
       return await getOrderStats(event, openid);
+    case "saveMenu":
+      return await saveMenu(event, openid);
     case "selectRecord":
       return await selectRecord();
     case "updateRecord":
