@@ -75,5 +75,11 @@ Page({
     wx.navigateTo({
       url: '/pages/admin/admin'
     });
+  },
+
+  goToEvaluations() {
+    wx.navigateTo({
+      url: '/pages/evaluations/evaluations'
+    });
   }
 });
