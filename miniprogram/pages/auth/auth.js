@@ -1,4 +1,5 @@
 const app = getApp();
+const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
@@ -15,19 +16,23 @@ Page({
     this.checkIfVerified();
   },
 
-  checkIfVerified() {
-    if (!app.globalData.openid) {
-      setTimeout(() => {
-        this.checkIfVerified();
-      }, 500);
-      return;
-    }
-
-    if (app.globalData.isVerified) {
+  async checkIfVerified() {
+    if (app.globalData.openid && app.globalData.isVerified) {
       wx.switchTab({
         url: '/pages/order/order'
       });
       return;
+    }
+
+    if (app.globalData.openid === null || app.globalData.isVerified === undefined) {
+      await initUtil.waitForAppInit();
+
+      if (app.globalData.isVerified) {
+        wx.switchTab({
+          url: '/pages/order/order'
+        });
+        return;
+      }
     }
 
     this.setData({ checking: false });
@@ -47,7 +52,7 @@ Page({
 
   verifyByPhoneNumber(code) {
     wx.showLoading({ title: '验证中...' });
-    
+
     wx.cloud.callFunction({
       name: 'quickstartFunctions',
       data: {
@@ -82,7 +87,7 @@ Page({
       });
       return;
     }
-    
+
     if (!/^1[3-9]\d{9}$/.test(phone)) {
       wx.showToast({
         title: '请输入正确的手机号',
@@ -90,13 +95,13 @@ Page({
       });
       return;
     }
-    
+
     this.verifyStaff(phone);
   },
 
   verifyStaff(phone) {
     const db = wx.cloud.database();
-    
+
     db.collection('staffs').where({
       phone: String(phone),
       status: 'active'
@@ -124,7 +129,7 @@ Page({
   createOrUpdateUser(staff) {
     const db = wx.cloud.database();
     const openid = app.globalData.openid;
-    
+
     db.collection('users').where({
       _openid: openid
     }).get().then(res => {
@@ -134,7 +139,7 @@ Page({
         role: staff.role,
         updateTime: new Date()
       };
-      
+
       if (res.data.length > 0) {
         db.collection('users').doc(res.data[0]._id).update({
           data: userData
@@ -162,13 +167,13 @@ Page({
     app.globalData.isVerified = true;
     app.globalData.role = staff.role;
     app.globalData.phone = staff.phone;
-    
+
     wx.hideLoading();
     wx.showToast({
       title: '验证成功',
       icon: 'success'
     });
-    
+
     setTimeout(() => {
       wx.switchTab({
         url: '/pages/order/order'
