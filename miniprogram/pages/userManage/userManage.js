@@ -17,9 +17,9 @@ Page({
     roleIndex: 0,
     statusIndex: 0,
     roleOptions: [
-      { label: '普通工作人员', value: 'staff' },
+      { label: '用餐人員', value: 'staff' },
       { label: '管理员', value: 'admin' },
-      { label: '厨房工作人员', value: 'kitchen' }
+      { label: '食堂工作人员', value: 'kitchen' }
     ],
     statusOptions: [
       { label: '在职', value: 'active' },
