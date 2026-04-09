@@ -1,0 +1,85 @@
+<view class="container">
+  <view class="header">
+    <text class="title">使用帮助</text>
+    <text class="subtitle">了解系统各项功能的使用方法</text>
+  </view>
+
+  <view class="section">
+    <view class="section-title">基础功能</view>
+
+    <view class="help-item">
+      <view class="help-q">如何订餐？</view>
+      <view class="help-a">1. 进入「订餐」页面
+2. 选择日期查看当日菜单
+3. 点击菜品进行选择（选中会高亮显示）
+4. 点击底部「订餐」按钮提交
+5. 订餐成功后会收到微信通知（如已开启）</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何修改或取消订单？</view>
+      <view class="help-a">• 进入「我的订单」页面
+• 在截止时间前可点击「取消预约」
+• 截止时间后无法取消，但可以修改菜品
+• 过了开饭时间后订单变为已完成状态</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">什么是订餐截止时间和开饭时间？</view>
+      <view class="help-a">• 订餐截止时间：在此时间前可以订餐和取消
+• 开饭时间：过了此时间订单自动标记为已完成
+• 具体时间由管理员在设置页配置</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何对餐品进行评价？</view>
+      <view class="help-a">• 开饭时间后，订单状态变为「已完成」
+• 此时会出现「评价」按钮
+• 点击即可进入评价页面打分和留言</view>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{showKitchen}}">
+    <view class="section-title">厨房功能</view>
+
+    <view class="help-item">
+      <view class="help-q">如何管理菜单？</view>
+      <view class="help-a">• 进入管理后台 → 菜单管理
+• 选择日期添加或编辑当日菜单
+• 为每餐（早/午/晚）添加菜品名称
+• 支持添加多个菜品</view>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{showAdmin}}">
+    <view class="section-title">管理功能</view>
+
+    <view class="help-item">
+      <view class="help-q">如何管理人员？</view>
+      <view class="help-a">• 进入管理后台 → 人员管理
+• 点击「添加人员」录入新员工信息
+• 设置员工的角色（管理员/工作人员/厨房）
+• 支持编辑和停用操作</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何设置订餐参数？</view>
+      <view class="help-a">• 进入管理后台 → 订餐设置
+• 设置各餐的截止订餐时间
+• 设置各餐的开饭时间
+• 保存后立即生效</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何初始化数据库？</view>
+      <view class="help-a">• 首次部署或数据异常时可能需要初始化
+• 订餐页出现提示时点击「初始化数据库」
+• 将创建所需的数据库集合
+• 注意：不会清除已有数据</view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text class="version">版本号：v1.3.0</text>
+  </view>
+</view>

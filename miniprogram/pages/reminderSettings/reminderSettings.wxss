@@ -1,0 +1,91 @@
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+  padding-top: 20rpx;
+}
+
+.title {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.setting-list {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.setting-icon {
+  font-size: 40rpx;
+}
+
+.setting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.setting-name {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.setting-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.tips-card {
+  margin-top: 30rpx;
+  background: #fffbe6;
+  border-radius: 16rpx;
+  padding: 24rpx 30rpx;
+}
+
+.tips-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #faad14;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.tips-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.8;
+  display: block;
+}

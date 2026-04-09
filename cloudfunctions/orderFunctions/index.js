@@ -17,12 +17,13 @@ const getMenu = async (event) => {
 
 const submitOrder = async (event) => {
   const wxContext = cloud.getWXContext();
-  const { date, dishes, totalPrice, existingOrderId } = event;
+  const { date, mealType, dishes, phone, existingOrderId } = event;
   
   const orderData = {
     date,
+    mealType,
     dishes,
-    totalPrice,
+    phone: phone || '',
     status: 'pending',
     createTime: db.serverDate(),
     updateTime: db.serverDate(),
@@ -33,7 +34,9 @@ const submitOrder = async (event) => {
     await db.collection('orders').doc(existingOrderId).update({
       data: {
         dishes,
-        totalPrice,
+        mealType,
+        phone: phone || '',
+        status: 'pending',
         updateTime: db.serverDate()
       }
     });
@@ -48,7 +51,10 @@ const submitOrder = async (event) => {
 
 const getOrderList = async (event) => {
   const { date } = event;
-  const result = await db.collection('orders').where({ date }).get();
+  const result = await db.collection('orders').where({ 
+    date,
+    status: _.neq('cancelled')
+  }).get();
   return {
     success: true,
     data: result.data
@@ -57,16 +63,21 @@ const getOrderList = async (event) => {
 
 const getStatistics = async (event) => {
   const { date } = event;
-  const orders = await db.collection('orders').where({ date }).get();
+  const orders = await db.collection('orders').where({ 
+    date,
+    status: _.neq('cancelled')
+  }).get();
   
   const totalOrders = orders.data.length;
   let dishCount = {};
   
   orders.data.forEach(order => {
-    order.dishes.forEach(dish => {
-      const key = `${dish.mealType}-${dish.name}`;
-      dishCount[key] = (dishCount[key] || 0) + 1;
-    });
+    if (order.dishes) {
+      order.dishes.forEach(dish => {
+        const key = `${order.mealType}-${dish.name}`;
+        dishCount[key] = (dishCount[key] || 0) + 1;
+      });
+    }
   });
   
   const dishStats = Object.entries(dishCount).map(([key, count]) => {

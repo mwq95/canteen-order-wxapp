@@ -206,7 +206,7 @@ Page({
         return db.collection('orders').where({
           date,
           mealType,
-          _openid: openid
+          phone: app.globalData.phone || openid
         }).get();
       });
 
@@ -460,6 +460,7 @@ Page({
       date: this.data.selectedDate,
       mealType,
       dishes: selections.map(name => ({ name })),
+      phone: app.globalData.phone || '',
       status: 'pending',
       createTime: new Date(),
       updateTime: new Date()

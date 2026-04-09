@@ -212,7 +212,7 @@ const getDeadlineConfig = async () => {
 };
 
 const cancelOrder = async (event, openid) => {
-  const { orderId } = event;
+  const { orderId, phone } = event;
 
   if (!orderId) {
     return { success: false, error: '缺少订单ID' };
@@ -227,7 +227,11 @@ const cancelOrder = async (event, openid) => {
 
     const order = orderRes.data;
 
-    if (order._openid !== openid) {
+    if (order.phone && order.phone !== phone) {
+      return { success: false, error: '无权操作此订单' };
+    }
+
+    if (!order.phone && order._openid !== openid) {
       return { success: false, error: '无权操作此订单' };
     }
 
@@ -352,6 +356,47 @@ const deleteRecord = async (event) => {
   }
 };
 
+const getOrderStats = async (event, openid) => {
+  const { phone } = event;
+  const userKey = phone || openid;
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+
+    const [thirtyDayRes, totalRes] = await Promise.all([
+      db.collection('orders')
+        .where({
+          phone: userKey,
+          date: db.command.gte(formatDate(thirtyDaysAgo)).and(db.command.lte(formatDate(now)))
+        })
+        .count(),
+      db.collection('orders')
+        .where({ phone: userKey })
+        .count()
+    ]);
+
+    return {
+      success: true,
+      data: {
+        thirtyDay: thirtyDayRes.total,
+        total: totalRes.total
+      }
+    };
+  } catch (e) {
+    console.error('获取统计失败', e);
+    return { success: false, error: '获取统计失败' };
+  }
+};
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
@@ -379,6 +424,8 @@ exports.main = async (event, context) => {
       return await getDeadlineConfig();
     case "cancelOrder":
       return await cancelOrder(event, openid);
+    case "getOrderStats":
+      return await getOrderStats(event, openid);
     case "selectRecord":
       return await selectRecord();
     case "updateRecord":

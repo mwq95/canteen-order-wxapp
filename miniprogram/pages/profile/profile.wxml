@@ -1,14 +1,34 @@
 <view class="container">
   <view class="user-card">
     <view class="user-info">
-      <image class="avatar" src="{{userInfo && userInfo.avatarUrl ? userInfo.avatarUrl : '/images/avatar.png'}}"></image>
+      <image class="avatar" src="{{userInfo.avatarUrl || '/images/avatar.png'}}" mode="aspectFill"></image>
       <view class="user-detail">
-        <view class="nickname">{{userInfo && userInfo.nickName ? userInfo.nickName : '未设置昵称'}}</view>
+        <view class="nickname">{{staffName}}</view>
+        <view class="phone">{{maskedPhone}}</view>
+        <view class="role-tag">{{roleText}}</view>
       </view>
     </view>
   </view>
 
   <view class="menu-list">
+    <view class="menu-item" bindtap="goToReminder">
+      <view class="menu-icon">🔔</view>
+      <view class="menu-text">提醒设置</view>
+      <view class="menu-arrow">›</view>
+    </view>
+
+    <view class="menu-item" bindtap="goToStats">
+      <view class="menu-icon">📊</view>
+      <view class="menu-text">订餐统计</view>
+      <view class="menu-arrow">›</view>
+    </view>
+
+    <view class="menu-item" bindtap="goToHelp">
+      <view class="menu-icon">❓</view>
+      <view class="menu-text">使用帮助</view>
+      <view class="menu-arrow">›</view>
+    </view>
+
     <view wx:if="{{canAccessAdmin}}" class="menu-item" bindtap="goToAdmin">
       <view class="menu-icon">⚙️</view>
       <view class="menu-text">管理后台</view>
