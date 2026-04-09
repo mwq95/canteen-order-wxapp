@@ -34,6 +34,8 @@
   </view>
 
   <view class="save-btn-wrapper">
-    <button class="save-btn" bindtap="saveConfig">保存设置</button>
+    <button class="save-btn" bindtap="saveConfig" disabled="{{loading}}">
+      {{loading ? '保存中...' : '保存设置'}}
+    </button>
   </view>
 </view>

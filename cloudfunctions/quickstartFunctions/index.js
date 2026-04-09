@@ -123,6 +123,50 @@ const createCanteenCollections = async () => {
   }
 };
 
+const updateDeadlineConfig = async (event, openid) => {
+  const isAdmin = await checkIsAdmin(openid);
+  if (!isAdmin) {
+    return { success: false, error: '您没有权限修改设置' };
+  }
+
+  const { breakfast_deadline, lunch_deadline, dinner_deadline } = event.data;
+
+  const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+  if (!timeRegex.test(breakfast_deadline) || !timeRegex.test(lunch_deadline) || !timeRegex.test(dinner_deadline)) {
+    return { success: false, error: '时间格式不正确' };
+  }
+
+  try {
+    const configRes = await db.collection('configs').where({ key: 'order_deadline' }).get();
+    
+    if (configRes.data.length > 0) {
+      await db.collection('configs').doc(configRes.data[0]._id).update({
+        data: {
+          breakfast_deadline,
+          lunch_deadline,
+          dinner_deadline,
+          updateTime: new Date()
+        }
+      });
+    } else {
+      await db.collection('configs').add({
+        data: {
+          key: 'order_deadline',
+          breakfast_deadline,
+          lunch_deadline,
+          dinner_deadline,
+          updateTime: new Date()
+        }
+      });
+    }
+
+    return { success: true };
+  } catch (e) {
+    console.error('更新截止时间失败', e);
+    return { success: false, error: '保存失败：' + (e.errMsg || e.message) };
+  }
+};
+
 const selectRecord = async () => {
   return await db.collection("sales").get();
 };
@@ -215,6 +259,8 @@ exports.main = async (event, context) => {
       return await getMiniProgramCode();
     case "createCanteenCollections":
       return await createCanteenCollections();
+    case "updateDeadlineConfig":
+      return await updateDeadlineConfig(event, openid);
     case "selectRecord":
       return await selectRecord();
     case "updateRecord":

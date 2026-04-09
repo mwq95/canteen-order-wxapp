@@ -90,3 +90,8 @@
 .save-btn::after {
   border: none;
 }
+
+.save-btn[disabled] {
+  background: #d9d9d9;
+  color: #999;
+}
