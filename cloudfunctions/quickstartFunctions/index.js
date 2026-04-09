@@ -167,6 +167,102 @@ const updateDeadlineConfig = async (event, openid) => {
   }
 };
 
+const getDeadlineConfig = async () => {
+  try {
+    const res = await db.collection('configs').where({ key: 'order_deadline' }).get();
+    if (res.data.length > 0) {
+      return {
+        success: true,
+        data: {
+          breakfast: res.data[0].breakfast_deadline || '08:00',
+          lunch: res.data[0].lunch_deadline || '12:00',
+          dinner: res.data[0].dinner_deadline || '17:00'
+        }
+      };
+    }
+    return {
+      success: true,
+      data: { breakfast: '08:00', lunch: '12:00', dinner: '17:00' }
+    };
+  } catch (e) {
+    console.error('获取截止时间配置失败', e);
+    return {
+      success: true,
+      data: { breakfast: '08:00', lunch: '12:00', dinner: '17:00' }
+    };
+  }
+};
+
+const cancelOrder = async (event, openid) => {
+  const { orderId } = event;
+
+  if (!orderId) {
+    return { success: false, error: '缺少订单ID' };
+  }
+
+  try {
+    const orderRes = await db.collection('orders').doc(orderId).get();
+    
+    if (!orderRes.data || orderRes.data.length === 0) {
+      return { success: false, error: '订单不存在' };
+    }
+
+    const order = orderRes.data;
+
+    if (order._openid !== openid) {
+      return { success: false, error: '无权操作此订单' };
+    }
+
+    if (order.status === 'cancelled') {
+      return { success: false, error: '该订单已取消' };
+    }
+
+    if (order.status === 'completed') {
+      return { success: false, error: '该订单已完成，无法取消' };
+    }
+
+    const deadlineRes = await db.collection('configs').where({ key: 'order_deadline' }).get();
+    const deadlineMap = {
+      '早餐': '08:00',
+      '午餐': '12:00',
+      '晚餐': '17:00'
+    };
+
+    if (deadlineRes.data.length > 0) {
+      const cfg = deadlineRes.data[0];
+      deadlineMap['早餐'] = cfg.breakfast_deadline || '08:00';
+      deadlineMap['午餐'] = cfg.lunch_deadline || '12:00';
+      deadlineMap['晚餐'] = cfg.dinner_deadline || '17:00';
+    }
+
+    const deadline = deadlineMap[order.mealType];
+    const now = new Date();
+    const orderDate = new Date(order.date + 'T00:00:00');
+    const [deadlineHour, deadlineMinute] = deadline.split(':').map(Number);
+    const deadlineTime = new Date(orderDate);
+    deadlineTime.setHours(deadlineHour, deadlineMinute, 0, 0);
+
+    if (now > deadlineTime) {
+      return { 
+        success: false, 
+        error: `已过${order.mealType}订餐截止时间（${deadline}），无法取消预约` 
+      };
+    }
+
+    await db.collection('orders').doc(orderId).update({
+      data: {
+        status: 'cancelled',
+        updateTime: new Date()
+      }
+    });
+
+    return { success: true };
+  } catch (e) {
+    console.error('取消订单失败', e);
+    return { success: false, error: '取消失败：' + (e.errMsg || e.message) };
+  }
+};
+
 const selectRecord = async () => {
   return await db.collection("sales").get();
 };
@@ -261,6 +357,10 @@ exports.main = async (event, context) => {
       return await createCanteenCollections();
     case "updateDeadlineConfig":
       return await updateDeadlineConfig(event, openid);
+    case "getDeadlineConfig":
+      return await getDeadlineConfig();
+    case "cancelOrder":
+      return await cancelOrder(event, openid);
     case "selectRecord":
       return await selectRecord();
     case "updateRecord":
