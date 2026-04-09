@@ -121,6 +121,46 @@ const submitEvaluation = async (event) => {
   return { success: true, message: '评价成功' };
 };
 
+const getUserEvaluations = async (event) => {
+  const { phone, page = 1, pageSize = 10 } = event;
+  const wxContext = cloud.getWXContext();
+  
+  try {
+    // 计算跳过的记录数
+    const skip = (page - 1) * pageSize;
+    
+    // 查询用户的评价，按创建时间降序排序
+    const evaluations = await db.collection('evaluations')
+      .where({ _openid: wxContext.OPENID })
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+    
+    // 获取总记录数
+    const countResult = await db.collection('evaluations')
+      .where({ _openid: wxContext.OPENID })
+      .count();
+    
+    return {
+      success: true,
+      data: {
+        evaluations: evaluations.data,
+        total: countResult.total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(countResult.total / pageSize)
+      }
+    };
+  } catch (error) {
+    console.error('获取用户评价失败', error);
+    return {
+      success: false,
+      message: '获取评价失败'
+    };
+  }
+};
+
 exports.main = async (event, context) => {
   switch (event.type) {
     case 'getMenu':
@@ -133,6 +173,8 @@ exports.main = async (event, context) => {
       return await getStatistics(event);
     case 'submitEvaluation':
       return await submitEvaluation(event);
+    case 'getUserEvaluations':
+      return await getUserEvaluations(event);
     default:
       return { success: false, message: '未知的操作类型' };
   }
