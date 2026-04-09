@@ -45,46 +45,47 @@
       
       <!-- 餐次标题行 -->
       <view class="meal-header">
-        <view class="meal-title-row">
-          <view class="meal-title">{{item.type}}</view>
-          <view class="meal-deadline">截止时间：{{deadlines[item.type === '早餐' ? 'breakfast' : (item.type === '午餐' ? 'lunch' : 'dinner')]}}</view>
+        <view class="meal-title">{{item.type}}</view>
+        
+        <!-- 已订标签（仅当已订餐时显示） -->
+        <view wx:if="{{orders[item.type].status === 'ordered'}}" class="ordered-tag">
+          已订
         </view>
         
-        <!-- 标签容器 -->
-        <view class="meal-tags">
-          <view wx:if="{{orders[item.type].status === 'ordered'}}" class="ordered-tag">
-            已订
-          </view>
-          
-          <view wx:if="{{disabledMeals[item.type]}}" class="disabled-tag">
-            已截止
-          </view>
+        <!-- 禁用标签（当超过截止时间时显示） -->
+        <view wx:if="{{disabledMeals[item.type]}}" class="disabled-tag">
+          已截止
         </view>
       </view>
 
       <!-- 菜品列表 -->
       <view class="dishes-list">
         
-        <!-- 遍历每个菜品 - 使用数据驱动的 selected 属性 -->
+        <!-- 遍历每个菜品 -->
         <view 
           wx:for="{{item.dishes}}" 
           wx:key="name" 
           wx:for-item="dish"
-          class="dish-item {{dish.selected ? 'selected' : ''}} {{disabledMeals[item.type] ? 'disabled' : ''}}"
+          class="dish-item {{isDishSelected(item.type, dish.name) ? 'selected' : ''}} {{disabledMeals[item.type] ? 'disabled' : ''}}"
           data-meal-type="{{item.type}}"
           data-dish-name="{{dish.name}}"
-          data-index="{{index}}"
           bindtap="toggleDish"
         >
           
           <!-- 菜品名称 -->
           <text class="dish-name">{{dish.name}}</text>
           
-          <!-- 选中标记 - 数据驱动 -->
-          <view wx:if="{{dish.selected}}" class="check-mark">
+          <!-- 选中标记 -->
+          <view wx:if="{{isDishSelected(item.type, dish.name)}}" class="check-mark">
             ✓
           </view>
         </view>
+      </view>
+
+      <!-- 已选菜品显示区 -->
+      <view wx:if="{{userSelections[item.type].length > 0}}" class="selected-dishes">
+        <text class="selected-label">已选：</text>
+        <text class="selected-list">{{userSelections[item.type].join('、')}}</text>
       </view>
 
       <!-- 提交按钮 -->
