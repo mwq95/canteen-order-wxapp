@@ -58,6 +58,8 @@ Page({
 
   submitEvaluation() {
     const { orderData, ratings, comments } = this.data;
+    const app = getApp();
+    const phone = app.globalData.phone;
     
     let allRated = true;
     Object.values(ratings).forEach(rating => {
@@ -76,42 +78,40 @@ Page({
 
     wx.showLoading({ title: '提交中...' });
 
-    const db = wx.cloud.database();
     const evaluations = orderData.dishes.map((dish, index) => ({
       dishName: dish.name,
       mealType: dish.mealType,
       rating: ratings[index],
-      comment: comments[index],
-      orderId: this.data.orderId
+      comment: comments[index]
     }));
 
-    const promises = evaluations.map(evalItem => {
-      return db.collection('evaluations').add({
-        data: {
-          ...evalItem,
-          createTime: new Date()
-        }
-      });
-    });
-
-    Promise.all(promises).then(() => {
-      return db.collection('orders').doc(this.data.orderId).update({
-        data: {
-          evaluated: true,
-          updateTime: new Date()
-        }
-      });
-    }).then(() => {
+    wx.cloud.callFunction({
+      name: 'orderFunctions',
+      data: {
+        type: 'submitEvaluation',
+        orderId: this.data.orderId,
+        evaluations: evaluations,
+        phone: phone
+      }
+    }).then(res => {
       wx.hideLoading();
-      wx.showToast({
-        title: '评价成功',
-        icon: 'success'
-      });
-      setTimeout(() => {
-        wx.navigateBack();
-      }, 1500);
+      if (res.result.success) {
+        wx.showToast({
+          title: '评价成功',
+          icon: 'success'
+        });
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1500);
+      } else {
+        wx.showToast({
+          title: res.result.message || '提交失败',
+          icon: 'none'
+        });
+      }
     }).catch(err => {
       wx.hideLoading();
+      console.error('提交评价失败', err);
       wx.showToast({
         title: '提交失败',
         icon: 'none'
