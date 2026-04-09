@@ -131,10 +131,11 @@ Page({
     const openid = app.globalData.openid;
 
     db.collection('users').where({
-      _openid: openid
+      phone: String(staff.phone)
     }).get().then(res => {
       const userData = {
         phone: staff.phone,
+        name: staff.name,
         isVerified: true,
         role: staff.role,
         updateTime: new Date()

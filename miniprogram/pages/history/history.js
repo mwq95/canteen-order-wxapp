@@ -136,7 +136,7 @@ Page({
     const db = wx.cloud.database();
     db.collection('orders')
       .where({
-        _openid: app.globalData.openid
+        phone: app.globalData.phone || app.globalData.openid
       })
       .orderBy('createTime', 'desc')
       .get()
@@ -187,7 +187,8 @@ Page({
             name: 'quickstartFunctions',
             data: {
               type: 'cancelOrder',
-              orderId: orderId
+              orderId: orderId,
+              phone: app.globalData.phone || ''
             }
           }).then(res => {
             wx.hideLoading();

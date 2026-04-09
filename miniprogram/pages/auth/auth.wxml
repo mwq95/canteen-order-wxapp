@@ -1,6 +1,6 @@
 <view class="container">
   <view wx:if="{{checking}}" class="loading-view">
-    <text>检查中...</text>
+    <text>身份验证中...</text>
   </view>
 
   <block wx:else>

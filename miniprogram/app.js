@@ -5,7 +5,8 @@ App({
       openid: null,
       isVerified: false,
       role: null,
-      phone: null
+      phone: null,
+      name: null
     };
     
     if (!wx.cloud) {
@@ -43,6 +44,7 @@ App({
         this.globalData.isVerified = user.isVerified || false;
         this.globalData.role = user.role || 'staff';
         this.globalData.phone = user.phone || null;
+        this.globalData.name = user.name || null;
         this.globalData.userInfo = user.userInfo || null;
         
         if (user.isVerified) {
