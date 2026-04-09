@@ -129,40 +129,48 @@ const updateDeadlineConfig = async (event, openid) => {
     return { success: false, error: '您没有权限修改设置' };
   }
 
-  const { breakfast_deadline, lunch_deadline, dinner_deadline } = event.data;
+  const { 
+    breakfast_deadline, lunch_deadline, dinner_deadline,
+    breakfast_meal_start, lunch_meal_start, dinner_meal_start
+  } = event.data;
 
   const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-  if (!timeRegex.test(breakfast_deadline) || !timeRegex.test(lunch_deadline) || !timeRegex.test(dinner_deadline)) {
-    return { success: false, error: '时间格式不正确' };
+  const allTimes = [breakfast_deadline, lunch_deadline, dinner_deadline, breakfast_meal_start, lunch_meal_start, dinner_meal_start];
+  for (const t of allTimes) {
+    if (!t || !timeRegex.test(t)) {
+      return { success: false, error: '时间格式不正确' };
+    }
   }
 
   try {
     const configRes = await db.collection('configs').where({ key: 'order_deadline' }).get();
     
+    const updateData = {
+      breakfast_deadline,
+      lunch_deadline,
+      dinner_deadline,
+      breakfast_meal_start: breakfast_meal_start || '08:00',
+      lunch_meal_start: lunch_meal_start || '12:00',
+      dinner_meal_start: dinner_meal_start || '17:30',
+      updateTime: new Date()
+    };
+
     if (configRes.data.length > 0) {
       await db.collection('configs').doc(configRes.data[0]._id).update({
-        data: {
-          breakfast_deadline,
-          lunch_deadline,
-          dinner_deadline,
-          updateTime: new Date()
-        }
+        data: updateData
       });
     } else {
       await db.collection('configs').add({
         data: {
           key: 'order_deadline',
-          breakfast_deadline,
-          lunch_deadline,
-          dinner_deadline,
-          updateTime: new Date()
+          ...updateData
         }
       });
     }
 
     return { success: true };
   } catch (e) {
-    console.error('更新截止时间失败', e);
+    console.error('更新配置失败', e);
     return { success: false, error: '保存失败：' + (e.errMsg || e.message) };
   }
 };
@@ -171,24 +179,34 @@ const getDeadlineConfig = async () => {
   try {
     const res = await db.collection('configs').where({ key: 'order_deadline' }).get();
     if (res.data.length > 0) {
+      const cfg = res.data[0];
       return {
         success: true,
         data: {
-          breakfast: res.data[0].breakfast_deadline || '08:00',
-          lunch: res.data[0].lunch_deadline || '12:00',
-          dinner: res.data[0].dinner_deadline || '17:00'
+          breakfast: cfg.breakfast_deadline || '08:00',
+          lunch: cfg.lunch_deadline || '12:00',
+          dinner: cfg.dinner_deadline || '17:00',
+          breakfastMealStart: cfg.breakfast_meal_start || '08:00',
+          lunchMealStart: cfg.lunch_meal_start || '12:00',
+          dinnerMealStart: cfg.dinner_meal_start || '17:30'
         }
       };
     }
     return {
       success: true,
-      data: { breakfast: '08:00', lunch: '12:00', dinner: '17:00' }
+      data: {
+        breakfast: '08:00', lunch: '12:00', dinner: '17:00',
+        breakfastMealStart: '08:00', lunchMealStart: '12:00', dinnerMealStart: '17:30'
+      }
     };
   } catch (e) {
-    console.error('获取截止时间配置失败', e);
+    console.error('获取配置失败', e);
     return {
       success: true,
-      data: { breakfast: '08:00', lunch: '12:00', dinner: '17:00' }
+      data: {
+        breakfast: '08:00', lunch: '12:00', dinner: '17:00',
+        breakfastMealStart: '08:00', lunchMealStart: '12:00', dinnerMealStart: '17:30'
+      }
     };
   }
 };

@@ -1,10 +1,12 @@
 <view class="container">
   <view class="header">
     <view class="title">订餐设置</view>
-    <view class="subtitle">设置每天各餐的截止订餐时间</view>
+    <view class="subtitle">设置每天各餐的截止订餐时间和开饭时间</view>
   </view>
 
   <view class="settings-card">
+    <view class="section-title">订餐截止时间</view>
+    
     <view class="setting-item">
       <view class="setting-label">早餐截止时间</view>
       <picker mode="time" value="{{breakfastDeadline}}" bindchange="onBreakfastChange">
@@ -27,10 +29,35 @@
     </view>
   </view>
 
+  <view class="settings-card">
+    <view class="section-title">开饭时间</view>
+
+    <view class="setting-item">
+      <view class="setting-label">早餐开饭时间</view>
+      <picker mode="time" value="{{breakfastMealStart}}" bindchange="onBreakfastMealStartChange">
+        <view class="picker-text">{{breakfastMealStart || '请选择'}}</view>
+      </picker>
+    </view>
+
+    <view class="setting-item">
+      <view class="setting-label">午餐开饭时间</view>
+      <picker mode="time" value="{{lunchMealStart}}" bindchange="onLunchMealStartChange">
+        <view class="picker-text">{{lunchMealStart || '请选择'}}</view>
+      </picker>
+    </view>
+
+    <view class="setting-item">
+      <view class="setting-label">晚餐开饭时间</view>
+      <picker mode="time" value="{{dinnerMealStart}}" bindchange="onDinnerMealStartChange">
+        <view class="picker-text">{{dinnerMealStart || '请选择'}}</view>
+      </picker>
+    </view>
+  </view>
+
   <view class="info-card">
     <view class="info-title">说明</view>
-    <view class="info-text">超过截止时间后，该餐将无法再订餐。</view>
-    <view class="info-text">例如：早餐截止时间设为08:00，则当天08:00后无法再订早餐。</view>
+    <view class="info-text">超过截止时间后，该餐将无法再订餐或取消预约。</view>
+    <view class="info-text">超过开饭后，订单状态将变为"已完成"，此时可进行评价。</view>
   </view>
 
   <view class="save-btn-wrapper">

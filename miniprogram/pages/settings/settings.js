@@ -5,6 +5,9 @@ Page({
     breakfastDeadline: '',
     lunchDeadline: '',
     dinnerDeadline: '',
+    breakfastMealStart: '',
+    lunchMealStart: '',
+    dinnerMealStart: '',
     configId: null,
     loading: false
   },
@@ -26,13 +29,19 @@ Page({
           breakfastDeadline: config.breakfast_deadline || '08:00',
           lunchDeadline: config.lunch_deadline || '12:00',
           dinnerDeadline: config.dinner_deadline || '17:00',
+          breakfastMealStart: config.breakfast_meal_start || '08:00',
+          lunchMealStart: config.lunch_meal_start || '12:00',
+          dinnerMealStart: config.dinner_meal_start || '17:30',
           configId: config._id
         });
       } else {
         this.setData({
           breakfastDeadline: '08:00',
           lunchDeadline: '12:00',
-          dinnerDeadline: '17:00'
+          dinnerDeadline: '17:00',
+          breakfastMealStart: '08:00',
+          lunchMealStart: '12:00',
+          dinnerMealStart: '17:30'
         });
       }
     }).catch(err => {
@@ -44,41 +53,35 @@ Page({
     });
   },
 
-  onBreakfastChange(e) {
-    this.setData({ breakfastDeadline: e.detail.value });
-  },
-
-  onLunchChange(e) {
-    this.setData({ lunchDeadline: e.detail.value });
-  },
-
-  onDinnerChange(e) {
-    this.setData({ dinnerDeadline: e.detail.value });
-  },
+  onBreakfastChange(e) { this.setData({ breakfastDeadline: e.detail.value }); },
+  onLunchChange(e) { this.setData({ lunchDeadline: e.detail.value }); },
+  onDinnerChange(e) { this.setData({ dinnerDeadline: e.detail.value }); },
+  onBreakfastMealStartChange(e) { this.setData({ breakfastMealStart: e.detail.value }); },
+  onLunchMealStartChange(e) { this.setData({ lunchMealStart: e.detail.value }); },
+  onDinnerMealStartChange(e) { this.setData({ dinnerMealStart: e.detail.value }); },
 
   validateTimeFormat(time) {
     if (!time) return false;
-    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    return timeRegex.test(time);
+    return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time);
   },
 
   saveConfig() {
-    const { breakfastDeadline, lunchDeadline, dinnerDeadline } = this.data;
+    const { 
+      breakfastDeadline, lunchDeadline, dinnerDeadline,
+      breakfastMealStart, lunchMealStart, dinnerMealStart
+    } = this.data;
 
-    if (!breakfastDeadline || !lunchDeadline || !dinnerDeadline) {
-      wx.showToast({
-        title: '请选择所有截止时间',
-        icon: 'none'
-      });
-      return;
-    }
-
-    if (!this.validateTimeFormat(breakfastDeadline) || !this.validateTimeFormat(lunchDeadline) || !this.validateTimeFormat(dinnerDeadline)) {
-      wx.showToast({
-        title: '时间格式不正确',
-        icon: 'none'
-      });
-      return;
+    const allTimes = [breakfastDeadline, lunchDeadline, dinnerDeadline, breakfastMealStart, lunchMealStart, dinnerMealStart];
+    
+    for (const t of allTimes) {
+      if (!t) {
+        wx.showToast({ title: '请选择所有时间', icon: 'none' });
+        return;
+      }
+      if (!this.validateTimeFormat(t)) {
+        wx.showToast({ title: '时间格式不正确', icon: 'none' });
+        return;
+      }
     }
 
     this.setData({ loading: true });
@@ -91,7 +94,10 @@ Page({
         data: {
           breakfast_deadline: breakfastDeadline,
           lunch_deadline: lunchDeadline,
-          dinner_deadline: dinnerDeadline
+          dinner_deadline: dinnerDeadline,
+          breakfast_meal_start: breakfastMealStart,
+          lunch_meal_start: lunchMealStart,
+          dinner_meal_start: dinnerMealStart
         }
       }
     }).then(res => {
@@ -99,34 +105,20 @@ Page({
       this.setData({ loading: false });
 
       if (res.result.success) {
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success'
-        });
+        wx.showToast({ title: '保存成功', icon: 'success' });
       } else {
-        wx.showToast({
-          title: res.result.error || '保存失败',
-          icon: 'none',
-          duration: 2000
-        });
+        wx.showToast({ title: res.result.error || '保存失败', icon: 'none', duration: 2000 });
       }
     }).catch(err => {
       wx.hideLoading();
       this.setData({ loading: false });
       console.error('保存设置失败', err);
-      
+
       let errorMsg = '保存失败';
-      if (err.errCode === -1) {
-        errorMsg = '网络错误，请检查网络连接';
-      } else if (err.errMsg) {
-        errorMsg = err.errMsg;
-      }
-      
-      wx.showToast({
-        title: errorMsg,
-        icon: 'none',
-        duration: 2000
-      });
+      if (err.errCode === -1) errorMsg = '网络错误，请检查网络连接';
+      else if (err.errMsg) errorMsg = err.errMsg;
+
+      wx.showToast({ title: errorMsg, icon: 'none', duration: 2000 });
     });
   }
 });
