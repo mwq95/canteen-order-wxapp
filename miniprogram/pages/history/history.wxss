@@ -99,3 +99,9 @@
   color: #52c41a;
   font-size: 24rpx;
 }
+
+.cancel-disabled-text {
+  color: #999;
+  font-size: 24rpx;
+  line-height: 1.4;
+}
