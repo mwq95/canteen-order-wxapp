@@ -29,6 +29,12 @@
       <view class="menu-arrow">›</view>
     </view>
 
+    <view class="menu-item" bindtap="goToEvaluations">
+      <view class="menu-icon">⭐</view>
+      <view class="menu-text">我的评价</view>
+      <view class="menu-arrow">›</view>
+    </view>
+
     <view wx:if="{{canAccessAdmin}}" class="menu-item" bindtap="goToAdmin">
       <view class="menu-icon">⚙️</view>
       <view class="menu-text">管理后台</view>
