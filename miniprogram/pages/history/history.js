@@ -19,7 +19,10 @@ Page({
     this.initPage();
   },
 
-  onShow() {
+  async onShow() {
+    if (auth.isInitializing()) {
+      await initUtil.waitForAppInit();
+    }
     auth.checkPageAccess('tabbar');
     this.loadOrders();
   },

@@ -72,7 +72,10 @@ Page({
   /**
    * 页面显示时执行
    */
-  onShow() {
+  async onShow() {
+    if (auth.isInitializing()) {
+      await initUtil.waitForAppInit();
+    }
     auth.checkPageAccess('tabbar');
     if (app.globalData.openid) {
       this.loadData();

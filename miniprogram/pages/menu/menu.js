@@ -1,5 +1,6 @@
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
+const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
@@ -21,7 +22,10 @@ Page({
     this.initDate();
   },
 
-  onShow() {
+  async onShow() {
+    if (auth.isInitializing()) {
+      await initUtil.waitForAppInit();
+    }
     auth.checkPageAccess('menu');
   },
 

@@ -1,11 +1,15 @@
+const app = getApp();
+
 const auth = {
   checkVerified() {
-    const app = getApp();
     return app.globalData.isVerified === true;
   },
 
+  isInitializing() {
+    return app.globalData.openid === null || app.globalData.isVerified === undefined;
+  },
+
   getRole() {
-    const app = getApp();
     return app.globalData.role || 'staff';
   },
 
@@ -28,6 +32,10 @@ const auth = {
   },
 
   checkPageAccess(pageType) {
+    if (this.isInitializing()) {
+      return false;
+    }
+
     if (!this.checkVerified()) {
       wx.reLaunch({
         url: '/pages/auth/auth'
