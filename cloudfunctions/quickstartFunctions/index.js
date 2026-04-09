@@ -227,11 +227,7 @@ const cancelOrder = async (event, openid) => {
 
     const order = orderRes.data;
 
-    if (order.phone && order.phone !== phone) {
-      return { success: false, error: '无权操作此订单' };
-    }
-
-    if (!order.phone && order._openid !== openid) {
+    if (order.phone !== phone) {
       return { success: false, error: '无权操作此订单' };
     }
 
