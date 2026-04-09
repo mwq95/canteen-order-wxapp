@@ -61,15 +61,15 @@ Page({
 
     const now = new Date();
     const orderDate = new Date(order.date);
-    const deadline = this.getDeadlineTime(order.mealType);
-    
-    if (!deadline) return order.status;
-    
-    const [dh, dm] = deadline.split(':').map(Number);
-    const deadlineTime = new Date(orderDate);
-    deadlineTime.setHours(dh, dm, 0, 0);
+    const mealEnd = this.getMealEndTime(order.mealType);
 
-    if (now > deadlineTime) return 'completed';
+    if (!mealEnd) return order.status;
+
+    const [eh, em] = mealEnd.split(':').map(Number);
+    const mealEndTime = new Date(orderDate);
+    mealEndTime.setHours(eh, em, 0, 0);
+
+    if (now > mealEndTime) return 'completed';
     return 'pending';
   },
 
