@@ -96,13 +96,14 @@ const getStatistics = async (event) => {
 
 const submitEvaluation = async (event) => {
   const wxContext = cloud.getWXContext();
-  const { orderId, evaluations } = event;
+  const { orderId, evaluations, phone } = event;
   
   const promises = evaluations.map(evalItem => {
     return db.collection('evaluations').add({
       data: {
         ...evalItem,
         orderId,
+        phone: phone || '',
         _openid: wxContext.OPENID,
         createTime: db.serverDate()
       }
@@ -123,7 +124,6 @@ const submitEvaluation = async (event) => {
 
 const getUserEvaluations = async (event) => {
   const { phone, page = 1, pageSize = 10 } = event;
-  const wxContext = cloud.getWXContext();
   
   try {
     // 计算跳过的记录数
@@ -131,7 +131,7 @@ const getUserEvaluations = async (event) => {
     
     // 查询用户的评价，按创建时间降序排序
     const evaluations = await db.collection('evaluations')
-      .where({ _openid: wxContext.OPENID })
+      .where({ phone })
       .orderBy('createTime', 'desc')
       .skip(skip)
       .limit(pageSize)
@@ -139,7 +139,7 @@ const getUserEvaluations = async (event) => {
     
     // 获取总记录数
     const countResult = await db.collection('evaluations')
-      .where({ _openid: wxContext.OPENID })
+      .where({ phone })
       .count();
     
     return {
