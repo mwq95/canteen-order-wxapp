@@ -8,7 +8,10 @@ Page({
     deadlines: {
       breakfast: '08:00',
       lunch: '12:00',
-      dinner: '17:00'
+      dinner: '17:00',
+      breakfastMealStart: '08:00',
+      lunchMealStart: '12:00',
+      dinnerMealStart: '17:30'
     }
   },
 
@@ -41,7 +44,12 @@ Page({
   },
 
   getMealEndTime(mealType) {
-    const map = { '早餐': '09:00', '午餐': '13:00', '晚餐': '19:00' };
+    const deadlines = this.data.deadlines;
+    const map = {
+      '早餐': deadlines.breakfastMealStart || '08:00',
+      '午餐': deadlines.lunchMealStart || '12:00',
+      '晚餐': deadlines.dinnerMealStart || '17:30'
+    };
     return map[mealType] || '12:00';
   },
 

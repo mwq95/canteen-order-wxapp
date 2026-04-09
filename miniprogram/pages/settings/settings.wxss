@@ -28,6 +28,15 @@
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
 .setting-item {
   display: flex;
   align-items: center;
