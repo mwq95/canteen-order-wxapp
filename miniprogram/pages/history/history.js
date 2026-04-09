@@ -40,66 +40,84 @@ Page({
     });
   },
 
-  calculateStatus(order) {
-    const now = new Date();
-    const orderDate = new Date(order.date);
+  getMealEndTime(mealType) {
+    const map = { '早餐': '09:00', '午餐': '13:00', '晚餐': '19:00' };
+    return map[mealType] || '12:00';
+  },
+
+  getDeadlineTime(mealType) {
     const deadlines = this.data.deadlines;
-    const deadlineMap = {
+    const map = {
       '早餐': deadlines.breakfast || '08:00',
       '午餐': deadlines.lunch || '12:00',
       '晚餐': deadlines.dinner || '17:00'
     };
+    return map[mealType];
+  },
+
+  calculateStatus(order) {
+    if (order.status === 'cancelled') return 'cancelled';
+    if (order.status === 'completed') return 'completed';
+
+    const now = new Date();
+    const orderDate = new Date(order.date);
+    const deadline = this.getDeadlineTime(order.mealType);
     
-    if (order.status === 'cancelled') {
-      return 'cancelled';
-    }
-    
-    if (order.status === 'completed') {
-      return 'completed';
-    }
-    
-    const deadline = deadlineMap[order.mealType];
     if (!deadline) return order.status;
     
-    const [deadlineHour, deadlineMinute] = deadline.split(':').map(Number);
+    const [dh, dm] = deadline.split(':').map(Number);
     const deadlineTime = new Date(orderDate);
-    deadlineTime.setHours(deadlineHour, deadlineMinute, 0, 0);
-    
-    if (now > deadlineTime) {
-      return 'completed';
-    }
+    deadlineTime.setHours(dh, dm, 0, 0);
+
+    if (now > deadlineTime) return 'completed';
     return 'pending';
   },
 
-  canCancel(order) {
+  getOrderActionInfo(order) {
     if (order.status === 'cancelled' || order.status === 'completed') {
-      return { can: false, reason: null };
+      return {
+        canCancel: false,
+        cancelReason: null,
+        showEvaluate: order.status === 'completed'
+      };
     }
 
     const now = new Date();
     const orderDate = new Date(order.date);
-    const deadlines = this.data.deadlines;
-    const deadlineMap = {
-      '早餐': deadlines.breakfast || '08:00',
-      '午餐': deadlines.lunch || '12:00',
-      '晚餐': deadlines.dinner || '17:00'
-    };
-    
-    const deadline = deadlineMap[order.mealType];
-    if (!deadline) return { can: false, reason: '无法获取截止时间' };
-    
-    const [deadlineHour, deadlineMinute] = deadline.split(':').map(Number);
-    const deadlineTime = new Date(orderDate);
-    deadlineTime.setHours(deadlineHour, deadlineMinute, 0, 0);
+    const deadline = this.getDeadlineTime(order.mealType);
+    const mealEnd = this.getMealEndTime(order.mealType);
 
-    if (now > deadlineTime) {
-      return { 
-        can: false, 
-        reason: `已过${order.mealType}订餐截止时间（${deadline}），无法取消预约` 
+    if (!deadline) return { canCancel: false, cancelReason: null, showEvaluate: false };
+
+    const [dh, dm] = deadline.split(':').map(Number);
+    const deadlineTime = new Date(orderDate);
+    deadlineTime.setHours(dh, dm, 0, 0);
+
+    const [eh, em] = mealEnd.split(':').map(Number);
+    const mealEndTime = new Date(orderDate);
+    mealEndTime.setHours(eh, em, 0, 0);
+
+    if (now > mealEndTime) {
+      return {
+        canCancel: false,
+        cancelReason: null,
+        showEvaluate: true
       };
     }
-    
-    return { can: true, reason: null };
+
+    if (now > deadlineTime) {
+      return {
+        canCancel: false,
+        cancelReason: `已过${order.mealType}订餐截止时间（${deadline}），无法取消预约`,
+        showEvaluate: false
+      };
+    }
+
+    return {
+      canCancel: true,
+      cancelReason: null,
+      showEvaluate: false
+    };
   },
 
   loadOrders() {
@@ -113,12 +131,13 @@ Page({
       .get()
       .then(res => {
         const ordersWithStatus = res.data.map(order => {
-          const cancelInfo = this.canCancel(order);
+          const actionInfo = this.getOrderActionInfo(order);
           return {
             ...order,
             displayStatus: this.calculateStatus(order),
-            canCancel: cancelInfo.can,
-            cancelReason: cancelInfo.reason
+            canCancel: actionInfo.canCancel,
+            cancelReason: actionInfo.cancelReason,
+            showEvaluate: actionInfo.showEvaluate
           };
         });
         this.setData({
