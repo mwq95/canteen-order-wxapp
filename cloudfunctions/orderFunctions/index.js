@@ -97,11 +97,15 @@ const getStatistics = async (event) => {
 const submitEvaluation = async (event) => {
   const wxContext = cloud.getWXContext();
   const { orderId, evaluations, phone } = event;
-  
+
   const promises = evaluations.map(evalItem => {
     return db.collection('evaluations').add({
       data: {
-        ...evalItem,
+        date: evalItem.date,
+        mealType: evalItem.mealType,
+        dishName: evalItem.dishName,
+        rating: evalItem.rating,
+        comment: evalItem.comment || '',
         orderId,
         phone: phone || '',
         _openid: wxContext.OPENID,
@@ -109,17 +113,88 @@ const submitEvaluation = async (event) => {
       }
     });
   });
-  
+
   await Promise.all(promises);
-  
+
   await db.collection('orders').doc(orderId).update({
     data: {
       evaluated: true,
       updateTime: db.serverDate()
     }
   });
-  
+
   return { success: true, message: '评价成功' };
+};
+
+const getEvaluationStatistics = async (event) => {
+  const { date } = event;
+  
+  try {
+    // 查询该日期的所有评价
+    const res = await db.collection('evaluations')
+      .where({ date })
+      .orderBy('createTime', 'desc')
+      .get();
+
+    if (res.data.length === 0) {
+      return {
+        success: true,
+        data: { totalEvaluations: 0, mealStats: [] }
+      };
+    }
+
+    // 按 餐次+菜品 分组统计
+    const groupMap = {};
+    res.data.forEach(evalItem => {
+      const key = `${evalItem.mealType}-${evalItem.dishName}`;
+      if (!groupMap[key]) {
+        groupMap[key] = {
+          mealType: evalItem.mealType,
+          dishName: evalItem.dishName,
+          ratings: [],
+          comments: []
+        };
+      }
+      groupMap[key].ratings.push(evalItem.rating);
+      if (evalItem.comment && evalItem.comment.trim()) {
+        groupMap[key].comments.push({
+          comment: evalItem.comment.trim(),
+          rating: evalItem.rating,
+          phone: evalItem.phone ? evalItem.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : '匿名'
+        });
+      }
+    });
+
+    // 计算平均评分并按餐次排序
+    const mealOrder = ['早餐', '午餐', '晚餐'];
+    const mealStats = Object.values(groupMap)
+      .map(group => ({
+        mealType: group.mealType,
+        dishName: group.dishName,
+        avgRating: (group.ratings.reduce((a, b) => a + b, 0) / group.ratings.length).toFixed(1),
+        totalRatings: group.ratings.length,
+        comments: group.comments
+      }))
+      .sort((a, b) => {
+        const aIdx = mealOrder.indexOf(a.mealType);
+        const bIdx = mealOrder.indexOf(b.mealType);
+        return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+      });
+
+    return {
+      success: true,
+      data: {
+        totalEvaluations: res.data.length,
+        mealStats
+      }
+    };
+  } catch (error) {
+    console.error('获取评价统计失败', error);
+    return {
+      success: false,
+      message: '获取评价统计失败'
+    };
+  }
 };
 
 const getUserEvaluations = async (event) => {
@@ -173,6 +248,8 @@ exports.main = async (event, context) => {
       return await getStatistics(event);
     case 'submitEvaluation':
       return await submitEvaluation(event);
+    case 'getEvaluationStatistics':
+      return await getEvaluationStatistics(event);
     case 'getUserEvaluations':
       return await getUserEvaluations(event);
     default:

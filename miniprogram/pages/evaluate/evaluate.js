@@ -86,8 +86,9 @@ Page({
     wx.showLoading({ title: '提交中...' });
 
     const evaluations = orderData.dishes.map((dish, index) => ({
-      dishName: dish.name,
+      date: orderData.date,
       mealType: dish.mealType,
+      dishName: dish.name,
       rating: ratings[index],
       comment: comments[index]
     }));
