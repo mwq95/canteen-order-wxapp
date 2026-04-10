@@ -211,7 +211,7 @@ Page({
         title: '加载失败',
         icon: 'none'
       });
-    });
+    }
   },
 
   goToEvaluate(e) {
