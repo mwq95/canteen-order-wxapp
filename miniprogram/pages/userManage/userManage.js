@@ -210,38 +210,6 @@ Page({
     });
   },
 
-  batchDelete() {
-    const ids = Object.keys(this.data.selectedIds);
-    if (ids.length === 0) return;
-
-    const names = this.getSelectedNames();
-
-    wx.showModal({
-      title: '确认删除',
-      content: `确定要删除以下人员吗？\n${names}`,
-      success: res => {
-        if (res.confirm) {
-          wx.showLoading({ title: '删除中...' });
-          const promises = ids.map(id =>
-            wx.cloud.callFunction({
-              name: 'quickstartFunctions',
-              data: { type: 'deleteStaff', id }
-            })
-          );
-          Promise.all(promises).then(() => {
-            wx.hideLoading();
-            wx.showToast({ title: '删除成功', icon: 'success' });
-            this.loadStaffList();
-          }).catch(err => {
-            wx.hideLoading();
-            console.error('批量删除失败', err);
-            wx.showToast({ title: '删除失败', icon: 'none' });
-          });
-        }
-      }
-    });
-  },
-
   onAddStaff() {
     this.setData({
       showModal: true,
@@ -271,28 +239,22 @@ Page({
     });
   },
 
-  onDeleteStaff(e) {
+  onEditStaff(e) {
     const staff = e.currentTarget.dataset.staff;
-    wx.showModal({
-      title: '确认删除',
-      content: `确定要删除 "${staff.name}" 吗？`,
-      success: res => {
-        if (res.confirm) {
-          wx.showLoading({ title: '删除中...' });
-          wx.cloud.callFunction({
-            name: 'quickstartFunctions',
-            data: { type: 'deleteStaff', id: staff._id }
-          }).then(() => {
-            wx.hideLoading();
-            wx.showToast({ title: '删除成功', icon: 'success' });
-            this.loadStaffList();
-          }).catch(err => {
-            wx.hideLoading();
-            console.error('删除失败', err);
-            wx.showToast({ title: '删除失败', icon: 'none' });
-          });
-        }
-      }
+    const roleIndex = this.data.roleOptions.findIndex(r => r.value === staff.role);
+    const statusIndex = this.data.statusOptions.findIndex(s => s.value === staff.status);
+    this.setData({
+      showModal: true,
+      isEdit: true,
+      editingId: staff._id,
+      formData: {
+        phone: staff.phone,
+        name: staff.name,
+        role: staff.role,
+        status: staff.status
+      },
+      roleIndex: roleIndex >= 0 ? roleIndex : 0,
+      statusIndex: statusIndex >= 0 ? statusIndex : 0
     });
   },
 
