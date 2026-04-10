@@ -416,9 +416,9 @@ Page({
       return;
     }
 
-    // 检查是否配置了订阅消息模板ID
+    // 检查是否配置了订阅消息模板ID 且 用户开启了订餐提醒
     const templateId = config.getSubscribeMessageTemplateId();
-    if (templateId && templateId !== '您的订阅消息模板ID') {
+    if (templateId && templateId !== '您的订阅消息模板ID' && app.globalData.subscribeOrderReminder !== false) {
       this.requestSubscribeMessageAndSubmit(mealType, selections);
     } else {
       this.doSubmitOrder(mealType, selections);
