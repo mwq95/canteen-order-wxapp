@@ -56,7 +56,6 @@
 
       <view class="staff-actions">
         <text class="action-edit" bindtap="onEditStaff" data-staff="{{item}}">编辑</text>
-        <text class="action-delete" bindtap="onDeleteStaff" data-staff="{{item}}">删除</text>
       </view>
     </view>
   </view>
@@ -64,9 +63,8 @@
   <view wx:if="{{selectedCount > 0}}" class="batch-bar">
     <text class="selected-tip">已选择 {{selectedCount}}/{{filteredStaffList.length}} 项</text>
     <view class="batch-actions">
-      <text class="batch-btn batch-deactivate" bindtap="batchDeactivate">批量离职</text>
       <text class="batch-btn cancel-btn" bindtap="cancelSelect">取消</text>
-      <text class="batch-btn delete-btn" bindtap="batchDelete">删除</text>
+      <text class="batch-btn batch-deactivate" bindtap="batchDeactivate">离职</text>
     </view>
   </view>
 
