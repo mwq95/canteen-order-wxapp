@@ -1,5 +1,7 @@
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
+const db = wx.cloud.database();
+const _ = db.command;
 
 Page({
   data: {
@@ -133,10 +135,10 @@ Page({
 
   loadOrders() {
     const app = getApp();
-    const db = wx.cloud.database();
     db.collection('orders')
       .where({
-        phone: app.globalData.phone || app.globalData.openid
+        phone: app.globalData.phone || app.globalData.openid,
+        status: _.neq('cancelled')
       })
       .orderBy('createTime', 'desc')
       .get()
