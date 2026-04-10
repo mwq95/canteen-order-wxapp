@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "envId": "your-env-id",
+  "envId": "cloudbase-9gsdyt4b14de5384",
   "functionRoot": "./cloudfunctions",
   "functions": [
     {
