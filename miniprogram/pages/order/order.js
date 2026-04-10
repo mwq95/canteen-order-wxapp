@@ -229,11 +229,12 @@ Page({
         // 处理每餐的订单结果，并为菜单数据添加选中状态
         const processedMeals = rawMenuData.meals.map((meal, index) => {
           const mealType = mealTypes[index];
-          
-          // 过滤掉已取消的订单，只保留有效订单
+
+          // 优先使用有效订单，如果没有则复用已取消的订单ID
           const orderRes = orderResults[index];
           const validOrders = orderRes.data.filter(o => o.status !== 'cancelled');
-          
+          const cancelledOrder = orderRes.data.find(o => o.status === 'cancelled');
+
           if (validOrders.length > 0) {
             // 有有效订单，标记为已订餐
             const order = validOrders[0];
@@ -244,6 +245,14 @@ Page({
             };
             // 将已选菜品填充到用户选择中
             userSelections[mealType] = order.dishes.map(d => d.name);
+          } else if (cancelledOrder) {
+            // 有已取消的订单，保留orderId以便重新订餐时更新而非新增
+            orders[mealType] = {
+              orderId: cancelledOrder._id,
+              dishes: [],
+              status: 'none'
+            };
+            userSelections[mealType] = [];
           } else {
             // 无有效订单或已取消，标记为未订餐
             orders[mealType] = {
