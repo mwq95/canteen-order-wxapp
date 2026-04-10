@@ -271,26 +271,6 @@ Page({
     });
   },
 
-  // 编辑员工
-  onEditStaff(e) {
-    const staff = e.currentTarget.dataset.staff;
-    const roleIndex = this.data.roleOptions.findIndex(r => r.value === staff.role);
-    const statusIndex = this.data.statusOptions.findIndex(s => s.value === staff.status);
-    this.setData({
-      showModal: true,
-      isEdit: true,
-      editingId: staff._id,
-      formData: {
-        phone: staff.phone,
-        name: staff.name,
-        role: staff.role,
-        status: staff.status
-      },
-      roleIndex: roleIndex >= 0 ? roleIndex : 0,
-      statusIndex: statusIndex >= 0 ? statusIndex : 0
-    });
-  },
-
   // 手机号输入事件
   onPhoneInput(e) {
     this.setData({
