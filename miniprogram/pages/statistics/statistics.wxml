@@ -28,15 +28,17 @@
             <view class="eval-dish-name">{{item.dishName}}</view>
           </view>
           <view class="eval-rating-row">
-            <view class="stars-display">
-              <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
-                class="star-sm {{item.avgRating >= itemP0 ? 'active' : ''}}"
-              >
-                ★
-              </text>
+            <view class="rating-left">
+              <view class="stars-display">
+                <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+                  class="star-sm {{item.avgRating >= itemP0 ? 'active' : ''}}"
+                >
+                  ★
+                </text>
+              </view>
+              <text class="avg-score">{{item.avgRating}}</text>
+              <text class="rating-count">({{item.totalRatings}}人评)</text>
             </view>
-            <text class="avg-score">{{item.avgRating}}</text>
-            <text class="rating-count">({{item.totalRatings}}人评)</text>
             <text wx:if="{{item.comments.length > 0}}" class="view-comment-btn" bindtap="viewComments"
               data-comments="{{item.comments}}" data-dishname="{{item.dishName}}">
               查看评价文字 ({{item.comments.length}})
