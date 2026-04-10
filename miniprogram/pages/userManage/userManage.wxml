@@ -1,36 +1,71 @@
 <view class="container">
-  <view class="header">
-    <view class="title">单位人员管理</view>
-    <button class="add-btn" bindtap="onAddStaff">
-      <text class="add-icon">+</text>
-      添加人员
-    </button>
+  <view class="top-bar">
+    <view class="search-bar">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="输入关键词搜索..."
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+      />
+      <text wx:if="{{searchKeyword}}" class="clear-icon" bindtap="clearSearch">✕</text>
+    </view>
+    <view class="add-btn" bindtap="onAddStaff">+</view>
+  </view>
+
+  <view wx:if="{{searchKeyword && filteredStaffList.length > 0}}" class="result-tip">
+    共找到 {{filteredStaffList.length}} 条结果
+  </view>
+
+  <view class="staff-section-header" wx:if="{{filteredStaffList.length > 0}}">
+    <view class="select-all" bindtap="toggleSelectAll">
+      <text class="checkbox {{isAllSelected ? 'checked' : ''}}">✓</text>
+      <text class="select-all-text">全选</text>
+    </view>
+    <text class="staff-count">共 {{filteredStaffList.length}} 人</text>
   </view>
 
   <view wx:if="{{loading}}" class="loading">
     <text>加载中...</text>
   </view>
 
-  <view wx:elif="{{staffList.length === 0}}" class="empty">
-    <text>暂无人员</text>
+  <view wx:elif="{{filteredStaffList.length === 0}}" class="empty">
+    <text wx:if="{{searchKeyword}}" class="empty-search">未找到"{{searchKeyword}}"的相关结果</text>
+    <text wx:else class="empty-list">暂无人员</text>
+    <view wx:if="{{searchKeyword}}" class="empty-action" bindtap="clearSearch">清除搜索</view>
+    <view wx:else class="empty-action" bindtap="onAddStaff">添加人员</view>
   </view>
 
   <view wx:else class="staff-list">
-    <view class="staff-card" wx:for="{{staffList}}" wx:key="_id" data-staff="{{item}}">
-      <view class="staff-info">
+    <view class="staff-card" wx:for="{{filteredStaffList}}" wx:key="_id">
+      <view class="checkbox {{selectedIds[item._id] ? 'checked' : ''}}" bindtap="toggleSelect" data-id="{{item._id}}">
+        <text wx:if="{{selectedIds[item._id]}}">✓</text>
+      </view>
+
+      <view class="staff-info" bindtap="toggleSelect" data-id="{{item._id}}">
         <view class="staff-header">
           <view class="staff-name">{{item.name}}</view>
           <view class="tag {{item.statusClass}}">{{item.displayStatus}}</view>
         </view>
         <view class="staff-detail">
-          <text class="detail-item phone-text">{{item.phone}}</text>
-          <text class="detail-item tag">{{item.displayRole}}</text>
+          <text class="phone-text">{{item.phone}}</text>
+          <text class="tag role-tag">{{item.displayRole}}</text>
         </view>
       </view>
+
       <view class="staff-actions">
-        <view class="action-btn action-edit" bindtap="onEditStaff" data-staff="{{item}}">编辑</view>
-        <view class="action-btn action-delete" bindtap="onDeleteStaff" data-staff="{{item}}">删除</view>
+        <text class="action-edit" bindtap="onEditStaff" data-staff="{{item}}">编辑</text>
+        <text class="action-delete" bindtap="onDeleteStaff" data-staff="{{item}}">删除</text>
       </view>
+    </view>
+  </view>
+
+  <view wx:if="{{selectedCount > 0}}" class="batch-bar">
+    <text class="selected-tip">已选择 {{selectedCount}}/{{filteredStaffList.length}} 项</text>
+    <view class="batch-actions">
+      <text class="batch-btn cancel-btn" bindtap="cancelSelect">取消</text>
+      <text class="batch-btn delete-btn" bindtap="batchDelete">删除</text>
     </view>
   </view>
 

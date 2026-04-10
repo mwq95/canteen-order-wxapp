@@ -5,6 +5,14 @@ const auth = {
     return app.globalData.isVerified === true;
   },
 
+  isVerified() {
+    return app.globalData.isVerified === true;
+  },
+
+  isAdmin() {
+    return app.globalData.role === 'admin';
+  },
+
   isInitializing() {
     return app.globalData.openid === null || app.globalData.isVerified === undefined;
   },
