@@ -1,40 +1,101 @@
 <view class="container">
-  <view class="date-nav">
-    <view class="nav-btn" bindtap="prevDay">
-      <text>←</text>
-    </view>
-    <view class="date-display">{{selectedDateStr}}</view>
-    <view class="nav-btn" bindtap="nextDay">
-      <text>→</text>
-    </view>
+  <view class="date-picker">
+    <view class="arrow" bindtap="prevDay">◀</view>
+    <view class="date-text">{{selectedDateStr}}</view>
+    <view class="arrow" bindtap="nextDay">▶</view>
   </view>
 
   <view wx:if="{{loading}}" class="loading">
     <text>加载中...</text>
   </view>
 
-  <view wx:elif="{{!statistics}}" class="empty">
-    <text>暂无数据</text>
-  </view>
-
   <view wx:else>
-    <view class="stat-card">
-      <view class="stat-title">订餐人数</view>
-      <view class="stat-value">{{statistics.totalOrders}} 人</view>
-    </view>
+    <!-- 订餐统计 -->
+    <view wx:if="{{statistics && statistics.totalOrders > 0}}" class="section">
+      <view class="section-title">订餐统计</view>
+      <view class="stat-card">
+        <text class="stat-number">{{statistics.totalOrders}}</text>
+        <text class="stat-label">总订单数</text>
+      </view>
 
-    <view class="stat-card">
-      <view class="stat-title">菜品受欢迎程度</view>
-      <view class="dish-rank">
-        <view class="dish-item" wx:for="{{statistics.dishStats}}" wx:key="name">
-          <view class="dish-rank">{{index + 1}}</view>
-          <view class="dish-info">
-            <text class="dish-tag tag">{{item.mealType}}</text>
-            <text class="dish-name">{{item.name}}</text>
-          </view>
-          <view class="dish-count">{{item.count}} 份</view>
+      <view wx:if="{{statistics.dishStats.length > 0}}" class="dish-stats">
+        <view wx:for="{{statistics.dishStats}}" wx:key="mealType-name" class="dish-stat-item">
+          <text class="dish-name">{{item.name}} ({{item.mealType}})</text>
+          <text class="dish-count">×{{item.count}}份</text>
         </view>
       </view>
+    </view>
+
+    <view wx:elif="{{statistics}}" class="empty">
+      <text>暂无订餐数据</text>
+    </view>
+
+    <!-- 菜品评价 -->
+    <view class="section eval-section">
+      <view class="section-title">
+        菜品评价
+        <text wx:if="{{evalStats && evalStats.totalEvaluations > 0}}" class="eval-count">
+          共 {{evalStats.totalEvaluations}} 条
+        </text>
+      </view>
+
+      <view wx:if="{{evalStats && evalStats.mealStats.length > 0}}">
+        <view wx:for="{{evalStats.mealStats}}" wx:key="index" class="eval-item">
+          <view class="eval-header">
+            <view class="eval-meal-tag {{item.mealType === '早餐' ? 'breakfast' : item.mealType === '午餐' ? 'lunch' : 'dinner'}}">
+              {{item.mealType}}
+            </view>
+            <view class="eval-dish-name">{{item.dishName}}</view>
+          </view>
+          <view class="eval-rating-row">
+            <view class="stars-display">
+              <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+                class="star-sm {{item.avgRating >= $id ? 'active' : ''}}"
+              >
+                ★
+              </text>
+            </view>
+            <text class="avg-score">{{item.avgRating}}</text>
+            <text class="rating-count">({{item.totalRatings}}人评)</text>
+          </view>
+          <view wx:if="{{item.comments.length > 0}}" class="comment-action">
+            <text class="view-comment-btn" bindtap="viewComments"
+              data-comments="{{item.comments}}" data-dishname="{{item.dishName}}">
+              查看评价文字 ({{item.comments.length}})
+            </text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:else class="empty-eval">
+        <text>暂无评价数据</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评论弹窗 -->
+  <view wx:if="{{showCommentModal}}" class="modal-mask" bindtap="closeCommentModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">{{currentDishName}} - 评价详情</text>
+        <text class="modal-close" bindtap="closeCommentModal">✕</text>
+      </view>
+      <scroll-view scroll-y class="modal-body">
+        <view wx:for="{{currentComments}}" wx:key="index" class="comment-item">
+          <view class="comment-top">
+            <text class="comment-phone">{{item.phone}}</text>
+            <view class="stars-xs">
+              <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+                class="star-xs {{item.rating >= $id ? 'active' : ''}}"
+              >★</text>
+            </view>
+          </view>
+          <text class="comment-text">{{item.comment}}</text>
+        </view>
+        <view wx:if="{{currentComments.length === 0}}" class="no-comments">
+          暂无文字评价
+        </view>
+      </scroll-view>
     </view>
   </view>
 </view>

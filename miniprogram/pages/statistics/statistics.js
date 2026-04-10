@@ -5,7 +5,11 @@ Page({
     selectedDate: '',
     selectedDateStr: '',
     statistics: null,
-    loading: true
+    evalStats: null,
+    loading: true,
+    showCommentModal: false,
+    currentComments: [],
+    currentDishName: ''
   },
 
   onLoad() {
@@ -42,36 +46,25 @@ Page({
   },
 
   loadStatistics() {
-    const db = wx.cloud.database();
     const date = this.data.selectedDate;
-    
-    db.collection('orders').where({ 
-      date,
-      status: db.command.neq('cancelled')
-    }).get().then(res => {
-      const orders = res.data;
-      const totalOrders = orders.length;
-      
-      let dishCount = {};
-      orders.forEach(order => {
-        order.dishes.forEach(dish => {
-          const key = `${order.mealType}-${dish.name}`;
-          dishCount[key] = (dishCount[key] || 0) + 1;
-        });
-      });
-      
-      const dishStats = Object.entries(dishCount).map(([key, count]) => {
-        const [mealType, name] = key.split('-');
-        return { mealType, name, count };
-      }).sort((a, b) => b.count - a.count);
-      
-      this.setData({
-        statistics: {
-          totalOrders,
-          dishStats
-        },
-        loading: false
-      });
+
+    Promise.all([
+      wx.cloud.callFunction({
+        name: 'orderFunctions',
+        data: { type: 'getStatistics', date }
+      }),
+      wx.cloud.callFunction({
+        name: 'orderFunctions',
+        data: { type: 'getEvaluationStatistics', date }
+      })
+    ]).then(([orderRes, evalRes]) => {
+      if (orderRes.result.success) {
+        this.setData({ statistics: orderRes.result.data });
+      }
+      if (evalRes.result.success) {
+        this.setData({ evalStats: evalRes.result.data });
+      }
+      this.setData({ loading: false });
     }).catch(err => {
       console.error('加载统计数据失败', err);
       this.setData({ loading: false });
@@ -80,5 +73,24 @@ Page({
         icon: 'none'
       });
     });
-  }
+  },
+
+  viewComments(e) {
+    const { comments, dishname } = e.currentTarget.dataset;
+    this.setData({
+      showCommentModal: true,
+      currentComments: comments,
+      currentDishName: dishname
+    });
+  },
+
+  closeCommentModal() {
+    this.setData({
+      showCommentModal: false,
+      currentComments: [],
+      currentDishName: ''
+    });
+  },
+
+  stopPropagation() {}
 });
