@@ -138,8 +138,8 @@ Page({
         name: staff.name,
         isVerified: true,
         role: staff.role,
-        subscribeOrderReminder: false,
-        subscribeMealReminder: false,
+        subscribeOrderReminder: true,
+        subscribeMealReminder: true,
         updateTime: new Date()
       };
 
@@ -171,8 +171,8 @@ Page({
     app.globalData.role = staff.role;
     app.globalData.phone = staff.phone;
     app.globalData.name = staff.name;
-    app.globalData.subscribeOrderReminder = false;
-    app.globalData.subscribeMealReminder = false;
+    app.globalData.subscribeOrderReminder = true;
+    app.globalData.subscribeMealReminder = true;
 
     wx.hideLoading();
     wx.showToast({
