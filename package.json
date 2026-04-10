@@ -1,0 +1,21 @@
+{
+  "name": "canteen-order-miniprogram",
+  "version": "1.4.0",
+  "description": "食堂订餐小程序",
+  "scripts": {
+    "deploy:functions": "tcb functions:deploy",
+    "deploy:function": "tcb functions:deploy",
+    "login": "tcb login",
+    "init": "tcb init"
+  },
+  "keywords": [
+    "miniprogram",
+    "wechat",
+    "canteen"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudbase/cli": "^2.1.0"
+  }
+}

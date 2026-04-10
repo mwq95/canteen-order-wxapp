@@ -1,0 +1,31 @@
+{
+  "version": "2.0",
+  "envId": "your-env-id",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "quickstartFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs10.15"
+      }
+    },
+    {
+      "name": "orderFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs10.15"
+      }
+    },
+    {
+      "name": "sendSubscribeMessage",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs10.15"
+      }
+    }
+  ]
+}
