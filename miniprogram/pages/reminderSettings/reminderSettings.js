@@ -92,6 +92,13 @@ Page({
         ...data,
         updateTime: new Date()
       }
+    }).then(() => {
+      if (data.subscribeOrderReminder !== undefined) {
+        app.globalData.subscribeOrderReminder = data.subscribeOrderReminder;
+      }
+      if (data.subscribeMealReminder !== undefined) {
+        app.globalData.subscribeMealReminder = data.subscribeMealReminder;
+      }
     });
   }
 });

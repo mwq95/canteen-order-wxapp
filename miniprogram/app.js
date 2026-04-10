@@ -1,3 +1,5 @@
+const app = getApp();
+
 App({
   onLaunch: function () {
     this.globalData = {
@@ -6,7 +8,9 @@ App({
       isVerified: false,
       role: null,
       phone: null,
-      name: null
+      name: null,
+      subscribeOrderReminder: true,
+      subscribeMealReminder: true
     };
     
     if (!wx.cloud) {
@@ -46,6 +50,8 @@ App({
         this.globalData.phone = user.phone || null;
         this.globalData.name = user.name || null;
         this.globalData.userInfo = user.userInfo || null;
+        this.globalData.subscribeOrderReminder = user.subscribeOrderReminder !== false;
+        this.globalData.subscribeMealReminder = user.subscribeMealReminder !== false;
         
         if (user.isVerified) {
           this.checkAndRedirect();
