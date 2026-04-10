@@ -13,18 +13,19 @@
       <view class="rating-section">
         <text class="rating-label">评分：</text>
         <view class="stars">
-          <view 
-            wx:for="{{[1,2,3,4,5]}}" 
-            wx:for-item="star" 
+          <view
+            wx:for="{{[1,2,3,4,5]}}"
+            wx:for-item="star"
             wx:key="*this"
             class="star {{ratings[index] >= star ? 'active' : ''}}"
             data-index="{{index}}"
             data-star="{{star}}"
-            bindtap="setRating"
+            catchtap="onStarTap"
           >
             ★
           </view>
         </view>
+        <text wx:if="{{ratings[index] > 0}}" class="rating-value">{{ratings[index]}}星</text>
       </view>
 
       <view class="comment-section">

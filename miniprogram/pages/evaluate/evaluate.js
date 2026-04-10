@@ -34,6 +34,13 @@ Page({
     });
   },
 
+  onStarTap(e) {
+    const { index, star } = e.currentTarget.dataset;
+    const ratings = { ...this.data.ratings };
+    ratings[index] = star;
+    this.setData({ ratings });
+  },
+
   onRatingChange(e) {
     const { index } = e.currentTarget.dataset;
     const { value } = e.detail;
