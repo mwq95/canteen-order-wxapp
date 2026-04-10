@@ -168,6 +168,7 @@ Page({
     app.globalData.isVerified = true;
     app.globalData.role = staff.role;
     app.globalData.phone = staff.phone;
+    app.globalData.name = staff.name;
 
     wx.hideLoading();
     wx.showToast({
