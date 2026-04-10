@@ -189,7 +189,7 @@ Page({
     wx.showLoading({ title: '保存中...' });
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'menuFunctions',
       data: {
         type: 'saveMenu',
         date: selectedDate,

@@ -7,6 +7,8 @@
  * 4. 订餐统计
  * 5. 评价管理
  * 6. 评价统计
+ * 7. 订单取消
+ * 8. 订单统计
  */
 const cloud = require('wx-server-sdk');
 cloud.init({
@@ -331,12 +333,144 @@ const getUserEvaluations = async (event) => {
 };
 
 /**
+ * 取消订单
+ * @param {Object} event - 事件对象，包含订单ID
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 取消结果
+ */
+const cancelOrder = async (event, openid) => {
+  const { orderId } = event;
+
+  if (!orderId) {
+    return { success: false, error: '缺少订单ID' };
+  }
+
+  try {
+    const orderRes = await db.collection('orders').doc(orderId).get();
+    
+    if (!orderRes.data || orderRes.data.length === 0) {
+      return { success: false, error: '订单不存在' };
+    }
+
+    const order = orderRes.data;
+
+    // 验证订单归属
+    if (order._openid !== openid) {
+      return { success: false, error: '无权操作此订单' };
+    }
+
+    // 检查订单状态
+    if (order.status === 'cancelled') {
+      return { success: false, error: '该订单已取消' };
+    }
+
+    if (order.status === 'completed') {
+      return { success: false, error: '该订单已完成，无法取消' };
+    }
+
+    // 获取截止时间配置
+    const deadlineRes = await db.collection('configs').where({ key: 'order_deadline' }).get();
+    const deadlineMap = {
+      '早餐': '08:00',
+      '午餐': '12:00',
+      '晚餐': '17:00'
+    };
+
+    if (deadlineRes.data.length > 0) {
+      const cfg = deadlineRes.data[0];
+      deadlineMap['早餐'] = cfg.breakfast_deadline || '08:00';
+      deadlineMap['午餐'] = cfg.lunch_deadline || '12:00';
+      deadlineMap['晚餐'] = cfg.dinner_deadline || '17:00';
+    }
+
+    // 检查是否过了截止时间
+    const deadline = deadlineMap[order.mealType];
+    const now = new Date();
+    const orderDate = new Date(order.date + 'T00:00:00');
+    const [deadlineHour, deadlineMinute] = deadline.split(':').map(Number);
+    const deadlineTime = new Date(orderDate);
+    deadlineTime.setHours(deadlineHour, deadlineMinute, 0, 0);
+
+    if (now > deadlineTime) {
+      return { 
+        success: false, 
+        error: `已过${order.mealType}订餐截止时间（${deadline}），无法取消预约` 
+      };
+    }
+
+    // 执行取消操作
+    await db.collection('orders').doc(orderId).update({
+      data: {
+        status: 'cancelled',
+        updateTime: new Date()
+      }
+    });
+
+    return { success: true };
+  } catch (e) {
+    console.error('取消订单失败', e);
+    return { success: false, error: '取消失败：' + (e.errMsg || e.message) };
+  }
+};
+
+/**
+ * 获取订单统计数据
+ * @param {Object} event - 事件对象，包含手机号
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 统计数据
+ */
+const getOrderStats = async (event, openid) => {
+  const { phone } = event;
+  const userKey = phone || openid;
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+
+    // 并行获取近30天和总订单数
+    const [thirtyDayRes, totalRes] = await Promise.all([
+      db.collection('orders')
+        .where({
+          phone: userKey,
+          date: db.command.gte(formatDate(thirtyDaysAgo)).and(db.command.lte(formatDate(now)))
+        })
+        .count(),
+      db.collection('orders')
+        .where({ phone: userKey })
+        .count()
+    ]);
+
+    return {
+      success: true,
+      data: {
+        thirtyDay: thirtyDayRes.total,
+        total: totalRes.total
+      }
+    };
+  } catch (e) {
+    console.error('获取统计失败', e);
+    return { success: false, error: '获取统计失败' };
+  }
+};
+
+/**
  * 云函数入口
  * @param {Object} event - 事件对象
  * @param {Object} context - 上下文对象
  * @returns {Object} 函数执行结果
  */
 exports.main = async (event, context) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+
   switch (event.type) {
     case 'getMenu':
       return await getMenu(event);
@@ -354,6 +488,10 @@ exports.main = async (event, context) => {
       return await getEvaluationStatistics(event);
     case 'getUserEvaluations':
       return await getUserEvaluations(event);
+    case 'cancelOrder':
+      return await cancelOrder(event, openid);
+    case 'getOrderStats':
+      return await getOrderStats(event, openid);
     default:
       return { success: false, message: '未知的操作类型' };
   }

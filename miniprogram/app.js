@@ -45,7 +45,7 @@ App({
    */
   getOpenid: function() {
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',  // 云函数名称
+      name: 'userFunctions',  // 云函数名称
       data: {
         type: 'getOpenId'  // 调用类型
       }

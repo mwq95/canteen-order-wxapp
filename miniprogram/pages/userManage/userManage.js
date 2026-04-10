@@ -74,7 +74,7 @@ Page({
   loadStaffList() {
     this.setData({ loading: true });
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'userFunctions',
       data: { type: 'getStaffList' }
     }).then(res => {
       const staffList = this.processStaffList(res.result.data || []);
@@ -221,7 +221,7 @@ Page({
           wx.showLoading({ title: '处理中...' });
           const promises = ids.map(id =>
             wx.cloud.callFunction({
-              name: 'quickstartFunctions',
+              name: 'userFunctions',
               data: { type: 'updateStaff', id, data: { status: 'inactive' } }
             })
           );
@@ -337,7 +337,7 @@ Page({
     const payload = this.data.isEdit ? { id: this.data.editingId, data } : { data };
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'userFunctions',
       data: { type: action, ...payload }
     }).then(() => {
       wx.hideLoading();

@@ -114,7 +114,7 @@ Page({
     wx.showLoading({ title: '保存中...' });
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'configFunctions',
       data: {
         type: 'updateDeadlineConfig',
         data: {
