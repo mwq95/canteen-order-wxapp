@@ -167,13 +167,58 @@ Page({
     });
   },
 
+  getSelectedNames() {
+    const names = [];
+    this.data.filteredStaffList.forEach(item => {
+      if (this.data.selectedIds[item._id]) {
+        names.push(item.name);
+      }
+    });
+    return names.join('、');
+  },
+
+  batchDeactivate() {
+    const ids = Object.keys(this.data.selectedIds);
+    if (ids.length === 0) return;
+
+    const names = this.getSelectedNames();
+
+    wx.showModal({
+      title: '确认批量离职',
+      content: `确定要将以下人员设为离职？\n${names}`,
+      success: res => {
+        if (res.confirm) {
+          wx.showLoading({ title: '处理中...' });
+          const promises = ids.map(id =>
+            wx.cloud.callFunction({
+              name: 'quickstartFunctions',
+              data: { type: 'updateStaff', id, data: { status: 'inactive' } }
+            })
+          );
+          Promise.all(promises).then(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '操作成功', icon: 'success' });
+            this.setData({ selectedIds: {}, selectedCount: 0, isAllSelected: false });
+            this.loadStaffList();
+          }).catch(err => {
+            wx.hideLoading();
+            console.error('批量离职失败', err);
+            wx.showToast({ title: '操作失败', icon: 'none' });
+          });
+        }
+      }
+    });
+  },
+
   batchDelete() {
     const ids = Object.keys(this.data.selectedIds);
     if (ids.length === 0) return;
 
+    const names = this.getSelectedNames();
+
     wx.showModal({
       title: '确认删除',
-      content: `确定要删除选中的 ${ids.length} 名人员吗？`,
+      content: `确定要删除以下人员吗？\n${names}`,
       success: res => {
         if (res.confirm) {
           wx.showLoading({ title: '删除中...' });
@@ -203,8 +248,7 @@ Page({
       isEdit: false,
       editingId: null,
       formData: { phone: '', name: '', role: 'staff', status: 'active' },
-      roleIndex: 0,
-      statusIndex: 0
+      roleIndex: 0
     });
   },
 
