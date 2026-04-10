@@ -4,7 +4,23 @@
   "functionRoot": "./cloudfunctions",
   "functions": [
     {
-      "name": "quickstartFunctions",
+      "name": "userFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs10.15"
+      }
+    },
+    {
+      "name": "configFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs10.15"
+      }
+    },
+    {
+      "name": "menuFunctions",
       "config": {
         "timeout": 60,
         "memorySize": 256,

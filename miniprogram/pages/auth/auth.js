@@ -70,7 +70,7 @@ Page({
     this.showLoading('验证中...');
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'userFunctions',
       data: {
         type: 'getPhoneNumber',
         code: code
@@ -126,7 +126,7 @@ Page({
     }
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'userFunctions',
       data: {
         type: 'verifyAndBindPhone',
         // 手机号

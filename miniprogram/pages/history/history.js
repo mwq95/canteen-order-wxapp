@@ -62,7 +62,7 @@ Page({
   // 加载截止时间配置
   loadDeadlines() {
     return wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'configFunctions',
       data: { type: 'getDeadlineConfig' }
     }).then(res => {
       if (res.result && res.result.success && res.result.data) {
@@ -314,7 +314,7 @@ Page({
           wx.showLoading({ title: '处理中...' });
 
           wx.cloud.callFunction({
-            name: 'quickstartFunctions',
+            name: 'orderFunctions',
             data: {
               type: 'cancelOrder',
               // 订单ID

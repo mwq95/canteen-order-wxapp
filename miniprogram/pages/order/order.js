@@ -544,7 +544,7 @@ Page({
   initDatabase() {
     wx.showLoading({ title: '初始化中...' });
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'menuFunctions',
       data: {
         type: 'createCanteenCollections'
       }
