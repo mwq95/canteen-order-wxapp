@@ -51,12 +51,18 @@
   display: flex;
   align-items: center;
   margin-bottom: 24rpx;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
 
 .rating-label {
   font-size: 28rpx;
   color: #666;
-  margin-right: 16rpx;
+}
+
+.rating-value {
+  font-size: 24rpx;
+  color: #faad14;
 }
 
 .stars {
