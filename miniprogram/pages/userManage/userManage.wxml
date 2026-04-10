@@ -64,6 +64,7 @@
   <view wx:if="{{selectedCount > 0}}" class="batch-bar">
     <text class="selected-tip">已选择 {{selectedCount}}/{{filteredStaffList.length}} 项</text>
     <view class="batch-actions">
+      <text class="batch-btn batch-deactivate" bindtap="batchDeactivate">批量离职</text>
       <text class="batch-btn cancel-btn" bindtap="cancelSelect">取消</text>
       <text class="batch-btn delete-btn" bindtap="batchDelete">删除</text>
     </view>
@@ -113,7 +114,7 @@
           </picker>
         </view>
 
-        <view class="form-item">
+        <view class="form-item" wx:if="{{isEdit}}">
           <view class="form-label">状态</view>
           <picker
             mode="selector"

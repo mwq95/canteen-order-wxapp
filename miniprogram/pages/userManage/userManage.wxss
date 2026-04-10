@@ -269,6 +269,11 @@
   color: #fff;
 }
 
+.batch-deactivate {
+  background: #faad14;
+  color: #fff;
+}
+
 .modal-mask {
   position: fixed;
   top: 0;
