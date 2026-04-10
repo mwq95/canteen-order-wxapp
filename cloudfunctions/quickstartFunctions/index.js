@@ -227,13 +227,7 @@ const deleteStaff = async (event, openid) => {
     return { success: false, error: '您没有权限操作' };
   }
 
-  return await db.collection('staffs').doc(event.id).remove()
-  // .update({
-  //   data: {
-  //     status: 'inactive',
-  //     updateTime: new Date()
-  //   }
-  // });
+  return await db.collection('staffs').doc(event.id).remove();
 };
 
 /**
@@ -471,95 +465,7 @@ const cancelOrder = async (event, openid) => {
   }
 };
 
-/**
- * 选择销售记录（示例函数）
- * @returns {Promise} 销售记录列表
- */
-const selectRecord = async () => {
-  return await db.collection("sales").get();
-};
 
-/**
- * 更新销售记录（示例函数）
- * @param {Object} event - 事件对象，包含记录数据
- * @returns {Object} 更新结果
- */
-const updateRecord = async (event) => {
-  try {
-    for (let i = 0; i < event.data.length; i++) {
-      await db
-        .collection("sales")
-        .where({
-          _id: event.data[i]._id,
-        })
-        .update({
-          data: {
-            sales: event.data[i].sales,
-          },
-        });
-    }
-    return {
-      success: true,
-      data: event.data,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
-  }
-};
-
-/**
- * 插入销售记录（示例函数）
- * @param {Object} event - 事件对象，包含记录数据
- * @returns {Object} 插入结果
- */
-const insertRecord = async (event) => {
-  try {
-    const insertRecord = event.data;
-    await db.collection("sales").add({
-      data: {
-        region: insertRecord.region,
-        city: insertRecord.city,
-        sales: Number(insertRecord.sales),
-      },
-    });
-    return {
-      success: true,
-      data: event.data,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
-  }
-};
-
-/**
- * 删除销售记录（示例函数）
- * @param {Object} event - 事件对象，包含记录ID
- * @returns {Object} 删除结果
- */
-const deleteRecord = async (event) => {
-  try {
-    await db
-      .collection("sales")
-      .where({
-        _id: event.data._id,
-      })
-      .remove();
-    return {
-      success: true,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
-  }
-};
 
 /**
  * 获取订单统计数据
@@ -702,13 +608,5 @@ exports.main = async (event, context) => {
       return await getOrderStats(event, openid);
     case "saveMenu":
       return await saveMenu(event, openid);
-    case "selectRecord":
-      return await selectRecord();
-    case "updateRecord":
-      return await updateRecord(event);
-    case "insertRecord":
-      return await insertRecord(event);
-    case "deleteRecord":
-      return await deleteRecord(event);
   }
 };
