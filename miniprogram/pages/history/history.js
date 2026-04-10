@@ -137,8 +137,7 @@ Page({
     const app = getApp();
     db.collection('orders')
       .where({
-        phone: app.globalData.phone || app.globalData.openid,
-        status: _.neq('cancelled')
+        phone: app.globalData.phone || app.globalData.openid
       })
       .orderBy('createTime', 'desc')
       .get()
