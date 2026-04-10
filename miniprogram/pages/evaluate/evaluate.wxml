@@ -1,47 +1,69 @@
 <view class="container">
   <view wx:if="{{orderData}}" class="order-info">
-    <view class="order-date">{{orderData.date}}</view>
+    <view class="order-date">{{orderData.date}} {{orderData.mealType}}</view>
   </view>
 
   <view wx:if="{{orderData}}" class="evaluate-list">
-    <view class="evaluate-item" wx:for="{{orderData.dishes}}" wx:key="name" wx:for-index="index">
+    <view class="evaluate-item" wx:for="{{orderData.dishes}}" wx:key="name" wx:for-index="dishIndex">
       <view class="dish-header">
-        <text class="dish-tag tag">{{item.mealType}}</text>
         <text class="dish-name">{{item.name}}</text>
+        <text class="evaluated-tag" wx:if="{{itemEvaluated[dishIndex]}}">已评价</text>
       </view>
       
-      <view class="rating-section">
+      <view class="rating-section" wx:if="{{!itemEvaluated[dishIndex] && !viewMode}}">
         <text class="rating-label">评分：</text>
         <view class="stars">
           <view
             wx:for="{{[1,2,3,4,5]}}"
             wx:for-item="star"
+            wx:for-index="starIndex"
             wx:key="*this"
-            class="star {{ratings[index] >= star ? 'active' : ''}}"
-            data-index="{{index}}"
+            class="star {{ratings[dishIndex] >= star ? 'active' : ''}}"
+            data-index="{{dishIndex}}"
             data-star="{{star}}"
             catchtap="onStarTap"
           >
             ★
           </view>
         </view>
-        <text wx:if="{{ratings[index] > 0}}" class="rating-value">{{ratings[index]}}星</text>
+        <text wx:if="{{ratings[dishIndex] > 0}}" class="rating-value">{{ratings[dishIndex]}}星</text>
+      </view>
+      
+      <view class="rating-section" wx:if="{{itemEvaluated[dishIndex] || viewMode}}">
+        <text class="rating-label">评分：</text>
+        <view class="stars">
+          <view
+            wx:for="{{[1,2,3,4,5]}}"
+            wx:for-item="star"
+            wx:for-index="starIndex"
+            wx:key="*this"
+            class="star {{evaluatedRatings[dishIndex] >= star ? 'active' : ''}}"
+          >
+            ★
+          </view>
+        </view>
+        <text class="rating-value">{{evaluatedRatings[dishIndex]}}星</text>
       </view>
 
-      <view class="comment-section">
+      <view class="comment-section" wx:if="{{!itemEvaluated[dishIndex] && !viewMode}}">
         <text class="comment-label">评价：</text>
         <textarea 
           class="comment-input" 
           placeholder="请输入您的评价（可选）"
-          value="{{comments[index]}}"
-          data-index="{{index}}"
+          value="{{comments[dishIndex]}}"
+          data-index="{{dishIndex}}"
           bindinput="onCommentInput"
         ></textarea>
       </view>
+      
+      <view class="comment-section" wx:if="{{itemEvaluated[dishIndex] || viewMode}}">
+        <text class="comment-label">评价：</text>
+        <view class="comment-display">{{evaluatedComments[dishIndex] || '无评价内容'}}</view>
+      </view>
+      
+      <view class="dish-actions" wx:if="{{!itemEvaluated[dishIndex] && !viewMode}}">
+        <button class="dish-submit-btn" data-index="{{dishIndex}}" bindtap="submitDishEvaluation">提交此菜品评价</button>
+      </view>
     </view>
-  </view>
-
-  <view class="submit-wrapper">
-    <button class="submit-btn" bindtap="submitEvaluation">提交评价</button>
   </view>
 </view>

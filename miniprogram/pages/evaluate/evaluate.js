@@ -3,12 +3,19 @@ Page({
     orderId: '',
     orderData: null,
     ratings: {},
-    comments: {}
+    comments: {},
+    itemEvaluated: {},
+    evaluatedRatings: {},
+    evaluatedComments: {},
+    viewMode: false
   },
 
   onLoad(options) {
     if (options.orderId) {
-      this.setData({ orderId: options.orderId });
+      this.setData({ 
+        orderId: options.orderId,
+        viewMode: options.mode === 'view'
+      });
       this.loadOrderData();
     }
   },
@@ -25,6 +32,8 @@ Page({
         comments[index] = '';
       });
       this.setData({ ratings, comments });
+      
+      this.loadExistingEvaluations();
     }).catch(err => {
       console.error('加载订单失败', err);
       wx.showToast({
@@ -34,50 +43,85 @@ Page({
     });
   },
 
+  loadExistingEvaluations() {
+    const { orderData } = this.data;
+    const app = getApp();
+    const phone = app.globalData.phone;
+    
+    if (!orderData || !phone) return;
+    
+    const db = wx.cloud.database();
+    
+    db.collection('evaluations').where({
+      orderId: this.data.orderId,
+      phone: phone
+    }).get().then(res => {
+      const itemEvaluated = {};
+      const evaluatedRatings = {};
+      const evaluatedComments = {};
+      
+      res.data.forEach(evalItem => {
+        const dishIndex = orderData.dishes.findIndex(d => d.name === evalItem.dishName);
+        if (dishIndex !== -1) {
+          itemEvaluated[dishIndex] = true;
+          evaluatedRatings[dishIndex] = evalItem.rating;
+          evaluatedComments[dishIndex] = evalItem.comment || '';
+        }
+      });
+      
+      this.setData({ itemEvaluated, evaluatedRatings, evaluatedComments });
+    }).catch(err => {
+      console.error('加载评价失败', err);
+    });
+  },
+
   onStarTap(e) {
+    if (this.data.viewMode) return;
+    
     const { index, star } = e.currentTarget.dataset;
+    
+    if (this.data.itemEvaluated[index]) return;
+    
     const ratings = { ...this.data.ratings };
     ratings[index] = star;
     this.setData({ ratings });
   },
 
-  onRatingChange(e) {
-    const { index } = e.currentTarget.dataset;
-    const { value } = e.detail;
-    const ratings = { ...this.data.ratings };
-    ratings[index] = value;
-    this.setData({ ratings });
-  },
-
   onCommentInput(e) {
+    if (this.data.viewMode) return;
+    
     const { index } = e.currentTarget.dataset;
+    
+    if (this.data.itemEvaluated[index]) return;
+    
     const comments = { ...this.data.comments };
     comments[index] = e.detail.value;
     this.setData({ comments });
   },
 
-  setRating(e) {
-    const { index, star } = e.currentTarget.dataset;
-    const ratings = { ...this.data.ratings };
-    ratings[index] = star;
-    this.setData({ ratings });
-  },
-
-  submitEvaluation() {
+  submitDishEvaluation(e) {
+    if (this.data.viewMode) return;
+    
+    const { index } = e.currentTarget.dataset;
+    
+    if (this.data.itemEvaluated[index]) {
+      wx.showToast({
+        title: '该菜品已评价',
+        icon: 'none'
+      });
+      return;
+    }
+    
     const { orderData, ratings, comments } = this.data;
     const app = getApp();
     const phone = app.globalData.phone;
     
-    let allRated = true;
-    Object.values(ratings).forEach(rating => {
-      if (rating === 0) {
-        allRated = false;
-      }
-    });
-
-    if (!allRated) {
+    const dish = orderData.dishes[index];
+    const rating = ratings[index];
+    
+    if (!rating || rating === 0) {
       wx.showToast({
-        title: '请为所有菜品评分',
+        title: '请为该菜品评分',
         icon: 'none'
       });
       return;
@@ -85,21 +129,21 @@ Page({
 
     wx.showLoading({ title: '提交中...' });
 
-    const evaluations = orderData.dishes.map((dish, index) => ({
+    const evaluationData = {
       date: orderData.date,
-      mealType: dish.mealType,
+      mealType: orderData.mealType,
       dishName: dish.name,
-      rating: ratings[index],
-      comment: comments[index]
-    }));
+      rating: rating,
+      comment: comments[index] || '',
+      orderId: this.data.orderId,
+      phone: phone
+    };
 
     wx.cloud.callFunction({
       name: 'orderFunctions',
       data: {
-        type: 'submitEvaluation',
-        orderId: this.data.orderId,
-        evaluations: evaluations,
-        phone: phone
+        type: 'submitSingleEvaluation',
+        evaluation: evaluationData
       }
     }).then(res => {
       wx.hideLoading();
@@ -108,9 +152,21 @@ Page({
           title: '评价成功',
           icon: 'success'
         });
-        setTimeout(() => {
-          wx.navigateBack();
-        }, 1500);
+        
+        const itemEvaluated = { ...this.data.itemEvaluated };
+        const evaluatedRatings = { ...this.data.evaluatedRatings };
+        const evaluatedComments = { ...this.data.evaluatedComments };
+        
+        itemEvaluated[index] = true;
+        evaluatedRatings[index] = rating;
+        evaluatedComments[index] = comments[index] || '';
+        
+        this.setData({ itemEvaluated, evaluatedRatings, evaluatedComments });
+        
+        const allEvaluated = Object.keys(itemEvaluated).length === orderData.dishes.length;
+        if (allEvaluated) {
+          this.updateOrderEvaluated();
+        }
       } else {
         wx.showToast({
           title: res.result.message || '提交失败',
@@ -124,6 +180,18 @@ Page({
         title: '提交失败',
         icon: 'none'
       });
+    });
+  },
+
+  updateOrderEvaluated() {
+    const db = wx.cloud.database();
+    db.collection('orders').doc(this.data.orderId).update({
+      data: {
+        evaluated: true,
+        updateTime: db.serverDate()
+      }
+    }).catch(err => {
+      console.error('更新订单状态失败', err);
     });
   }
 });

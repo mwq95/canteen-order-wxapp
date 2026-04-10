@@ -126,6 +126,43 @@ const submitEvaluation = async (event) => {
   return { success: true, message: '评价成功' };
 };
 
+const submitSingleEvaluation = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const { evaluation } = event;
+
+  try {
+    const existingEval = await db.collection('evaluations').where({
+      date: evaluation.date,
+      mealType: evaluation.mealType,
+      dishName: evaluation.dishName,
+      phone: evaluation.phone
+    }).get();
+
+    if (existingEval.data.length > 0) {
+      return { success: false, message: '该菜品已评价，无法重复评价' };
+    }
+
+    await db.collection('evaluations').add({
+      data: {
+        date: evaluation.date,
+        mealType: evaluation.mealType,
+        dishName: evaluation.dishName,
+        rating: evaluation.rating,
+        comment: evaluation.comment || '',
+        orderId: evaluation.orderId,
+        phone: evaluation.phone || '',
+        _openid: wxContext.OPENID,
+        createTime: db.serverDate()
+      }
+    });
+
+    return { success: true, message: '评价成功' };
+  } catch (error) {
+    console.error('提交单个评价失败', error);
+    return { success: false, message: '评价失败' };
+  }
+};
+
 const getEvaluationStatistics = async (event) => {
   const { date } = event;
   
@@ -248,6 +285,8 @@ exports.main = async (event, context) => {
       return await getStatistics(event);
     case 'submitEvaluation':
       return await submitEvaluation(event);
+    case 'submitSingleEvaluation':
+      return await submitSingleEvaluation(event);
     case 'getEvaluationStatistics':
       return await getEvaluationStatistics(event);
     case 'getUserEvaluations':
