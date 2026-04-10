@@ -273,7 +273,7 @@ Page({
 
   getRoleLabel(role) {
     const map = {
-      'staff': '普通工作人员',
+      'staff': '用餐人员',
       'admin': '管理员',
       'kitchen': '厨房工作人员'
     };
