@@ -1,21 +1,22 @@
+
 const app = getApp();
 
 const initUtil = {
   waitForAppInit() {
-    return new Promise((resolve) => {
-      if (app.globalData.openid && app.globalData.isVerified) {
+    return new Promise((resolve) =&gt; {
+      if (app.globalData.openid &amp;&amp; app.globalData.isVerified) {
         resolve();
         return;
       }
 
-      const checkInterval = setInterval(() => {
-        if (app.globalData.openid && app.globalData.isVerified) {
+      const checkInterval = setInterval(() =&gt; {
+        if (app.globalData.openid &amp;&amp; app.globalData.isVerified) {
           clearInterval(checkInterval);
           resolve();
         }
       }, 100);
 
-      setTimeout(() => {
+      setTimeout(() =&gt; {
         clearInterval(checkInterval);
         resolve();
       }, 5000);
@@ -23,20 +24,20 @@ const initUtil = {
   },
 
   waitForOpenid() {
-    return new Promise((resolve) => {
+    return new Promise((resolve) =&gt; {
       if (app.globalData.openid) {
         resolve();
         return;
       }
 
-      const checkInterval = setInterval(() => {
+      const checkInterval = setInterval(() =&gt; {
         if (app.globalData.openid) {
           clearInterval(checkInterval);
           resolve();
         }
       }, 100);
 
-      setTimeout(() => {
+      setTimeout(() =&gt; {
         clearInterval(checkInterval);
         resolve();
       }, 5000);
@@ -45,3 +46,4 @@ const initUtil = {
 };
 
 module.exports = initUtil;
+

@@ -1,3 +1,4 @@
+
 const dateUtil = {
   formatDate(date) {
     const year = date.getFullYear();
@@ -51,7 +52,7 @@ const dateUtil = {
     today.setHours(0, 0, 0, 0);
     const target = new Date(dateStr);
     target.setHours(0, 0, 0, 0);
-    return target < today;
+    return target &lt; today;
   },
 
   prevDay(dateStr) {
@@ -68,3 +69,4 @@ const dateUtil = {
 };
 
 module.exports = dateUtil;
+

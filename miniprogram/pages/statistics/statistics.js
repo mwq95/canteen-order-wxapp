@@ -1,21 +1,34 @@
+/*
+ * 统计页面 - 查看评价统计数据
+ */
+
 const dateUtil = require('../../utils/dateUtil.js');
 
 Page({
   data: {
+    // 选中的日期
     selectedDate: '',
+    // 选中日期的中文显示
     selectedDateStr: '',
+    // 评价统计数据
     evalStats: null,
+    // 加载状态
     loading: true,
+    // 是否显示评论弹窗
     showCommentModal: false,
+    // 当前评论列表
     currentComments: [],
+    // 当前菜品名称
     currentDishName: ''
   },
 
+  // 页面加载时调用
   onLoad() {
     this.initDate();
     this.loadStatistics();
   },
 
+  // 初始化日期
   initDate() {
     const now = new Date();
     this.setData({
@@ -24,6 +37,7 @@ Page({
     });
   },
 
+  // 切换到前一天
   prevDay() {
     const current = dateUtil.prevDay(this.data.selectedDate);
     this.setData({
@@ -34,6 +48,7 @@ Page({
     this.loadStatistics();
   },
 
+  // 切换到后一天
   nextDay() {
     const current = dateUtil.nextDay(this.data.selectedDate);
     this.setData({
@@ -44,6 +59,7 @@ Page({
     this.loadStatistics();
   },
 
+  // 加载统计数据
   loadStatistics() {
     const date = this.data.selectedDate;
 
@@ -65,6 +81,7 @@ Page({
     });
   },
 
+  // 查看评论
   viewComments(e) {
     const { comments, dishname } = e.currentTarget.dataset;
     this.setData({
@@ -74,6 +91,7 @@ Page({
     });
   },
 
+  // 关闭评论弹窗
   closeCommentModal() {
     this.setData({
       showCommentModal: false,
@@ -82,5 +100,6 @@ Page({
     });
   },
 
+  // 阻止事件冒泡
   stopPropagation() {}
 });

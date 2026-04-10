@@ -1,21 +1,32 @@
+/*
+ * 首页 - 展示每日菜单信息
+ */
+
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
+    // 当前日期
     currentDate: '',
+    // 当前日期中文显示
     currentDateStr: '',
+    // 菜单数据
     menuData: null,
+    // 加载状态
     loading: true,
+    // 是否显示初始化按钮
     showInitButton: false
   },
 
+  // 页面加载时调用
   onLoad() {
     this.initDate();
     this.initPage();
   },
 
+  // 页面显示时调用
   async onShow() {
     if (auth.isInitializing()) {
       await initUtil.waitForAppInit();
@@ -24,11 +35,13 @@ Page({
     this.loadMenu();
   },
 
+  // 初始化页面
   async initPage() {
     await initUtil.waitForAppInit();
     this.loadMenu();
   },
 
+  // 初始化日期
   initDate() {
     const now = new Date();
     this.setData({
@@ -37,6 +50,7 @@ Page({
     });
   },
 
+  // 加载菜单数据
   loadMenu() {
     const db = wx.cloud.database();
     const date = this.data.currentDate;
@@ -56,6 +70,7 @@ Page({
     });
   },
 
+  // 切换到前一天
   prevDay() {
     const current = dateUtil.prevDay(this.data.currentDate);
     this.setData({
@@ -66,6 +81,7 @@ Page({
     this.loadMenu();
   },
 
+  // 切换到后一天
   nextDay() {
     const current = dateUtil.nextDay(this.data.currentDate);
     this.setData({
@@ -76,6 +92,7 @@ Page({
     this.loadMenu();
   },
 
+  // 初始化数据库
   initDatabase() {
     wx.showLoading({ title: '初始化中...' });
     wx.cloud.callFunction({
@@ -102,12 +119,14 @@ Page({
     });
   },
 
+  // 跳转到订餐页面
   goToOrder() {
     wx.switchTab({
       url: '/pages/order/order'
     });
   },
 
+  // 下拉刷新时调用
   onPullDownRefresh() {
     this.loadMenu();
     setTimeout(() => {

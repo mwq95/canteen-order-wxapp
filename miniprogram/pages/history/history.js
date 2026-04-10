@@ -1,3 +1,7 @@
+/*
+ * 历史订单页面 - 查看历史订餐记录
+ */
+
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
 const db = wx.cloud.database();
@@ -7,26 +11,38 @@ const PAGE_SIZE = 15;
 
 Page({
   data: {
+    // 订单列表
     orderList: [],
+    // 加载状态
     loading: true,
+    // 加载更多状态
     loadingMore: false,
+    // 当前页码
     page: 1,
+    // 总数
     total: 0,
+    // 是否有更多数据
     hasMore: true,
+    // 截止时间配置
     deadlines: {
       breakfast: '08:00',
       lunch: '12:00',
       dinner: '17:00',
+      // 早餐开餐时间
       breakfastMealStart: '08:00',
+      // 午餐开餐时间
       lunchMealStart: '12:00',
+      // 晚餐开餐时间
       dinnerMealStart: '17:30'
     }
   },
 
+  // 页面加载时调用
   onLoad() {
     this.initPage();
   },
 
+  // 页面显示时调用
   async onShow() {
     if (auth.isInitializing()) {
       await initUtil.waitForAppInit();
@@ -36,12 +52,14 @@ Page({
     this.loadOrders(true);
   },
 
+  // 初始化页面
   async initPage() {
     await initUtil.waitForAppInit();
     await this.loadDeadlines();
     this.loadOrders(true);
   },
 
+  // 加载截止时间配置
   loadDeadlines() {
     return wx.cloud.callFunction({
       name: 'quickstartFunctions',
@@ -55,6 +73,7 @@ Page({
     });
   },
 
+  // 获取用餐结束时间
   getMealEndTime(mealType) {
     const deadlines = this.data.deadlines;
     const map = {
@@ -65,6 +84,7 @@ Page({
     return map[mealType] || '12:00';
   },
 
+  // 获取截止时间
   getDeadlineTime(mealType) {
     const deadlines = this.data.deadlines;
     const map = {
@@ -75,6 +95,7 @@ Page({
     return map[mealType];
   },
 
+  // 计算订单状态
   calculateStatus(order) {
     if (order.status === 'cancelled') return 'cancelled';
     if (order.status === 'completed') return 'completed';
@@ -93,6 +114,7 @@ Page({
     return 'pending';
   },
 
+  // 获取订单操作信息
   getOrderActionInfo(order) {
     if (order.status === 'cancelled' || order.status === 'completed') {
       return {
@@ -140,6 +162,7 @@ Page({
     };
   },
 
+  // 处理订单数据
   processOrders(orders, evalMap) {
     orders.forEach(order => {
       const dishesWithEval = order.dishes.map(dish => ({
@@ -164,6 +187,7 @@ Page({
     return orders;
   },
 
+  // 加载订单数据
   async loadOrders(isRefresh = false) {
     const app = getApp();
     const openid = app.globalData.openid;
@@ -261,6 +285,7 @@ Page({
     }
   },
 
+  // 跳转到评价页面
   goToEvaluate(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.navigateTo({
@@ -268,6 +293,7 @@ Page({
     });
   },
 
+  // 查看评价
   viewEvaluation(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.navigateTo({
@@ -275,6 +301,7 @@ Page({
     });
   },
 
+  // 取消订单
   cancelOrder(e) {
     const orderId = e.currentTarget.dataset.id;
     const app = getApp();
@@ -290,6 +317,7 @@ Page({
             name: 'quickstartFunctions',
             data: {
               type: 'cancelOrder',
+              // 订单ID
               orderId: orderId,
               openid: app.globalData.openid || ''
             }
@@ -331,12 +359,14 @@ Page({
     });
   },
 
+  // 上拉触底时调用
   onReachBottom() {
     if (this.data.hasMore && !this.data.loadingMore) {
       this.loadOrders(false);
     }
   },
 
+  // 下拉刷新时调用
   async onPullDownRefresh() {
     await this.loadDeadlines();
     this.loadOrders(true);

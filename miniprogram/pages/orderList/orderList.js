@@ -1,11 +1,20 @@
+/*
+ * 订单列表页面 - 管理员查看所有订单
+ */
+
 const dateUtil = require('../../utils/dateUtil.js');
 
 Page({
   data: {
+    // 选中的日期
     selectedDate: '',
+    // 选中日期的中文显示
     selectedDateStr: '',
+    // 是否显示详情
     showDetail: false,
+    // 选中的餐次类型
     selectedMealType: '',
+    // 餐次统计
     mealStats: {
       '早餐': { dishes: [], orders: [] },
       '午餐': { dishes: [], orders: [] },
@@ -14,11 +23,13 @@ Page({
     loading: true
   },
 
+  // 页面加载时调用
   onLoad() {
     this.initDate();
     this.loadOrders();
   },
 
+  // 初始化日期
   initDate() {
     const now = new Date();
     this.setData({
@@ -27,6 +38,7 @@ Page({
     });
   },
 
+  // 切换到前一天
   prevDay() {
     const current = dateUtil.prevDay(this.data.selectedDate);
     this.setData({
@@ -38,6 +50,7 @@ Page({
     this.loadOrders();
   },
 
+  // 切换到后一天
   nextDay() {
     const current = dateUtil.nextDay(this.data.selectedDate);
     this.setData({
@@ -49,6 +62,7 @@ Page({
     this.loadOrders();
   },
 
+  // 加载订单数据
   loadOrders() {
     const db = wx.cloud.database();
     const date = this.data.selectedDate;
@@ -105,6 +119,7 @@ Page({
     });
   },
 
+  // 显示餐次详情
   showMealDetail(e) {
     const { mealType } = e.currentTarget.dataset;
     this.setData({
@@ -113,6 +128,7 @@ Page({
     });
   },
 
+  // 返回统计页面
   backToStats() {
     this.setData({
       showDetail: false
