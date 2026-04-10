@@ -1,20 +1,31 @@
+/*
+ * 个人中心页面 - 用户信息展示和设置
+ */
+
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
 const app = getApp();
 
 Page({
   data: {
+    // 用户信息
     userInfo: null,
+    // 员工姓名
     staffName: '',
+    // 脱敏手机号
     maskedPhone: '',
+    // 角色文本
     roleText: '',
+    // 是否可访问管理后台
     canAccessAdmin: false
   },
 
+  // 页面加载时调用
   onLoad() {
     this.initPage();
   },
 
+  // 页面显示时调用
   async onShow() {
     if (auth.isInitializing()) {
       await initUtil.waitForAppInit();
@@ -24,12 +35,14 @@ Page({
     this.checkAdminAccess();
   },
 
+  // 初始化页面
   async initPage() {
     await initUtil.waitForAppInit();
     this.loadUserInfo();
     this.checkAdminAccess();
   },
 
+  // 加载用户信息
   loadUserInfo() {
     const phone = app.globalData.phone;
     const staffName = app.globalData.name || '姓名未录入';
@@ -46,6 +59,7 @@ Page({
     });
   },
 
+  // 检查管理员访问权限
   checkAdminAccess() {
     const role = auth.getRole();
     this.setData({
@@ -53,30 +67,35 @@ Page({
     });
   },
 
+  // 跳转到提醒设置页面
   goToReminder() {
     wx.navigateTo({
       url: '/pages/reminderSettings/reminderSettings'
     });
   },
 
+  // 跳转到统计页面
   goToStats() {
     wx.navigateTo({
       url: '/pages/orderStats/orderStats'
     });
   },
 
+  // 跳转到帮助页面
   goToHelp() {
     wx.navigateTo({
       url: '/pages/help/help'
     });
   },
 
+  // 跳转到管理后台
   goToAdmin() {
     wx.navigateTo({
       url: '/pages/admin/admin'
     });
   },
 
+  // 跳转到评价页面
   goToEvaluations() {
     wx.navigateTo({
       url: '/pages/evaluations/evaluations'

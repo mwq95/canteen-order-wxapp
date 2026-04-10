@@ -1,17 +1,26 @@
+/*
+ * 订单统计页面 - 查看个人订餐统计
+ */
+
 const app = getApp();
 
 Page({
   data: {
+    // 30天日期范围
     thirtyDayRange: '',
+    // 30天订单数
     thirtyDayCount: 0,
+    // 总订单数
     totalCount: 0
   },
 
+  // 页面加载时调用
   onLoad() {
     this.setDateRanges();
     this.loadStats();
   },
 
+  // 设置日期范围
   setDateRanges() {
     const now = new Date();
     const thirtyDaysAgo = new Date(now);
@@ -26,6 +35,7 @@ Page({
     });
   },
 
+  // 加载统计数据
   async loadStats() {
     await Promise.all([
       this.loadThirtyDayStats(),
@@ -33,6 +43,7 @@ Page({
     ]);
   },
 
+  // 加载30天统计
   async loadThirtyDayStats() {
     const db = wx.cloud.database();
     const now = new Date();
@@ -50,6 +61,7 @@ Page({
     this.setData({ thirtyDayCount: res.total });
   },
 
+  // 加载总统计
   async loadTotalStats() {
     const db = wx.cloud.database();
     const res = await db.collection('orders')
@@ -61,6 +73,7 @@ Page({
     this.setData({ totalCount: res.total });
   },
 
+  // 格式化日期
   formatDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');

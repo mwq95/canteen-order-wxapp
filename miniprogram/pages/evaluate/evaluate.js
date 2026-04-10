@@ -1,15 +1,28 @@
+/*
+ * 评价页面 - 用户对菜品进行评价
+ */
+
 Page({
   data: {
+    // 订单ID
     orderId: '',
+    // 订单数据
     orderData: null,
+    // 评分数据
     ratings: {},
+    // 评论数据
     comments: {},
+    // 已评价的项目
     itemEvaluated: {},
+    // 已评价的评分
     evaluatedRatings: {},
+    // 已评价的评论
     evaluatedComments: {},
+    // 查看模式
     viewMode: false
   },
 
+  // 页面加载时调用
   onLoad(options) {
     if (options.orderId) {
       this.setData({ 
@@ -20,6 +33,7 @@ Page({
     }
   },
 
+  // 加载订单数据
   loadOrderData() {
     const db = wx.cloud.database();
     db.collection('orders').doc(this.data.orderId).get().then(res => {
@@ -43,6 +57,7 @@ Page({
     });
   },
 
+  // 加载已有评价
   loadExistingEvaluations() {
     const { orderData } = this.data;
     const app = getApp();
@@ -75,6 +90,7 @@ Page({
     });
   },
 
+  // 星级评分点击
   onStarTap(e) {
     if (this.data.viewMode) return;
     
@@ -87,6 +103,7 @@ Page({
     this.setData({ ratings });
   },
 
+  // 评论输入
   onCommentInput(e) {
     if (this.data.viewMode) return;
     
@@ -99,6 +116,7 @@ Page({
     this.setData({ comments });
   },
 
+  // 提交菜品评价
   submitDishEvaluation(e) {
     if (this.data.viewMode) return;
     
@@ -182,6 +200,7 @@ Page({
     });
   },
 
+  // 更新订单评价状态
   updateOrderEvaluated() {
     const db = wx.cloud.database();
     db.collection('orders').doc(this.data.orderId).update({

@@ -1,22 +1,36 @@
+/*
+ * 系统设置页面 - 配置订餐截止时间等
+ */
+
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
+    // 早餐截止时间
     breakfastDeadline: '',
+    // 午餐截止时间
     lunchDeadline: '',
+    // 晚餐截止时间
     dinnerDeadline: '',
+    // 早餐开餐时间
     breakfastMealStart: '',
+    // 午餐开餐时间
     lunchMealStart: '',
+    // 晚餐开餐时间
     dinnerMealStart: '',
+    // 配置ID
     configId: null,
+    // 加载状态
     loading: false
   },
 
+  // 页面加载时调用
   onLoad() {
     this.loadConfig();
   },
 
+  // 页面显示时调用
   async onShow() {
     if (auth.isInitializing()) {
       await initUtil.waitForAppInit();
@@ -57,18 +71,26 @@ Page({
     });
   },
 
+  // 早餐时间变化
   onBreakfastChange(e) { this.setData({ breakfastDeadline: e.detail.value }); },
+  // 午餐时间变化
   onLunchChange(e) { this.setData({ lunchDeadline: e.detail.value }); },
+  // 晚餐时间变化
   onDinnerChange(e) { this.setData({ dinnerDeadline: e.detail.value }); },
+  // 早餐开餐时间变化
   onBreakfastMealStartChange(e) { this.setData({ breakfastMealStart: e.detail.value }); },
+  // 午餐开餐时间变化
   onLunchMealStartChange(e) { this.setData({ lunchMealStart: e.detail.value }); },
+  // 晚餐开餐时间变化
   onDinnerMealStartChange(e) { this.setData({ dinnerMealStart: e.detail.value }); },
 
+  // 验证时间格式
   validateTimeFormat(time) {
     if (!time) return false;
     return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time);
   },
 
+  // 保存配置
   saveConfig() {
     const { 
       breakfastDeadline, lunchDeadline, dinnerDeadline,

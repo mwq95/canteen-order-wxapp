@@ -1,4 +1,3 @@
-const app = getApp();
 
 App({
   onLaunch: function () {
@@ -30,10 +29,10 @@ App({
       data: {
         type: 'getOpenId'
       }
-    }).then(res => {
+    }).then(res =&gt; {
       this.globalData.openid = res.result.openid;
       this.checkUserStatus();
-    }).catch(err => {
+    }).catch(err =&gt; {
       console.error('获取openid失败', err);
     });
   },
@@ -42,8 +41,8 @@ App({
     const db = wx.cloud.database();
     db.collection('users').where({
       _openid: this.globalData.openid
-    }).get().then(res => {
-      if (res.data.length > 0) {
+    }).get().then(res =&gt; {
+      if (res.data.length &gt; 0) {
         const user = res.data[0];
         this.globalData.isVerified = user.isVerified || false;
         this.globalData.role = user.role || 'staff';
@@ -59,7 +58,7 @@ App({
       } else {
         this.checkAndRedirect();
       }
-    }).catch(err => {
+    }).catch(err =&gt; {
       console.error('检查用户状态失败', err);
       this.checkAndRedirect();
     });
@@ -76,3 +75,4 @@ App({
     }
   }
 });
+

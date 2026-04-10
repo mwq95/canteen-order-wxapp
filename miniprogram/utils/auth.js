@@ -1,3 +1,4 @@
+
 const app = getApp();
 
 const auth = {
@@ -57,7 +58,7 @@ const auth = {
         icon: 'none',
         duration: 2000
       });
-      setTimeout(() => {
+      setTimeout(() =&gt; {
         wx.switchTab({
           url: '/pages/order/order'
         });
@@ -70,3 +71,4 @@ const auth = {
 };
 
 module.exports = auth;
+
