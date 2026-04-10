@@ -1,69 +1,199 @@
+const app = getApp();
 const auth = require('../../utils/auth.js');
-const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
     staffList: [],
+    filteredStaffList: [],
     loading: true,
     showModal: false,
     isEdit: false,
-    editStaffId: null,
+    editingId: null,
     formData: {
       phone: '',
       name: '',
       role: 'staff',
       status: 'active'
     },
-    roleIndex: 0,
-    statusIndex: 0,
     roleOptions: [
-      { label: '用餐人員', value: 'staff' },
-      { label: '管理员', value: 'admin' },
-      { label: '食堂工作人员', value: 'kitchen' }
+      { label: '用餐人员', value: 'staff' },
+      { label: '厨房工作人员', value: 'kitchen' },
+      { label: '管理员', value: 'admin' }
     ],
     statusOptions: [
       { label: '在职', value: 'active' },
       { label: '离职', value: 'inactive' }
-    ]
+    ],
+    roleIndex: 0,
+    statusIndex: 0,
+    searchKeyword: '',
+    selectedIds: {},
+    selectedCount: 0,
+    isAllSelected: false
   },
 
   onLoad() {
+    if (!auth.isVerified()) {
+      wx.showToast({ title: '请先完成身份验证', icon: 'none' });
+      setTimeout(() => {
+        wx.reLaunch({ url: '/pages/auth/auth' });
+      }, 1500);
+      return;
+    }
+    if (!auth.isAdmin()) {
+      wx.showToast({ title: '无权限访问', icon: 'none' });
+      setTimeout(() => {
+        wx.switchTab({ url: '/pages/order/order' });
+      }, 1500);
+      return;
+    }
     this.loadStaffList();
   },
 
-  async onShow() {
-    if (auth.isInitializing()) {
-      await initUtil.waitForAppInit();
+  onShow() {
+    if (this.data.staffList.length > 0) {
+      this.loadStaffList();
     }
-    auth.checkPageAccess('userManage');
   },
 
   loadStaffList() {
+    this.setData({ loading: true });
     wx.cloud.callFunction({
       name: 'quickstartFunctions',
-      data: {
-        type: 'getStaffList'
-      }
+      data: { type: 'getStaffList' }
     }).then(res => {
-      const staffList = res.result.data.map(item => {
-        return {
-          ...item,
-          displayRole: this.getRoleLabel(item.role),
-          displayStatus: this.getStatusLabel(item.status),
-          statusClass: item.status === 'active' ? 'tag-success' : 'tag-warning'
-        };
-      });
+      const staffList = this.processStaffList(res.result.data || []);
       this.setData({
-        staffList: staffList,
-        loading: false
+        staffList,
+        filteredStaffList: staffList,
+        loading: false,
+        selectedIds: {},
+        selectedCount: 0,
+        isAllSelected: false
       });
     }).catch(err => {
-      console.error('加载人员列表失败', err);
+      console.error('获取人员列表失败', err);
       this.setData({ loading: false });
-      wx.showToast({
-        title: '加载失败',
-        icon: 'none'
+      wx.showToast({ title: '获取列表失败', icon: 'none' });
+    });
+  },
+
+  processStaffList(list) {
+    const roleMap = { staff: '用餐人员', kitchen: '厨房工作人员', admin: '管理员' };
+    return list.map(item => {
+      let statusClass = 'tag-success';
+      if (item.status === 'inactive') statusClass = 'tag-warning';
+      return {
+        ...item,
+        displayRole: roleMap[item.role] || '用餐人员',
+        displayStatus: item.status === 'active' ? '在职' : '离职',
+        statusClass
+      };
+    });
+  },
+
+  onSearchInput(e) {
+    const keyword = e.detail.value;
+    this.setData({ searchKeyword: keyword });
+    this.filterStaffList(keyword);
+  },
+
+  onSearch(e) {
+    this.filterStaffList(e.detail.value);
+  },
+
+  clearSearch() {
+    this.setData({ searchKeyword: '' });
+    this.filterStaffList('');
+  },
+
+  filterStaffList(keyword) {
+    if (!keyword) {
+      this.setData({
+        filteredStaffList: this.data.staffList,
+        selectedIds: {},
+        selectedCount: 0,
+        isAllSelected: false
       });
+      return;
+    }
+    const lowerKeyword = keyword.toLowerCase();
+    const filtered = this.data.staffList.filter(item =>
+      item.name.toLowerCase().includes(lowerKeyword) ||
+      item.phone.includes(keyword)
+    );
+    this.setData({
+      filteredStaffList: filtered,
+      selectedIds: {},
+      selectedCount: 0,
+      isAllSelected: false
+    });
+  },
+
+  toggleSelect(e) {
+    const id = e.currentTarget.dataset.id;
+    const selectedIds = { ...this.data.selectedIds };
+    if (selectedIds[id]) {
+      delete selectedIds[id];
+    } else {
+      selectedIds[id] = true;
+    }
+    const selectedCount = Object.keys(selectedIds).length;
+    const isAllSelected = selectedCount === this.data.filteredStaffList.length;
+    this.setData({ selectedIds, selectedCount, isAllSelected });
+  },
+
+  toggleSelectAll() {
+    if (this.data.isAllSelected) {
+      this.setData({ selectedIds: {}, selectedCount: 0, isAllSelected: false });
+    } else {
+      const selectedIds = {};
+      this.data.filteredStaffList.forEach(item => {
+        selectedIds[item._id] = true;
+      });
+      this.setData({
+        selectedIds,
+        selectedCount: this.data.filteredStaffList.length,
+        isAllSelected: true
+      });
+    }
+  },
+
+  cancelSelect() {
+    this.setData({
+      selectedIds: {},
+      selectedCount: 0,
+      isAllSelected: false
+    });
+  },
+
+  batchDelete() {
+    const ids = Object.keys(this.data.selectedIds);
+    if (ids.length === 0) return;
+
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除选中的 ${ids.length} 名人员吗？`,
+      success: res => {
+        if (res.confirm) {
+          wx.showLoading({ title: '删除中...' });
+          const promises = ids.map(id =>
+            wx.cloud.callFunction({
+              name: 'quickstartFunctions',
+              data: { type: 'deleteStaff', id }
+            })
+          );
+          Promise.all(promises).then(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '删除成功', icon: 'success' });
+            this.loadStaffList();
+          }).catch(err => {
+            wx.hideLoading();
+            console.error('批量删除失败', err);
+            wx.showToast({ title: '删除失败', icon: 'none' });
+          });
+        }
+      }
     });
   },
 
@@ -71,26 +201,21 @@ Page({
     this.setData({
       showModal: true,
       isEdit: false,
-      editStaffId: null,
-      formData: {
-        phone: '',
-        name: '',
-        role: 'staff',
-        status: 'active'
-      },
+      editingId: null,
+      formData: { phone: '', name: '', role: 'staff', status: 'active' },
       roleIndex: 0,
       statusIndex: 0
     });
   },
 
   onEditStaff(e) {
-    const { staff } = e.currentTarget.dataset;
-    const roleIndex = this.data.roleOptions.findIndex(o => o.value === staff.role);
-    const statusIndex = this.data.statusOptions.findIndex(o => o.value === staff.status);
+    const staff = e.currentTarget.dataset.staff;
+    const roleIndex = this.data.roleOptions.findIndex(r => r.value === staff.role);
+    const statusIndex = this.data.statusOptions.findIndex(s => s.value === staff.status);
     this.setData({
       showModal: true,
       isEdit: true,
-      editStaffId: staff._id,
+      editingId: staff._id,
       formData: {
         phone: staff.phone,
         name: staff.name,
@@ -103,47 +228,27 @@ Page({
   },
 
   onDeleteStaff(e) {
-    const { staff } = e.currentTarget.dataset;
+    const staff = e.currentTarget.dataset.staff;
     wx.showModal({
-      title: '提示',
-      content: `确定要删除 ${staff.name} 吗？`,
+      title: '确认删除',
+      content: `确定要删除 "${staff.name}" 吗？`,
       success: res => {
         if (res.confirm) {
-          this.doDeleteStaff(staff._id);
+          wx.showLoading({ title: '删除中...' });
+          wx.cloud.callFunction({
+            name: 'quickstartFunctions',
+            data: { type: 'deleteStaff', id: staff._id }
+          }).then(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '删除成功', icon: 'success' });
+            this.loadStaffList();
+          }).catch(err => {
+            wx.hideLoading();
+            console.error('删除失败', err);
+            wx.showToast({ title: '删除失败', icon: 'none' });
+          });
         }
       }
-    });
-  },
-
-  doDeleteStaff(staffId) {
-    wx.showLoading({ title: '删除中...' });
-    wx.cloud.callFunction({
-      name: 'quickstartFunctions',
-      data: {
-        type: 'deleteStaff',
-        id: staffId
-      }
-    }).then(res => {
-      if (res.result.success !== false) {
-        wx.hideLoading();
-        wx.showToast({
-          title: '删除成功',
-          icon: 'success'
-        });
-        this.loadStaffList();
-      } else {
-        wx.hideLoading();
-        wx.showToast({
-          title: res.result.error || '删除失败',
-          icon: 'none'
-        });
-      }
-    }).catch(err => {
-      wx.hideLoading();
-      wx.showToast({
-        title: '删除失败',
-        icon: 'none'
-      });
     });
   },
 
@@ -160,134 +265,63 @@ Page({
   },
 
   onRoleChange(e) {
-    const index = parseInt(e.detail.value);
+    const index = e.detail.value;
     this.setData({
-      'formData.role': this.data.roleOptions[index].value,
-      roleIndex: index
+      roleIndex: index,
+      'formData.role': this.data.roleOptions[index].value
     });
   },
 
   onStatusChange(e) {
-    const index = parseInt(e.detail.value);
+    const index = e.detail.value;
     this.setData({
-      'formData.status': this.data.statusOptions[index].value,
-      statusIndex: index
+      statusIndex: index,
+      'formData.status': this.data.statusOptions[index].value
     });
   },
 
   onCancelModal() {
-    this.setData({
-      showModal: false
-    });
+    this.setData({ showModal: false });
   },
+
+  stopPropagation() {},
 
   onConfirmModal() {
     const { phone, name, role, status } = this.data.formData;
-    
-    if (!phone || !name) {
-      wx.showToast({
-        title: '请填写完整信息',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    if (!/^1[3-9]\d{9}$/.test(phone)) {
-      wx.showToast({
-        title: '请输入正确的手机号',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    this.saveStaff();
-  },
 
-  saveStaff() {
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+      wx.showToast({ title: '请输入正确的手机号', icon: 'none' });
+      return;
+    }
+
+    if (!name || name.trim().length === 0) {
+      wx.showToast({ title: '请输入姓名', icon: 'none' });
+      return;
+    }
+
     wx.showLoading({ title: '保存中...' });
-    const { isEdit, editStaffId, formData } = this.data;
-    
     const data = {
-      phone: String(formData.phone),
-      name: formData.name,
-      role: formData.role,
-      status: formData.status,
-      updateTime: new Date()
+      phone: phone.trim(),
+      name: name.trim(),
+      role,
+      status
     };
-    
-    if (isEdit) {
-      wx.cloud.callFunction({
-        name: 'quickstartFunctions',
-        data: {
-          type: 'updateStaff',
-          id: editStaffId,
-          data: data
-        }
-      }).then(res => {
-        if (res.result.success !== false) {
-          this.handleSaveSuccess();
-        } else {
-          this.handleSaveError(new Error(res.result.error));
-        }
-      }).catch(err => {
-        this.handleSaveError(err);
-      });
-    } else {
-      data.createTime = new Date();
-      wx.cloud.callFunction({
-        name: 'quickstartFunctions',
-        data: {
-          type: 'addStaff',
-          data: data
-        }
-      }).then(res => {
-        if (res.result.success !== false) {
-          this.handleSaveSuccess();
-        } else {
-          this.handleSaveError(new Error(res.result.error));
-        }
-      }).catch(err => {
-        this.handleSaveError(err);
-      });
-    }
-  },
 
-  handleSaveSuccess() {
-    wx.hideLoading();
-    wx.showToast({
-      title: '保存成功',
-      icon: 'success'
+    const action = this.data.isEdit ? 'updateStaff' : 'addStaff';
+    const payload = this.data.isEdit ? { id: this.data.editingId, data } : { data };
+
+    wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: { type: action, ...payload }
+    }).then(() => {
+      wx.hideLoading();
+      wx.showToast({ title: '保存成功', icon: 'success' });
+      this.setData({ showModal: false });
+      this.loadStaffList();
+    }).catch(err => {
+      wx.hideLoading();
+      console.error('保存失败', err);
+      wx.showToast({ title: '保存失败', icon: 'none' });
     });
-    this.setData({ showModal: false });
-    this.loadStaffList();
-  },
-
-  handleSaveError(err) {
-    wx.hideLoading();
-    console.error('保存失败', err);
-    wx.showToast({
-      title: '保存失败',
-      icon: 'none'
-    });
-  },
-
-  getRoleLabel(role) {
-    const map = {
-      'staff': '用餐人员',
-      'admin': '管理员',
-      'kitchen': '厨房工作人员'
-    };
-    return map[role] || role;
-  },
-
-  getStatusLabel(status) {
-    return status === 'active' ? '在职' : '离职';
-  },
-
-  onPullDownRefresh() {
-    this.loadStaffList();
-    setTimeout(() => {
-      wx.stopPullDownRefresh();
-    }, 1000);
   }
 });
