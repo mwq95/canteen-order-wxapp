@@ -16,10 +16,10 @@
 
 .order-card {
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 30rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 }
 
 .order-header {
@@ -61,12 +61,12 @@
 }
 
 .dish-evaluated-tag {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: #ffffff;
   font-size: 20rpx;
-  color: #52c41a;
-  background: #f6ffed;
-  padding: 2rpx 12rpx;
-  border-radius: 6rpx;
-  border: 1rpx solid #b7eb8f;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
 }
 
 .order-footer {
@@ -84,10 +84,13 @@
 }
 
 .action-btn {
-  padding: 12rpx 32rpx;
-  border-radius: 48rpx;
-  font-size: 24rpx;
-  line-height: 1;
+  height: 72rpx;
+  padding: 0 40rpx;
+  border-radius: 36rpx;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .action-btn::after {
@@ -100,14 +103,15 @@
 }
 
 .evaluate-btn {
-  background: #1890FF;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
   color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.3);
 }
 
 .view-evaluate-btn {
-  background: #f6ffed;
-  color: #52c41a;
-  border: 1rpx solid #b7eb8f;
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(82, 196, 26, 0.3);
 }
 
 .evaluated-text {
@@ -119,4 +123,11 @@
   color: #999;
   font-size: 24rpx;
   line-height: 1.4;
+}
+
+.loading-more, .no-more {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #999;
+  font-size: 26rpx;
 }

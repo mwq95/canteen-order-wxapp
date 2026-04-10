@@ -9,8 +9,8 @@ App({
       role: null,
       phone: null,
       name: null,
-      subscribeOrderReminder: true,
-      subscribeMealReminder: true
+      subscribeOrderReminder: false,
+      subscribeMealReminder: false
     };
     
     if (!wx.cloud) {

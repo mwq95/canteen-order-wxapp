@@ -4,7 +4,6 @@ Page({
   data: {
     selectedDate: '',
     selectedDateStr: '',
-    statistics: null,
     evalStats: null,
     loading: true,
     showCommentModal: false,
@@ -48,25 +47,16 @@ Page({
   loadStatistics() {
     const date = this.data.selectedDate;
 
-    Promise.all([
-      wx.cloud.callFunction({
-        name: 'orderFunctions',
-        data: { type: 'getStatistics', date }
-      }),
-      wx.cloud.callFunction({
-        name: 'orderFunctions',
-        data: { type: 'getEvaluationStatistics', date }
-      })
-    ]).then(([orderRes, evalRes]) => {
-      if (orderRes.result.success) {
-        this.setData({ statistics: orderRes.result.data });
-      }
-      if (evalRes.result.success) {
-        this.setData({ evalStats: evalRes.result.data });
+    wx.cloud.callFunction({
+      name: 'orderFunctions',
+      data: { type: 'getEvaluationStatistics', date }
+    }).then(res => {
+      if (res.result.success) {
+        this.setData({ evalStats: res.result.data });
       }
       this.setData({ loading: false });
     }).catch(err => {
-      console.error('加载统计数据失败', err);
+      console.error('加载评价数据失败', err);
       this.setData({ loading: false });
       wx.showToast({
         title: '加载失败',

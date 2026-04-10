@@ -5,6 +5,103 @@ cloud.init({
 
 const db = cloud.database();
 
+const verifyAndBindPhone = async (event, openid) => {
+  const { phone } = event;
+
+  if (!phone) {
+    return { success: false, error: '请输入手机号' };
+  }
+
+  try {
+    const staffRes = await db.collection('staffs').where({
+      phone: String(phone),
+      status: 'active'
+    }).get();
+
+    if (staffRes.data.length === 0) {
+      return { success: false, error: '您不在单位人员列表中，请联系管理员' };
+    }
+
+    const staff = staffRes.data[0];
+
+    const existingUserByPhone = await db.collection('users').where({
+      phone: String(phone)
+    }).get();
+
+    if (existingUserByPhone.data.length > 0) {
+      const existingUser = existingUserByPhone.data[0];
+      
+      if (existingUser._openid && existingUser._openid !== openid) {
+        return { 
+          success: false, 
+          error: '该手机号已被其他账号绑定，请联系管理员',
+          code: 'PHONE_ALREADY_BOUND'
+        };
+      }
+      
+      if (existingUser._openid === openid) {
+        await db.collection('users').doc(existingUser._id).update({
+          data: {
+            isVerified: true,
+            role: staff.role,
+            name: staff.name,
+            phone: String(phone),
+            updateTime: new Date()
+          }
+        });
+
+        return { 
+          success: true, 
+          data: { ...staff, isNewUser: false },
+          message: '验证成功'
+        };
+      }
+    }
+
+    const existingUserByOpenid = await db.collection('users').where({
+      _openid: openid
+    }).get();
+
+    if (existingUserByOpenid.data.length > 0) {
+      await db.collection('users').doc(existingUserByOpenid.data[0]._id).update({
+        data: {
+          phone: String(phone),
+          name: staff.name,
+          role: staff.role,
+          isVerified: true,
+          subscribeOrderReminder: true,
+          subscribeMealReminder: true,
+          updateTime: new Date()
+        }
+      });
+    } else {
+      await db.collection('users').add({
+        data: {
+          _openid: openid,
+          phone: String(phone),
+          name: staff.name,
+          role: staff.role,
+          isVerified: true,
+          subscribeOrderReminder: true,
+          subscribeMealReminder: true,
+          createTime: new Date(),
+          updateTime: new Date()
+        }
+      });
+    }
+
+    return { 
+      success: true, 
+      data: { ...staff, isNewUser: true },
+      message: '验证成功'
+    };
+
+  } catch (e) {
+    console.error('验证绑定失败', e);
+    return { success: false, error: '验证失败：' + (e.errMsg || e.message) };
+  }
+};
+
 const getOpenId = async () => {
   const wxContext = cloud.getWXContext();
   return {
@@ -212,7 +309,7 @@ const getDeadlineConfig = async () => {
 };
 
 const cancelOrder = async (event, openid) => {
-  const { orderId, phone } = event;
+  const { orderId } = event;
 
   if (!orderId) {
     return { success: false, error: '缺少订单ID' };
@@ -227,7 +324,7 @@ const cancelOrder = async (event, openid) => {
 
     const order = orderRes.data;
 
-    if (order.phone !== phone) {
+    if (order._openid !== openid) {
       return { success: false, error: '无权操作此订单' };
     }
 
@@ -443,6 +540,8 @@ exports.main = async (event, context) => {
       return await getOpenId();
     case "getPhoneNumber":
       return await getPhoneNumber(event);
+    case "verifyAndBindPhone":
+      return await verifyAndBindPhone(event, openid);
     case "getStaffList":
       return await getStaffList();
     case "addStaff":

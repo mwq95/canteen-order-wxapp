@@ -32,5 +32,12 @@
         </view>
       </view>
     </view>
+    
+    <view wx:if="{{loadingMore}}" class="loading-more">
+      <text>加载中...</text>
+    </view>
+    <view wx:elif="{{!hasMore && orderList.length > 0}}" class="no-more">
+      <text>没有更多订单了</text>
+    </view>
   </view>
 </view>
