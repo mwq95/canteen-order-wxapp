@@ -206,7 +206,7 @@ Page({
         return db.collection('orders').where({
           date,
           mealType,
-          phone: app.globalData.phone || openid
+          _openid: openid
         }).get();
       });
 

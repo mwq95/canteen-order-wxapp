@@ -46,15 +46,15 @@ Page({
   loadExistingEvaluations() {
     const { orderData } = this.data;
     const app = getApp();
-    const phone = app.globalData.phone;
+    const openid = app.globalData.openid;
     
-    if (!orderData || !phone) return;
+    if (!orderData || !openid) return;
     
     const db = wx.cloud.database();
     
     db.collection('evaluations').where({
       orderId: this.data.orderId,
-      phone: phone
+      _openid: openid
     }).get().then(res => {
       const itemEvaluated = {};
       const evaluatedRatings = {};
@@ -114,7 +114,7 @@ Page({
     
     const { orderData, ratings, comments } = this.data;
     const app = getApp();
-    const phone = app.globalData.phone;
+    const openid = app.globalData.openid;
     
     const dish = orderData.dishes[index];
     const rating = ratings[index];
@@ -135,8 +135,7 @@ Page({
       dishName: dish.name,
       rating: rating,
       comment: comments[index] || '',
-      orderId: this.data.orderId,
-      phone: phone
+      orderId: this.data.orderId
     };
 
     wx.cloud.callFunction({

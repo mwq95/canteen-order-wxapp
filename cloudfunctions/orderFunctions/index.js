@@ -135,7 +135,7 @@ const submitSingleEvaluation = async (event) => {
       date: evaluation.date,
       mealType: evaluation.mealType,
       dishName: evaluation.dishName,
-      phone: evaluation.phone
+      _openid: wxContext.OPENID
     }).get();
 
     if (existingEval.data.length > 0) {
@@ -150,7 +150,6 @@ const submitSingleEvaluation = async (event) => {
         rating: evaluation.rating,
         comment: evaluation.comment || '',
         orderId: evaluation.orderId,
-        phone: evaluation.phone || '',
         _openid: wxContext.OPENID,
         createTime: db.serverDate()
       }
@@ -235,23 +234,21 @@ const getEvaluationStatistics = async (event) => {
 };
 
 const getUserEvaluations = async (event) => {
-  const { phone, page = 1, pageSize = 10 } = event;
+  const wxContext = cloud.getWXContext();
+  const { page = 1, pageSize = 10 } = event;
   
   try {
-    // 计算跳过的记录数
     const skip = (page - 1) * pageSize;
     
-    // 查询用户的评价，按创建时间降序排序
     const evaluations = await db.collection('evaluations')
-      .where({ phone })
+      .where({ _openid: wxContext.OPENID })
       .orderBy('createTime', 'desc')
       .skip(skip)
       .limit(pageSize)
       .get();
     
-    // 获取总记录数
     const countResult = await db.collection('evaluations')
-      .where({ phone })
+      .where({ _openid: wxContext.OPENID })
       .count();
     
     return {

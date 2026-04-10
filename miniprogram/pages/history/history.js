@@ -3,10 +3,16 @@ const initUtil = require('../../utils/initUtil.js');
 const db = wx.cloud.database();
 const _ = db.command;
 
+const PAGE_SIZE = 15;
+
 Page({
   data: {
     orderList: [],
     loading: true,
+    loadingMore: false,
+    page: 1,
+    total: 0,
+    hasMore: true,
     deadlines: {
       breakfast: '08:00',
       lunch: '12:00',
@@ -27,13 +33,13 @@ Page({
     }
     auth.checkPageAccess('tabbar');
     await this.loadDeadlines();
-    this.loadOrders();
+    this.loadOrders(true);
   },
 
   async initPage() {
     await initUtil.waitForAppInit();
     await this.loadDeadlines();
-    this.loadOrders();
+    this.loadOrders(true);
   },
 
   loadDeadlines() {
@@ -134,79 +140,120 @@ Page({
     };
   },
 
-  async loadOrders() {
+  processOrders(orders, evalMap) {
+    orders.forEach(order => {
+      const dishesWithEval = order.dishes.map(dish => ({
+        ...dish,
+        evaluated: !!(evalMap[order._id] && evalMap[order._id][dish.name])
+      }));
+
+      const evaluatedCount = dishesWithEval.filter(d => d.evaluated).length;
+      const allEvaluated = evaluatedCount === dishesWithEval.length;
+      const hasEvaluation = evaluatedCount > 0;
+
+      order.dishes = dishesWithEval;
+      order.displayStatus = this.calculateStatus(order);
+      const actionInfo = this.getOrderActionInfo(order);
+      order.canCancel = actionInfo.canCancel;
+      order.cancelReason = actionInfo.cancelReason;
+      order.showEvaluate = actionInfo.showEvaluate;
+      order.allEvaluated = allEvaluated;
+      order.hasEvaluation = hasEvaluation;
+    });
+
+    return orders;
+  },
+
+  async loadOrders(isRefresh = false) {
     const app = getApp();
-    const phone = app.globalData.phone;
+    const openid = app.globalData.openid;
+    const evalMap = {};
     
-    if (!phone) {
+    if (!openid) {
       this.setData({ loading: false });
       return;
     }
 
+    const page = isRefresh ? 1 : this.data.page;
+    const isLoadingMore = !isRefresh;
+
+    if (isLoadingMore) {
+      if (this.data.loadingMore || !this.data.hasMore) return;
+      this.setData({ loadingMore: true });
+    } else {
+      this.setData({ loading: true });
+    }
+
     try {
-      const ordersRes = await db.collection('orders')
-        .where({
-          phone: phone
-        })
-        .orderBy('createTime', 'desc')
-        .get();
+      let ordersRes, total;
+
+      if (isRefresh) {
+        total = await db.collection('orders')
+          .where({ _openid: openid })
+          .count();
+
+        ordersRes = await db.collection('orders')
+          .where({ _openid: openid })
+          .orderBy('createTime', 'desc')
+          .skip(0)
+          .limit(PAGE_SIZE)
+          .get();
+      } else {
+        ordersRes = await db.collection('orders')
+          .where({ _openid: openid })
+          .orderBy('createTime', 'desc')
+          .skip((page - 1) * PAGE_SIZE)
+          .limit(PAGE_SIZE)
+          .get();
+        total = this.data.total;
+      }
 
       const orderIds = ordersRes.data.map(o => o._id);
       
-      let evaluations = [];
       if (orderIds.length > 0) {
         const evalRes = await db.collection('evaluations')
           .where({
             orderId: _.in(orderIds),
-            phone: phone
+            _openid: openid
           })
           .get();
-        evaluations = evalRes.data;
+        
+        evalRes.data.forEach(e => {
+          if (!evalMap[e.orderId]) {
+            evalMap[e.orderId] = {};
+          }
+          evalMap[e.orderId][e.dishName] = {
+            rating: e.rating,
+            comment: e.comment
+          };
+        });
       }
 
-      const evalMap = {};
-      evaluations.forEach(e => {
-        if (!evalMap[e.orderId]) {
-          evalMap[e.orderId] = {};
-        }
-        evalMap[e.orderId][e.dishName] = {
-          rating: e.rating,
-          comment: e.comment
-        };
-      });
+      const processedOrders = this.processOrders(ordersRes.data, evalMap);
+      const hasMore = ordersRes.data.length === PAGE_SIZE;
 
-      const ordersWithStatus = ordersRes.data.map(order => {
-        const actionInfo = this.getOrderActionInfo(order);
-        const orderEvals = evalMap[order._id] || {};
-        
-        const dishesWithEval = order.dishes.map(dish => ({
-          ...dish,
-          evaluated: !!orderEvals[dish.name]
-        }));
-
-        const evaluatedCount = dishesWithEval.filter(d => d.evaluated).length;
-        const allEvaluated = evaluatedCount === dishesWithEval.length;
-        const hasEvaluation = evaluatedCount > 0;
-
-        return {
-          ...order,
-          dishes: dishesWithEval,
-          displayStatus: this.calculateStatus(order),
-          canCancel: actionInfo.canCancel,
-          cancelReason: actionInfo.cancelReason,
-          showEvaluate: actionInfo.showEvaluate,
-          allEvaluated,
-          hasEvaluation
-        };
-      });
-
-      this.setData({
-        orderList: ordersWithStatus,
-        loading: false
-      });
+      if (isLoadingMore) {
+        this.setData({
+          orderList: [...this.data.orderList, ...processedOrders],
+          page: page + 1,
+          hasMore,
+          loadingMore: false
+        });
+      } else {
+        this.setData({
+          orderList: processedOrders,
+          page: 2,
+          total: total.total,
+          hasMore,
+          loading: false
+        });
+      }
     } catch (err) {
       console.error('加载订单失败', err);
-      this.setData({ loading: false });
+      this.setData({ 
+        loading: false, 
+        loadingMore: false 
+      });
       wx.showToast({
         title: '加载失败',
         icon: 'none'
@@ -244,7 +291,7 @@ Page({
             data: {
               type: 'cancelOrder',
               orderId: orderId,
-              phone: app.globalData.phone || ''
+              openid: app.globalData.openid || ''
             }
           }).then(res => {
             wx.hideLoading();
@@ -254,7 +301,7 @@ Page({
                 title: '已取消预约',
                 icon: 'success'
               });
-              this.loadOrders();
+              this.loadOrders(true);
             } else {
               wx.showToast({
                 title: res.result.error || '取消失败',
@@ -284,9 +331,15 @@ Page({
     });
   },
 
+  onReachBottom() {
+    if (this.data.hasMore && !this.data.loadingMore) {
+      this.loadOrders(false);
+    }
+  },
+
   async onPullDownRefresh() {
     await this.loadDeadlines();
-    this.loadOrders();
+    this.loadOrders(true);
     setTimeout(() => {
       wx.stopPullDownRefresh();
     }, 1000);

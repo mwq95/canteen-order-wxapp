@@ -14,7 +14,7 @@
     </view>
     <view class="menu-item" bindtap="goToStatistics">
       <view class="menu-icon">📊</view>
-      <view class="menu-text">数据分析</view>
+      <view class="menu-text">菜品评价</view>
     </view>
     <view class="menu-item" bindtap="goToSettings">
       <view class="menu-icon">⚙️</view>
