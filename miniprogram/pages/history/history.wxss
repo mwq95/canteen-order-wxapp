@@ -60,6 +60,15 @@
   color: #333;
 }
 
+.dish-evaluated-tag {
+  font-size: 20rpx;
+  color: #52c41a;
+  background: #f6ffed;
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+  border: 1rpx solid #b7eb8f;
+}
+
 .order-footer {
   display: flex;
   justify-content: flex-end;
@@ -93,6 +102,12 @@
 .evaluate-btn {
   background: #1890FF;
   color: #fff;
+}
+
+.view-evaluate-btn {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1rpx solid #b7eb8f;
 }
 
 .evaluated-text {

@@ -19,6 +19,7 @@
       <view class="order-dishes">
         <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name">
           <text class="dish-name">{{dish.name}}</text>
+          <text wx:if="{{dish.evaluated}}" class="dish-evaluated-tag">已评</text>
         </view>
       </view>
       
@@ -26,8 +27,8 @@
         <view class="order-actions">
           <button wx:if="{{item.canCancel}}" class="action-btn cancel-btn" data-id="{{item._id}}" bindtap="cancelOrder">取消预约</button>
           <text wx:elif="{{item.cancelReason}}" class="cancel-disabled-text">{{item.cancelReason}}</text>
-          <button wx:if="{{item.showEvaluate && !item.evaluated}}" class="action-btn evaluate-btn" data-id="{{item._id}}" bindtap="goToEvaluate">评价</button>
-          <text wx:if="{{item.evaluated}}" class="evaluated-text">已评价</text>
+          <button wx:if="{{item.showEvaluate && !item.allEvaluated}}" class="action-btn evaluate-btn" data-id="{{item._id}}" bindtap="goToEvaluate">评价</button>
+          <button wx:if="{{item.showEvaluate && item.hasEvaluation}}" class="action-btn view-evaluate-btn" data-id="{{item._id}}" bindtap="viewEvaluation">查看评价</button>
         </view>
       </view>
     </view>

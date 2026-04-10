@@ -26,17 +26,18 @@ Page({
       await initUtil.waitForAppInit();
     }
     auth.checkPageAccess('tabbar');
+    await this.loadDeadlines();
     this.loadOrders();
   },
 
   async initPage() {
     await initUtil.waitForAppInit();
-    this.loadDeadlines();
+    await this.loadDeadlines();
     this.loadOrders();
   },
 
   loadDeadlines() {
-    wx.cloud.callFunction({
+    return wx.cloud.callFunction({
       name: 'quickstartFunctions',
       data: { type: 'getDeadlineConfig' }
     }).then(res => {
@@ -133,44 +134,97 @@ Page({
     };
   },
 
-  loadOrders() {
+  async loadOrders() {
     const app = getApp();
-    db.collection('orders')
-      .where({
-        phone: app.globalData.phone || app.globalData.openid
-      })
-      .orderBy('createTime', 'desc')
-      .get()
-      .then(res => {
-        const ordersWithStatus = res.data.map(order => {
-          const actionInfo = this.getOrderActionInfo(order);
-          return {
-            ...order,
-            displayStatus: this.calculateStatus(order),
-            canCancel: actionInfo.canCancel,
-            cancelReason: actionInfo.cancelReason,
-            showEvaluate: actionInfo.showEvaluate
-          };
-        });
-        this.setData({
-          orderList: ordersWithStatus,
-          loading: false
-        });
-      })
-      .catch(err => {
-        console.error('加载订单失败', err);
-        this.setData({ loading: false });
-        wx.showToast({
-          title: '加载失败',
-          icon: 'none'
-        });
+    const phone = app.globalData.phone;
+    
+    if (!phone) {
+      this.setData({ loading: false });
+      return;
+    }
+
+    try {
+      const ordersRes = await db.collection('orders')
+        .where({
+          phone: phone
+        })
+        .orderBy('createTime', 'desc')
+        .get();
+
+      const orderIds = ordersRes.data.map(o => o._id);
+      
+      let evaluations = [];
+      if (orderIds.length > 0) {
+        const evalRes = await db.collection('evaluations')
+          .where({
+            orderId: _.in(orderIds),
+            phone: phone
+          })
+          .get();
+        evaluations = evalRes.data;
+      }
+
+      const evalMap = {};
+      evaluations.forEach(e => {
+        if (!evalMap[e.orderId]) {
+          evalMap[e.orderId] = {};
+        }
+        evalMap[e.orderId][e.dishName] = {
+          rating: e.rating,
+          comment: e.comment
+        };
       });
+
+      const ordersWithStatus = ordersRes.data.map(order => {
+        const actionInfo = this.getOrderActionInfo(order);
+        const orderEvals = evalMap[order._id] || {};
+        
+        const dishesWithEval = order.dishes.map(dish => ({
+          ...dish,
+          evaluated: !!orderEvals[dish.name]
+        }));
+
+        const evaluatedCount = dishesWithEval.filter(d => d.evaluated).length;
+        const allEvaluated = evaluatedCount === dishesWithEval.length;
+        const hasEvaluation = evaluatedCount > 0;
+
+        return {
+          ...order,
+          dishes: dishesWithEval,
+          displayStatus: this.calculateStatus(order),
+          canCancel: actionInfo.canCancel,
+          cancelReason: actionInfo.cancelReason,
+          showEvaluate: actionInfo.showEvaluate,
+          allEvaluated,
+          hasEvaluation
+        };
+      });
+
+      this.setData({
+        orderList: ordersWithStatus,
+        loading: false
+      });
+    } catch (err) {
+      console.error('加载订单失败', err);
+      this.setData({ loading: false });
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      });
+    });
   },
 
   goToEvaluate(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.navigateTo({
       url: `/pages/evaluate/evaluate?orderId=${orderId}`
+    });
+  },
+
+  viewEvaluation(e) {
+    const orderId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/evaluate/evaluate?orderId=${orderId}&mode=view`
     });
   },
 
@@ -230,8 +284,8 @@ Page({
     });
   },
 
-  onPullDownRefresh() {
-    this.loadDeadlines();
+  async onPullDownRefresh() {
+    await this.loadDeadlines();
     this.loadOrders();
     setTimeout(() => {
       wx.stopPullDownRefresh();
