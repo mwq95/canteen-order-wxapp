@@ -175,6 +175,7 @@ Page({
 
   cancelOrder(e) {
     const orderId = e.currentTarget.dataset.id;
+    const app = getApp();
 
     wx.showModal({
       title: '提示',
