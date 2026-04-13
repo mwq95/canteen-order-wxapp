@@ -1,27 +1,41 @@
+/*
+ * 菜单管理页面 - 管理员编辑每日菜单
+ */
+
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
+    // 选中的日期
     selectedDate: '',
+    // 选中日期的中文显示
     selectedDateStr: '',
+    // 是否为过去的日期
     isPast: false,
+    // 餐次数据
     meals: [
       { type: '早餐', dishes: [] },
       { type: '午餐', dishes: [] },
       { type: '晚餐', dishes: [] }
     ],
+    // 现有菜单ID
     existingMenuId: null,
+    // 新菜品名称
     newDishName: '',
+    // 当前餐次索引
     currentMealIndex: 0,
+    // 是否显示添加菜品弹窗
     showAddDishModal: false
   },
 
+  // 页面加载时调用
   onLoad() {
     this.initDate();
   },
 
+  // 页面显示时调用
   async onShow() {
     if (auth.isInitializing()) {
       await initUtil.waitForAppInit();
@@ -29,6 +43,7 @@ Page({
     auth.checkPageAccess('menu');
   },
 
+  // 初始化日期
   initDate() {
     const now = new Date();
     this.setData({
@@ -39,6 +54,7 @@ Page({
     this.loadMenu();
   },
 
+  // 切换到前一天
   prevDay() {
     const current = dateUtil.prevDay(this.data.selectedDate);
     const isPast = dateUtil.isPast(dateUtil.formatDate(current));
@@ -51,6 +67,7 @@ Page({
     this.loadMenu();
   },
 
+  // 切换到后一天
   nextDay() {
     const current = dateUtil.nextDay(this.data.selectedDate);
     this.setData({
@@ -61,6 +78,7 @@ Page({
     this.loadMenu();
   },
 
+  // 加载菜单数据
   loadMenu() {
     const db = wx.cloud.database();
     db.collection('menus').where({
@@ -86,6 +104,7 @@ Page({
     });
   },
 
+  // 显示添加菜品弹窗
   showAddDish(e) {
     if (this.data.isPast) {
       wx.showToast({
@@ -103,10 +122,12 @@ Page({
     });
   },
 
+  // 菜品名称输入
   onDishNameInput(e) {
     this.setData({ newDishName: e.detail.value });
   },
 
+  // 添加菜品
   addDish() {
     if (!this.data.newDishName.trim()) {
       wx.showToast({
@@ -129,6 +150,7 @@ Page({
     });
   },
 
+  // 删除菜品
   deleteDish(e) {
     if (this.data.isPast) {
       wx.showToast({
@@ -152,6 +174,7 @@ Page({
     });
   },
 
+  // 取消添加菜品
   cancelAddDish() {
     this.setData({
       showAddDishModal: false,
@@ -159,16 +182,18 @@ Page({
     });
   },
 
+  // 保存菜单
   saveMenu() {
     const { selectedDate, meals } = this.data;
 
     wx.showLoading({ title: '保存中...' });
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'menuFunctions',
       data: {
         type: 'saveMenu',
         date: selectedDate,
+        // 餐次数据
         meals: meals
       }
     }).then(res => {

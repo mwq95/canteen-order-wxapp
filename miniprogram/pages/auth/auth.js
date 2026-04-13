@@ -1,21 +1,31 @@
+/*
+ * 身份验证页面 - 用于员工手机号验证和身份绑定
+ */
+
 const app = getApp();
 const initUtil = require('../../utils/initUtil.js');
 
 Page({
   data: {
+    // 手机号
     phone: '',
+    // 加载状态
     loading: false,
+    // 验证检查状态
     checking: true
   },
 
+  // 页面加载时调用
   onLoad() {
     this.checkIfVerified();
   },
 
+  // 页面显示时调用
   onShow() {
     this.checkIfVerified();
   },
 
+  // 检查是否已验证
   async checkIfVerified() {
     if (app.globalData.openid && app.globalData.isVerified) {
       this.redirectToOrderPage();
@@ -34,29 +44,33 @@ Page({
     this.setData({ checking: false });
   },
 
+  // 跳转到订单页面
   redirectToOrderPage() {
     wx.switchTab({
       url: '/pages/order/order'
     });
   },
 
+  // 手机号输入事件
   onPhoneInput(e) {
     this.setData({
       phone: e.detail.value
     });
   },
 
+  // 获取手机号
   getPhoneNumber(e) {
     if (e.detail.code) {
       this.verifyByPhoneNumber(e.detail.code);
     }
   },
 
+  // 通过手机号验证
   verifyByPhoneNumber(code) {
     this.showLoading('验证中...');
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'userFunctions',
       data: {
         type: 'getPhoneNumber',
         code: code
@@ -75,6 +89,7 @@ Page({
     });
   },
 
+  // 手动验证
   onManualVerify() {
     const phone = this.data.phone.trim();
 
@@ -85,6 +100,7 @@ Page({
     this.verifyStaff(phone);
   },
 
+  // 验证手机号格式
   validatePhone(phone) {
     if (!phone) {
       this.showToast('请输入手机号', 'none');
@@ -99,6 +115,7 @@ Page({
     return true;
   },
 
+  // 验证员工身份
   verifyStaff(phone) {
     const openid = app.globalData.openid;
 
@@ -109,9 +126,10 @@ Page({
     }
 
     wx.cloud.callFunction({
-      name: 'quickstartFunctions',
+      name: 'userFunctions',
       data: {
         type: 'verifyAndBindPhone',
+        // 手机号
         phone: String(phone)
       }
     }).then(res => {
@@ -144,20 +162,24 @@ Page({
     });
   },
 
+  // 显示加载提示
   showLoading(title = '加载中...') {
     this.setData({ loading: true });
     wx.showLoading({ title, mask: true });
   },
 
+  // 隐藏加载提示
   hideLoading() {
     this.setData({ loading: false });
     wx.hideLoading();
   },
 
+  // 显示提示消息
   showToast(title, icon = 'none') {
     wx.showToast({ title, icon, duration: 2000 });
   },
 
+  // 显示模态框
   showModal(title, content) {
     wx.showModal({
       title,

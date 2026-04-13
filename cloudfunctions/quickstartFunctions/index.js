@@ -1,3 +1,13 @@
+/**
+ * 食堂订餐小程序 - 通用云函数
+ * 主要功能：
+ * 1. 用户身份验证和绑定
+ * 2. 员工管理
+ * 3. 订单管理
+ * 4. 配置管理
+ * 5. 菜单管理
+ * 6. 数据统计
+ */
 const cloud = require("wx-server-sdk");
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
@@ -5,6 +15,12 @@ cloud.init({
 
 const db = cloud.database();
 
+/**
+ * 验证并绑定手机号
+ * @param {Object} event - 事件对象，包含手机号
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 验证结果
+ */
 const verifyAndBindPhone = async (event, openid) => {
   const { phone } = event;
 
@@ -13,6 +29,7 @@ const verifyAndBindPhone = async (event, openid) => {
   }
 
   try {
+    // 检查手机号是否在单位人员列表中
     const staffRes = await db.collection('staffs').where({
       phone: String(phone),
       status: 'active'
@@ -24,6 +41,7 @@ const verifyAndBindPhone = async (event, openid) => {
 
     const staff = staffRes.data[0];
 
+    // 检查手机号是否已被其他账号绑定
     const existingUserByPhone = await db.collection('users').where({
       phone: String(phone)
     }).get();
@@ -39,6 +57,7 @@ const verifyAndBindPhone = async (event, openid) => {
         };
       }
       
+      // 同一账号，更新信息
       if (existingUser._openid === openid) {
         await db.collection('users').doc(existingUser._id).update({
           data: {
@@ -58,11 +77,13 @@ const verifyAndBindPhone = async (event, openid) => {
       }
     }
 
+    // 检查openid是否已有用户记录
     const existingUserByOpenid = await db.collection('users').where({
       _openid: openid
     }).get();
 
     if (existingUserByOpenid.data.length > 0) {
+      // 更新现有用户记录
       await db.collection('users').doc(existingUserByOpenid.data[0]._id).update({
         data: {
           phone: String(phone),
@@ -75,6 +96,7 @@ const verifyAndBindPhone = async (event, openid) => {
         }
       });
     } else {
+      // 创建新用户记录
       await db.collection('users').add({
         data: {
           _openid: openid,
@@ -102,6 +124,10 @@ const verifyAndBindPhone = async (event, openid) => {
   }
 };
 
+/**
+ * 获取用户OpenID
+ * @returns {Object} 包含openid、appid、unionid的对象
+ */
 const getOpenId = async () => {
   const wxContext = cloud.getWXContext();
   return {
@@ -111,6 +137,11 @@ const getOpenId = async () => {
   };
 };
 
+/**
+ * 获取手机号
+ * @param {Object} event - 事件对象，包含code
+ * @returns {Object} 包含手机号的对象
+ */
 const getPhoneNumber = async (event) => {
   try {
     const result = await cloud.getOpenData({
@@ -127,6 +158,11 @@ const getPhoneNumber = async (event) => {
   }
 };
 
+/**
+ * 检查用户是否为管理员
+ * @param {string} openid - 用户唯一标识
+ * @returns {boolean} 是否为管理员
+ */
 const checkIsAdmin = async (openid) => {
   const userRes = await db.collection('users').where({
     _openid: openid
@@ -137,10 +173,20 @@ const checkIsAdmin = async (openid) => {
   return false;
 };
 
+/**
+ * 获取员工列表
+ * @returns {Promise} 员工列表
+ */
 const getStaffList = async () => {
   return await db.collection('staffs').orderBy('createTime', 'desc').get();
 };
 
+/**
+ * 添加员工
+ * @param {Object} event - 事件对象，包含员工数据
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 添加结果
+ */
 const addStaff = async (event, openid) => {
   const isAdmin = await checkIsAdmin(openid);
   if (!isAdmin) {
@@ -152,6 +198,12 @@ const addStaff = async (event, openid) => {
   });
 };
 
+/**
+ * 更新员工信息
+ * @param {Object} event - 事件对象，包含员工ID和数据
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 更新结果
+ */
 const updateStaff = async (event, openid) => {
   const isAdmin = await checkIsAdmin(openid);
   if (!isAdmin) {
@@ -163,21 +215,25 @@ const updateStaff = async (event, openid) => {
   });
 };
 
+/**
+ * 删除员工
+ * @param {Object} event - 事件对象，包含员工ID
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 删除结果
+ */
 const deleteStaff = async (event, openid) => {
   const isAdmin = await checkIsAdmin(openid);
   if (!isAdmin) {
     return { success: false, error: '您没有权限操作' };
   }
 
-  return await db.collection('staffs').doc(event.id).remove()
-  // .update({
-  //   data: {
-  //     status: 'inactive',
-  //     updateTime: new Date()
-  //   }
-  // });
+  return await db.collection('staffs').doc(event.id).remove();
 };
 
+/**
+ * 获取小程序码
+ * @returns {string} 小程序码的fileID
+ */
 const getMiniProgramCode = async () => {
   const resp = await cloud.openapi.wxacode.get({
     path: "pages/order/order",
@@ -190,6 +246,10 @@ const getMiniProgramCode = async () => {
   return upload.fileID;
 };
 
+/**
+ * 创建食堂相关的数据库集合
+ * @returns {Object} 创建结果
+ */
 const createCanteenCollections = async () => {
   try {
     await db.createCollection("menus");
@@ -199,6 +259,7 @@ const createCanteenCollections = async () => {
     await db.createCollection("configs");
     await db.createCollection("staffs");
 
+    // 添加默认配置
     await db.collection("configs").add({
       data: {
         key: "order_deadline",
@@ -220,6 +281,12 @@ const createCanteenCollections = async () => {
   }
 };
 
+/**
+ * 更新截止时间配置
+ * @param {Object} event - 事件对象，包含配置数据
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 更新结果
+ */
 const updateDeadlineConfig = async (event, openid) => {
   const isAuthorized = await checkIsAdminOrKitchen(openid);
   if (!isAuthorized) {
@@ -231,6 +298,7 @@ const updateDeadlineConfig = async (event, openid) => {
     breakfast_meal_start, lunch_meal_start, dinner_meal_start
   } = event.data;
 
+  // 验证时间格式
   const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
   const allTimes = [breakfast_deadline, lunch_deadline, dinner_deadline, breakfast_meal_start, lunch_meal_start, dinner_meal_start];
   for (const t of allTimes) {
@@ -253,10 +321,12 @@ const updateDeadlineConfig = async (event, openid) => {
     };
 
     if (configRes.data.length > 0) {
+      // 更新现有配置
       await db.collection('configs').doc(configRes.data[0]._id).update({
         data: updateData
       });
     } else {
+      // 创建新配置
       await db.collection('configs').add({
         data: {
           key: 'order_deadline',
@@ -272,6 +342,10 @@ const updateDeadlineConfig = async (event, openid) => {
   }
 };
 
+/**
+ * 获取截止时间配置
+ * @returns {Object} 配置数据
+ */
 const getDeadlineConfig = async () => {
   try {
     const res = await db.collection('configs').where({ key: 'order_deadline' }).get();
@@ -289,6 +363,7 @@ const getDeadlineConfig = async () => {
         }
       };
     }
+    // 返回默认配置
     return {
       success: true,
       data: {
@@ -298,6 +373,7 @@ const getDeadlineConfig = async () => {
     };
   } catch (e) {
     console.error('获取配置失败', e);
+    // 出错时返回默认配置
     return {
       success: true,
       data: {
@@ -308,6 +384,12 @@ const getDeadlineConfig = async () => {
   }
 };
 
+/**
+ * 取消订单
+ * @param {Object} event - 事件对象，包含订单ID
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 取消结果
+ */
 const cancelOrder = async (event, openid) => {
   const { orderId } = event;
 
@@ -324,10 +406,12 @@ const cancelOrder = async (event, openid) => {
 
     const order = orderRes.data;
 
+    // 验证订单归属
     if (order._openid !== openid) {
       return { success: false, error: '无权操作此订单' };
     }
 
+    // 检查订单状态
     if (order.status === 'cancelled') {
       return { success: false, error: '该订单已取消' };
     }
@@ -336,6 +420,7 @@ const cancelOrder = async (event, openid) => {
       return { success: false, error: '该订单已完成，无法取消' };
     }
 
+    // 获取截止时间配置
     const deadlineRes = await db.collection('configs').where({ key: 'order_deadline' }).get();
     const deadlineMap = {
       '早餐': '08:00',
@@ -350,6 +435,7 @@ const cancelOrder = async (event, openid) => {
       deadlineMap['晚餐'] = cfg.dinner_deadline || '17:00';
     }
 
+    // 检查是否过了截止时间
     const deadline = deadlineMap[order.mealType];
     const now = new Date();
     const orderDate = new Date(order.date + 'T00:00:00');
@@ -364,6 +450,7 @@ const cancelOrder = async (event, openid) => {
       };
     }
 
+    // 执行取消操作
     await db.collection('orders').doc(orderId).update({
       data: {
         status: 'cancelled',
@@ -378,77 +465,14 @@ const cancelOrder = async (event, openid) => {
   }
 };
 
-const selectRecord = async () => {
-  return await db.collection("sales").get();
-};
 
-const updateRecord = async (event) => {
-  try {
-    for (let i = 0; i < event.data.length; i++) {
-      await db
-        .collection("sales")
-        .where({
-          _id: event.data[i]._id,
-        })
-        .update({
-          data: {
-            sales: event.data[i].sales,
-          },
-        });
-    }
-    return {
-      success: true,
-      data: event.data,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
-  }
-};
 
-const insertRecord = async (event) => {
-  try {
-    const insertRecord = event.data;
-    await db.collection("sales").add({
-      data: {
-        region: insertRecord.region,
-        city: insertRecord.city,
-        sales: Number(insertRecord.sales),
-      },
-    });
-    return {
-      success: true,
-      data: event.data,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
-  }
-};
-
-const deleteRecord = async (event) => {
-  try {
-    await db
-      .collection("sales")
-      .where({
-        _id: event.data._id,
-      })
-      .remove();
-    return {
-      success: true,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
-  }
-};
-
+/**
+ * 获取订单统计数据
+ * @param {Object} event - 事件对象，包含手机号
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 统计数据
+ */
 const getOrderStats = async (event, openid) => {
   const { phone } = event;
   const userKey = phone || openid;
@@ -465,6 +489,7 @@ const getOrderStats = async (event, openid) => {
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(now.getDate() - 30);
 
+    // 并行获取近30天和总订单数
     const [thirtyDayRes, totalRes] = await Promise.all([
       db.collection('orders')
         .where({
@@ -490,6 +515,11 @@ const getOrderStats = async (event, openid) => {
   }
 };
 
+/**
+ * 检查用户是否为管理员或厨房工作人员
+ * @param {string} openid - 用户唯一标识
+ * @returns {boolean} 是否为管理员或厨房工作人员
+ */
 const checkIsAdminOrKitchen = async (openid) => {
   const userRes = await db.collection('users').where({
     _openid: openid
@@ -501,6 +531,12 @@ const checkIsAdminOrKitchen = async (openid) => {
   return false;
 };
 
+/**
+ * 保存菜单
+ * @param {Object} event - 事件对象，包含日期和菜单数据
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 保存结果
+ */
 const saveMenu = async (event, openid) => {
   const isAuthorized = await checkIsAdminOrKitchen(openid);
   if (!isAuthorized) {
@@ -516,10 +552,12 @@ const saveMenu = async (event, openid) => {
   try {
     const existing = await db.collection('menus').where({ date }).get();
     if (existing.data.length > 0) {
+      // 更新现有菜单
       await db.collection('menus').doc(existing.data[0]._id).update({
         data: { meals, updateTime: new Date() }
       });
     } else {
+      // 创建新菜单
       await db.collection('menus').add({
         data: { date, meals, createTime: new Date(), updateTime: new Date() }
       });
@@ -531,6 +569,12 @@ const saveMenu = async (event, openid) => {
   }
 };
 
+/**
+ * 云函数入口
+ * @param {Object} event - 事件对象
+ * @param {Object} context - 上下文对象
+ * @returns {Object} 函数执行结果
+ */
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
@@ -564,13 +608,5 @@ exports.main = async (event, context) => {
       return await getOrderStats(event, openid);
     case "saveMenu":
       return await saveMenu(event, openid);
-    case "selectRecord":
-      return await selectRecord();
-    case "updateRecord":
-      return await updateRecord(event);
-    case "insertRecord":
-      return await insertRecord(event);
-    case "deleteRecord":
-      return await deleteRecord(event);
   }
 };

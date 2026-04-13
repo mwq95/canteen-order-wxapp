@@ -1,16 +1,24 @@
+/*
+ * 提醒设置页面 - 用户配置消息提醒
+ */
+
 const app = getApp();
 const config = require('../../config.js');
 
 Page({
   data: {
+    // 订餐提醒
     orderReminder: true,
+    // 用餐提醒
     mealReminder: true
   },
 
+  // 页面加载时调用
   onLoad() {
     this.loadSettings();
   },
 
+  // 加载设置
   loadSettings() {
     const db = wx.cloud.database();
     db.collection('users').where({
@@ -26,6 +34,7 @@ Page({
     });
   },
 
+  // 订餐提醒变化
   onOrderReminderChange(e) {
     const value = e.detail.value;
     if (value) {
@@ -36,6 +45,7 @@ Page({
     this.setData({ orderReminder: value });
   },
 
+  // 用餐提醒变化
   onMealReminderChange(e) {
     const value = e.detail.value;
     if (value) {
@@ -46,6 +56,7 @@ Page({
     this.setData({ mealReminder: value });
   },
 
+  // 请求订阅并保存
   requestSubscribeAndSave(type) {
     const templateId = config.getSubscribeMessageTemplateId();
 
@@ -83,6 +94,7 @@ Page({
     });
   },
 
+  // 保存设置
   saveSetting(data) {
     const db = wx.cloud.database();
     db.collection('users').where({
