@@ -5,6 +5,7 @@
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 
 Page({
   data: {
@@ -95,14 +96,11 @@ Page({
   // 初始化数据库
   initDatabase() {
     wx.showLoading({ title: '初始化中...' });
-    wx.cloud.callFunction({
-      name: 'menuFunctions',
-      data: {
-        type: 'createCanteenCollections'
-      }
+    callCloudFunction('menuFunctions', {
+      type: 'createCanteenCollections'
     }).then(res => {
       wx.hideLoading();
-      if (res.result.success) {
+      if (res.success) {
         wx.showToast({
           title: '初始化成功',
           icon: 'success'

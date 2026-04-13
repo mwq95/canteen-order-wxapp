@@ -3,6 +3,12 @@
     <text>身份验证中...</text>
   </view>
 
+  <view wx:elif="{{initFailed}}" class="init-failed-view">
+    <text class="error-text">系统初始化失败</text>
+    <text class="error-hint">请检查网络连接或云函数是否已部署</text>
+    <button class="retry-btn" bindtap="retryInit">重试</button>
+  </view>
+
   <block wx:else>
     <view class="header">
       <view class="title">身份验证</view>

@@ -1,95 +1,94 @@
-/*
- * 身份验证页面 - 用于员工手机号验证和身份绑定
- */
-
 const app = getApp();
 const initUtil = require('../../utils/initUtil.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 
 Page({
   data: {
-    // 手机号
     phone: '',
-    // 加载状态
     loading: false,
-    // 验证检查状态
-    checking: true
+    checking: true,
+    initFailed: false
   },
 
-  // 页面加载时调用
   onLoad() {
     this.checkIfVerified();
   },
 
-  // 页面显示时调用
   onShow() {
-    this.checkIfVerified();
+    if (!this.data.checking) {
+      this.checkIfVerified();
+    }
   },
 
-  // 检查是否已验证
   async checkIfVerified() {
+    this.setData({ checking: true, initFailed: false });
+
+    await initUtil.waitForAppInit();
+
     if (app.globalData.openid && app.globalData.isVerified) {
       this.redirectToOrderPage();
       return;
     }
 
-    if (app.globalData.openid === null || app.globalData.isVerified === undefined) {
-      await initUtil.waitForAppInit();
-
-      if (app.globalData.isVerified) {
-        this.redirectToOrderPage();
-        return;
-      }
+    if (!app.globalData.openid) {
+      this.setData({ 
+        checking: false, 
+        initFailed: true 
+      });
+      return;
     }
 
     this.setData({ checking: false });
   },
 
-  // 跳转到订单页面
+  retryInit() {
+    this.checkIfVerified();
+  },
+
   redirectToOrderPage() {
     wx.switchTab({
       url: '/pages/order/order'
     });
   },
 
-  // 手机号输入事件
   onPhoneInput(e) {
     this.setData({
       phone: e.detail.value
     });
   },
 
-  // 获取手机号
   getPhoneNumber(e) {
+    console.log('getPhoneNumber 回调:', JSON.stringify(e.detail));
     if (e.detail.code) {
       this.verifyByPhoneNumber(e.detail.code);
+    } else {
+      console.log('没有 code');
+      this.showToast('获取手机号失败，请重试', 'none');
     }
   },
 
-  // 通过手机号验证
-  verifyByPhoneNumber(code) {
+  async verifyByPhoneNumber(code) {
     this.showLoading('验证中...');
 
-    wx.cloud.callFunction({
-      name: 'userFunctions',
-      data: {
+    try {
+      const res = await callCloudFunction('userFunctions', {
         type: 'getPhoneNumber',
         code: code
-      }
-    }).then(res => {
-      if (res.result.phoneNumber) {
-        this.verifyStaff(res.result.phoneNumber);
+      });
+
+      if (res.phoneNumber) {
+        this.verifyStaff(res.phoneNumber);
       } else {
         this.hideLoading();
         this.showToast('获取手机号失败', 'none');
       }
-    }).catch(err => {
+    } catch (err) {
       console.error('获取手机号失败', err);
       this.hideLoading();
       this.showToast('获取手机号失败', 'none');
-    });
+    }
   },
 
-  // 手动验证
   onManualVerify() {
     const phone = this.data.phone.trim();
 
@@ -100,7 +99,6 @@ Page({
     this.verifyStaff(phone);
   },
 
-  // 验证手机号格式
   validatePhone(phone) {
     if (!phone) {
       this.showToast('请输入手机号', 'none');
@@ -115,28 +113,26 @@ Page({
     return true;
   },
 
-  // 验证员工身份
-  verifyStaff(phone) {
+  async verifyStaff(phone) {
     const openid = app.globalData.openid;
 
     if (!openid) {
       this.hideLoading();
-      this.showToast('系统初始化中，请稍后再试', 'none');
+      this.setData({ initFailed: true });
+      this.showToast('系统初始化中，请点击重试', 'none');
       return;
     }
 
-    wx.cloud.callFunction({
-      name: 'userFunctions',
-      data: {
+    try {
+      const res = await callCloudFunction('userFunctions', {
         type: 'verifyAndBindPhone',
-        // 手机号
         phone: String(phone)
-      }
-    }).then(res => {
+      });
+
       this.hideLoading();
 
-      if (res.result.success) {
-        const staffData = res.result.data || {};
+      if (res.success) {
+        const staffData = res.data || {};
         
         app.globalData.isVerified = true;
         app.globalData.role = staffData.role;
@@ -149,37 +145,33 @@ Page({
           this.redirectToOrderPage();
         }, 1500);
       } else {
-        if (res.result.code === 'PHONE_ALREADY_BOUND') {
-          this.showModal('绑定失败', res.result.error);
+        if (res.code === 'PHONE_ALREADY_BOUND') {
+          this.showModal('绑定失败', res.error);
         } else {
-          this.showModal('验证失败', res.result.error || '验证失败');
+          this.showModal('验证失败', res.error || '验证失败');
         }
       }
-    }).catch(err => {
+    } catch (err) {
       console.error('验证员工身份失败', err);
       this.hideLoading();
       this.showToast('验证失败', 'none');
-    });
+    }
   },
 
-  // 显示加载提示
   showLoading(title = '加载中...') {
     this.setData({ loading: true });
     wx.showLoading({ title, mask: true });
   },
 
-  // 隐藏加载提示
   hideLoading() {
     this.setData({ loading: false });
     wx.hideLoading();
   },
 
-  // 显示提示消息
   showToast(title, icon = 'none') {
     wx.showToast({ title, icon, duration: 2000 });
   },
 
-  // 显示模态框
   showModal(title, content) {
     wx.showModal({
       title,

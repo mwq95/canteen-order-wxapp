@@ -95,10 +95,10 @@ Page({
     });
   },
 
-  // 跳转到评价页面
-  goToEvaluations() {
+  // 跳转到意见建议页面
+  goToFeedback() {
     wx.navigateTo({
-      url: '/pages/evaluations/evaluations'
+      url: '/pages/feedback/feedback'
     });
   }
 });

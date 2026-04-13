@@ -183,6 +183,7 @@ Page({
         const allEvaluated = Object.keys(itemEvaluated).length === orderData.dishes.length;
         if (allEvaluated) {
           this.updateOrderEvaluated();
+          getApp().notifyOrderChange();
         }
       } else {
         wx.showToast({

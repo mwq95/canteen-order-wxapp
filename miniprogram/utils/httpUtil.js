@@ -13,7 +13,7 @@
  * @param {Object} options - 额外选项
  * @returns {Promise} 云函数调用结果
  */
-export const callCloudFunction = async (name, data, options = {}) => {
+const callCloudFunction = async (name, data, options = {}) => {
   try {
     const result = await wx.cloud.callFunction({
       name,
@@ -35,9 +35,8 @@ export const callCloudFunction = async (name, data, options = {}) => {
  * @param {number} cacheTime - 缓存时间（毫秒），默认5分钟
  * @returns {Promise} 云函数调用结果
  */
-export const callCloudFunctionWithCache = async (name, data, cacheKey, cacheTime = 5 * 60 * 1000) => {
+const callCloudFunctionWithCache = async (name, data, cacheKey, cacheTime = 5 * 60 * 1000) => {
   try {
-    // 尝试从缓存获取
     const cachedData = wx.getStorageSync(cacheKey);
     const now = Date.now();
     
@@ -46,10 +45,8 @@ export const callCloudFunctionWithCache = async (name, data, cacheKey, cacheTime
       return cachedData.data;
     }
     
-    // 调用云函数
     const result = await callCloudFunction(name, data);
     
-    // 缓存结果
     wx.setStorageSync(cacheKey, {
       data: result,
       timestamp: now
@@ -66,14 +63,14 @@ export const callCloudFunctionWithCache = async (name, data, cacheKey, cacheTime
  * 清除指定缓存
  * @param {string} cacheKey - 缓存键
  */
-export const clearCache = (cacheKey) => {
+const clearCache = (cacheKey) => {
   wx.removeStorageSync(cacheKey);
 };
 
 /**
  * 清除所有缓存
  */
-export const clearAllCache = () => {
+const clearAllCache = () => {
   wx.clearStorageSync();
 };
 
@@ -82,7 +79,7 @@ export const clearAllCache = () => {
  * @param {Array} functions - 云函数调用配置数组
  * @returns {Promise} 所有云函数调用结果的数组
  */
-export const batchCallCloudFunctions = async (functions) => {
+const batchCallCloudFunctions = async (functions) => {
   try {
     const promises = functions.map(({ name, data, options }) => 
       callCloudFunction(name, data, options)
@@ -94,8 +91,7 @@ export const batchCallCloudFunctions = async (functions) => {
   }
 };
 
-// 导出工具类
-export default {
+module.exports = {
   callCloudFunction,
   callCloudFunctionWithCache,
   clearCache,

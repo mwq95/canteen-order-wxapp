@@ -4,6 +4,7 @@
 
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 
 Page({
   data: {
@@ -113,27 +114,24 @@ Page({
     this.setData({ loading: true });
     wx.showLoading({ title: '保存中...' });
 
-    wx.cloud.callFunction({
-      name: 'configFunctions',
+    callCloudFunction('configFunctions', {
+      type: 'updateDeadlineConfig',
       data: {
-        type: 'updateDeadlineConfig',
-        data: {
-          breakfast_deadline: breakfastDeadline,
-          lunch_deadline: lunchDeadline,
-          dinner_deadline: dinnerDeadline,
-          breakfast_meal_start: breakfastMealStart,
-          lunch_meal_start: lunchMealStart,
-          dinner_meal_start: dinnerMealStart
-        }
+        breakfast_deadline: breakfastDeadline,
+        lunch_deadline: lunchDeadline,
+        dinner_deadline: dinnerDeadline,
+        breakfast_meal_start: breakfastMealStart,
+        lunch_meal_start: lunchMealStart,
+        dinner_meal_start: dinnerMealStart
       }
     }).then(res => {
       wx.hideLoading();
       this.setData({ loading: false });
 
-      if (res.result.success) {
+      if (res.success) {
         wx.showToast({ title: '保存成功', icon: 'success' });
       } else {
-        wx.showToast({ title: res.result.error || '保存失败', icon: 'none', duration: 2000 });
+        wx.showToast({ title: res.error || '保存失败', icon: 'none', duration: 2000 });
       }
     }).catch(err => {
       wx.hideLoading();

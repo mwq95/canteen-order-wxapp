@@ -1,55 +1,57 @@
 {
   "pages": [
-    "pages/auth/auth",               // 身份验证页面
-    "pages/index/index",             // 首页（保留但已不使用）
-    "pages/order/order",             // 订餐页面（统一页面）
-    "pages/history/history",         // 历史订单页面
-    "pages/profile/profile",         // 个人中心页面
-    "pages/admin/admin",             // 管理后台入口
-    "pages/menu/menu",               // 菜单管理页面
-    "pages/statistics/statistics",   // 数据统计页面
-    "pages/evaluate/evaluate",       // 评价页面
-    "pages/orderList/orderList",     // 订餐名单页面
-    "pages/settings/settings",       // 订餐设置页面
-    "pages/userManage/userManage",   // 用户管理页面
-    "pages/reminderSettings/reminderSettings", // 提醒设置页面
-    "pages/orderStats/orderStats",   // 订餐统计页面
-    "pages/help/help"                // 使用帮助页面
+    "pages/auth/auth",
+    "pages/index/index",
+    "pages/order/order",
+    "pages/history/history",
+    "pages/profile/profile",
+    "pages/admin/admin",
+    "pages/menu/menu",
+    "pages/statistics/statistics",
+    "pages/evaluate/evaluate",
+    "pages/orderList/orderList",
+    "pages/settings/settings",
+    "pages/userManage/userManage",
+    "pages/reminderSettings/reminderSettings",
+    "pages/orderStats/orderStats",
+    "pages/help/help",
+    "pages/feedback/feedback",
+    "pages/feedbackList/feedbackList"
   ],
   "window": {
-    "backgroundColor": "#F6F6F6",        // 窗口背景色
-    "backgroundTextStyle": "light",      // 背景文字样式
-    "navigationBarBackgroundColor": "#1890FF", // 导航栏背景色
-    "navigationBarTitleText": "食堂订餐",     // 导航栏标题
-    "navigationBarTextStyle": "white"       // 导航栏文字颜色
+    "backgroundColor": "#F6F6F6",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1890FF",
+    "navigationBarTitleText": "食堂订餐",
+    "navigationBarTextStyle": "white"
   },
   "tabBar": {
-    "color": "#999999",               // 未选中颜色
-    "selectedColor": "#1890FF",        // 选中颜色
-    "backgroundColor": "#ffffff",       // 背景色
-    "borderStyle": "black",            // 边框样式
+    "color": "#999999",
+    "selectedColor": "#1890FF",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
     "list": [
       {
-        "pagePath": "pages/order/order",     // 订餐页面
-        "text": "订餐",                    // 导航文字
-        "iconPath": "images/icons/home.png", // 未选中图标
-        "selectedIconPath": "images/icons/home-active.png" // 选中图标
+        "pagePath": "pages/order/order",
+        "text": "订餐",
+        "iconPath": "images/icons/home.png",
+        "selectedIconPath": "images/icons/home-active.png"
       },
       {
-        "pagePath": "pages/history/history",     // 订单页面
-        "text": "订单",                          // 导航文字
-        "iconPath": "images/icons/business.png", // 未选中图标
-        "selectedIconPath": "images/icons/business-active.png" // 选中图标
+        "pagePath": "pages/history/history",
+        "text": "订单",
+        "iconPath": "images/icons/business.png",
+        "selectedIconPath": "images/icons/business-active.png"
       },
       {
-        "pagePath": "pages/profile/profile",         // 个人中心
-        "text": "我的",                              // 导航文字
-        "iconPath": "images/icons/usercenter.png",   // 未选中图标
-        "selectedIconPath": "images/icons/usercenter-active.png" // 选中图标
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/icons/usercenter.png",
+        "selectedIconPath": "images/icons/usercenter-active.png"
       }
     ]
   },
-  "sitemapLocation": "sitemap.json",  // 站点地图位置
-  "style": "v2",                      // 使用新版样式
-  "lazyCodeLoading": "requiredComponents" // 按需加载组件
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
 }

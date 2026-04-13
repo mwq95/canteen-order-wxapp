@@ -1,0 +1,31 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{list.length === 0}}" class="empty">
+    <text>暂无意见建议</text>
+  </view>
+
+  <view wx:else>
+    <view class="total-bar">共 {{total}} 条反馈</view>
+
+    <view class="feedback-list">
+      <view wx:for="{{list}}" wx:key="_id" class="feedback-item">
+        <view class="feedback-header">
+          <text class="feedback-name">{{item.name || '匿名用户'}}</text>
+          <text class="feedback-time">{{item.timeStr}}</text>
+        </view>
+        <view class="feedback-content">{{item.content}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{loadingMore}}" class="loading-more">
+      <text>加载中...</text>
+    </view>
+
+    <view wx:elif="{{!hasMore}}" class="no-more">
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

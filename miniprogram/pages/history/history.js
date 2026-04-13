@@ -4,6 +4,7 @@
 
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 const db = wx.cloud.database();
 const _ = db.command;
 
@@ -34,7 +35,9 @@ Page({
       lunchMealStart: '12:00',
       // 晚餐开餐时间
       dinnerMealStart: '17:30'
-    }
+    },
+    // 上一次加载的订单版本号，用于判断是否需要刷新
+    lastOrderVersion: -1
   },
 
   // 页面加载时调用
@@ -48,8 +51,15 @@ Page({
       await initUtil.waitForAppInit();
     }
     auth.checkPageAccess('tabbar');
-    await this.loadDeadlines();
-    this.loadOrders(true);
+
+    const app = getApp();
+    const currentVersion = app.globalData.orderVersion || 0;
+
+    if (currentVersion !== this.data.lastOrderVersion) {
+      this.setData({ lastOrderVersion: currentVersion });
+      await this.loadDeadlines();
+      this.loadOrders(true);
+    }
   },
 
   // 初始化页面
@@ -61,12 +71,9 @@ Page({
 
   // 加载截止时间配置
   loadDeadlines() {
-    return wx.cloud.callFunction({
-      name: 'configFunctions',
-      data: { type: 'getDeadlineConfig' }
-    }).then(res => {
-      if (res.result && res.result.success && res.result.data) {
-        this.setData({ deadlines: res.result.data });
+    return callCloudFunction('configFunctions', { type: 'getDeadlineConfig' }).then(res => {
+      if (res && res.success && res.data) {
+        this.setData({ deadlines: res.data });
       }
     }).catch(err => {
       console.error('加载截止时间失败', err);
@@ -313,26 +320,23 @@ Page({
         if (res.confirm) {
           wx.showLoading({ title: '处理中...' });
 
-          wx.cloud.callFunction({
-            name: 'orderFunctions',
-            data: {
-              type: 'cancelOrder',
-              // 订单ID
-              orderId: orderId,
-              openid: app.globalData.openid || ''
-            }
+          callCloudFunction('orderFunctions', {
+            type: 'cancelOrder',
+            orderId: orderId,
+            openid: app.globalData.openid || ''
           }).then(res => {
             wx.hideLoading();
 
-            if (res.result.success) {
+            if (res.success) {
               wx.showToast({
                 title: '已取消预约',
                 icon: 'success'
               });
+              getApp().notifyOrderChange();
               this.loadOrders(true);
             } else {
               wx.showToast({
-                title: res.result.error || '取消失败',
+                title: res.error || '取消失败',
                 icon: 'none',
                 duration: 2000
               });

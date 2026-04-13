@@ -289,50 +289,6 @@ const getEvaluationStatistics = async (event) => {
 };
 
 /**
- * 获取用户的评价列表
- * @param {Object} event - 事件对象，包含分页信息
- * @returns {Object} 用户评价列表
- */
-const getUserEvaluations = async (event) => {
-  const wxContext = cloud.getWXContext();
-  const { page = 1, pageSize = 10 } = event;
-  
-  try {
-    const skip = (page - 1) * pageSize;
-    
-    // 查询用户的评价
-    const evaluations = await db.collection('evaluations')
-      .where({ _openid: wxContext.OPENID })
-      .orderBy('createTime', 'desc')
-      .skip(skip)
-      .limit(pageSize)
-      .get();
-    
-    // 获取总评价数
-    const countResult = await db.collection('evaluations')
-      .where({ _openid: wxContext.OPENID })
-      .count();
-    
-    return {
-      success: true,
-      data: {
-        evaluations: evaluations.data,
-        total: countResult.total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(countResult.total / pageSize)
-      }
-    };
-  } catch (error) {
-    console.error('获取用户评价失败', error);
-    return {
-      success: false,
-      message: '获取评价失败'
-    };
-  }
-};
-
-/**
  * 取消订单
  * @param {Object} event - 事件对象，包含订单ID
  * @param {string} openid - 用户唯一标识
@@ -486,8 +442,6 @@ exports.main = async (event, context) => {
       return await submitSingleEvaluation(event);
     case 'getEvaluationStatistics':
       return await getEvaluationStatistics(event);
-    case 'getUserEvaluations':
-      return await getUserEvaluations(event);
     case 'cancelOrder':
       return await cancelOrder(event, openid);
     case 'getOrderStats':

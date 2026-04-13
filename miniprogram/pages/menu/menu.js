@@ -5,6 +5,7 @@
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 
 Page({
   data: {
@@ -188,25 +189,21 @@ Page({
 
     wx.showLoading({ title: '保存中...' });
 
-    wx.cloud.callFunction({
-      name: 'menuFunctions',
-      data: {
-        type: 'saveMenu',
-        date: selectedDate,
-        // 餐次数据
-        meals: meals
-      }
+    callCloudFunction('menuFunctions', {
+      type: 'saveMenu',
+      date: selectedDate,
+      meals: meals
     }).then(res => {
       wx.hideLoading();
       
-      if (res.result.success) {
+      if (res.success) {
         wx.showToast({
           title: '保存成功',
           icon: 'success'
         });
       } else {
         wx.showToast({
-          title: res.result.error || '保存失败',
+          title: res.error || '保存失败',
           icon: 'none'
         });
       }

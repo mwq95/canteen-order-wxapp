@@ -244,6 +244,93 @@ const getMiniProgramCode = async () => {
 };
 
 /**
+ * 提交意见建议
+ * @param {Object} event - 事件对象，包含建议内容
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 提交结果
+ */
+const submitFeedback = async (event, openid) => {
+  const { content } = event;
+
+  if (!content || !content.trim()) {
+    return { success: false, error: '请输入意见建议内容' };
+  }
+
+  if (content.length > 500) {
+    return { success: false, error: '意见建议内容不能超过500字' };
+  }
+
+  try {
+    const userRes = await db.collection('users').where({
+      _openid: openid
+    }).get();
+
+    const user = userRes.data[0] || {};
+
+    await db.collection('feedbacks').add({
+      data: {
+        _openid: openid,
+        content: content.trim(),
+        phone: user.phone || '',
+        name: user.name || '',
+        createTime: new Date()
+      }
+    });
+
+    return { success: true, message: '提交成功，感谢您的反馈' };
+  } catch (e) {
+    console.error('提交意见建议失败', e);
+    return { success: false, error: '提交失败，请稍后重试' };
+  }
+};
+
+/**
+ * 获取意见建议列表（分页）
+ * @param {Object} event - 事件对象，包含分页参数
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 建议列表
+ */
+const getFeedbackList = async (event, openid) => {
+  const isAdmin = await checkIsAdmin(openid);
+  const userRes = await db.collection('users').where({
+    _openid: openid
+  }).get();
+  const role = userRes.data[0]?.role;
+
+  if (!isAdmin && role !== 'kitchen') {
+    return { success: false, error: '您没有权限查看' };
+  }
+
+  const { page = 1, pageSize = 15 } = event;
+  const skip = (page - 1) * pageSize;
+
+  try {
+    const countRes = await db.collection('feedbacks').count();
+    const total = countRes.total;
+
+    const listRes = await db.collection('feedbacks')
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return {
+      success: true,
+      data: {
+        list: listRes.data,
+        total,
+        page,
+        pageSize,
+        hasMore: skip + listRes.data.length < total
+      }
+    };
+  } catch (e) {
+    console.error('获取意见建议列表失败', e);
+    return { success: false, error: '获取失败，请稍后重试' };
+  }
+};
+
+/**
  * 云函数入口
  * @param {Object} event - 事件对象
  * @param {Object} context - 上下文对象
@@ -270,5 +357,9 @@ exports.main = async (event, context) => {
       return await deleteStaff(event, openid);
     case "getMiniProgramCode":
       return await getMiniProgramCode();
+    case "submitFeedback":
+      return await submitFeedback(event, openid);
+    case "getFeedbackList":
+      return await getFeedbackList(event, openid);
   }
 };

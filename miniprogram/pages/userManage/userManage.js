@@ -4,6 +4,7 @@
 
 const app = getApp();
 const auth = require('../../utils/auth.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 
 Page({
   data: {
@@ -73,22 +74,14 @@ Page({
   // 加载员工列表
   loadStaffList() {
     this.setData({ loading: true });
-    wx.cloud.callFunction({
-      name: 'userFunctions',
-      data: { type: 'getStaffList' }
-    }).then(res => {
-      const staffList = this.processStaffList(res.result.data || []);
+    callCloudFunction('userFunctions', { type: 'getStaffList' }).then(res => {
+      const staffList = this.processStaffList(res.data || []);
       this.setData({
         staffList,
-        // 筛选后的员工列表
         filteredStaffList: staffList,
-        // 加载状态
         loading: false,
-        // 选中的ID
         selectedIds: {},
-        // 选中数量
         selectedCount: 0,
-        // 是否全选
         isAllSelected: false
       });
     }).catch(err => {
@@ -220,10 +213,7 @@ Page({
         if (res.confirm) {
           wx.showLoading({ title: '处理中...' });
           const promises = ids.map(id =>
-            wx.cloud.callFunction({
-              name: 'userFunctions',
-              data: { type: 'updateStaff', id, data: { status: 'inactive' } }
-            })
+            callCloudFunction('userFunctions', { type: 'updateStaff', id, data: { status: 'inactive' } })
           );
           Promise.all(promises).then(() => {
             wx.hideLoading();
@@ -336,10 +326,7 @@ Page({
     const action = this.data.isEdit ? 'updateStaff' : 'addStaff';
     const payload = this.data.isEdit ? { id: this.data.editingId, data } : { data };
 
-    wx.cloud.callFunction({
-      name: 'userFunctions',
-      data: { type: action, ...payload }
-    }).then(() => {
+    callCloudFunction('userFunctions', { type: action, ...payload }).then(() => {
       wx.hideLoading();
       wx.showToast({ title: '保存成功', icon: 'success' });
       this.setData({ showModal: false });

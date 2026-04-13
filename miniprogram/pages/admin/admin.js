@@ -66,5 +66,12 @@ Page({
     wx.navigateTo({
       url: '/pages/userManage/userManage'
     });
+  },
+
+  // 跳转到意见建议列表页面
+  goToFeedbackList() {
+    wx.navigateTo({
+      url: '/pages/feedbackList/feedbackList'
+    });
   }
 });

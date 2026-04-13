@@ -11,6 +11,7 @@ const config = require('../../config.js');
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 const app = getApp();
 
 Page({
@@ -491,16 +492,18 @@ Page({
 
     submitPromise.then(() => {
       wx.hideLoading();
-      
+
       wx.showToast({
         title: existingOrder.orderId ? `${mealType}已更新` : `${mealType}订餐成功`,
         icon: 'success'
       });
-      
+
+      getApp().notifyOrderChange();
+
       if (hasSubscribed && !existingOrder.orderId) {
         this.sendSubscribeMessage(mealType, selections);
       }
-      
+
       // 重新加载数据以刷新界面
       this.loadData();
     }).catch(err => {
@@ -521,15 +524,12 @@ Page({
     const templateId = config.getSubscribeMessageTemplateId();
     const dishNames = selections.join('、');
     
-    wx.cloud.callFunction({
-      name: 'sendSubscribeMessage',
+    callCloudFunction('sendSubscribeMessage', {
+      templateId: templateId,
       data: {
-        templateId: templateId,
-        data: {
-          thing1: { value: `${this.data.selectedDate} ${mealType}` },
-          thing2: { value: dishNames },
-          thing3: { value: '请按时用餐' }
-        }
+        thing1: { value: `${this.data.selectedDate} ${mealType}` },
+        thing2: { value: dishNames },
+        thing3: { value: '请按时用餐' }
       }
     }).then(res => {
       console.log('订阅消息发送结果', res);
@@ -543,14 +543,11 @@ Page({
    */
   initDatabase() {
     wx.showLoading({ title: '初始化中...' });
-    wx.cloud.callFunction({
-      name: 'menuFunctions',
-      data: {
-        type: 'createCanteenCollections'
-      }
+    callCloudFunction('menuFunctions', {
+      type: 'createCanteenCollections'
     }).then(res => {
       wx.hideLoading();
-      if (res.result.success) {
+      if (res.success) {
         wx.showToast({
           title: '初始化成功',
           icon: 'success'

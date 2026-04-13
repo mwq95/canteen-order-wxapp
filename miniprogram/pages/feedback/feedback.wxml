@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="section">
+    <view class="section-title">意见建议</view>
+    <textarea
+      class="feedback-input"
+      placeholder="请输入您的意见或建议，我们将认真对待每一条反馈..."
+      maxlength="500"
+      value="{{content}}"
+      bindinput="onInputChange"
+    ></textarea>
+    <view class="char-count">{{content.length}}/500</view>
+  </view>
+
+  <button class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="submitFeedback">
+    {{submitting ? '提交中...' : '提交'}}
+  </button>
+</view>
