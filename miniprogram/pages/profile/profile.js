@@ -4,6 +4,7 @@
 
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
+const { callCloudFunction } = require('../../utils/httpUtil.js');
 const app = getApp();
 
 Page({
@@ -57,6 +58,37 @@ Page({
       maskedPhone,
       roleText
     });
+  },
+
+  // 选择头像
+  async onChooseAvatar(e) {
+    const { avatarUrl } = e.detail;
+    
+    if (!avatarUrl) return;
+
+    wx.showLoading({ title: '保存中...' });
+
+    try {
+      const res = await callCloudFunction('userFunctions', {
+        type: 'updateAvatar',
+        avatarUrl: avatarUrl
+      });
+
+      if (res && res.success) {
+        const userInfo = { avatarUrl };
+        app.globalData.userInfo = userInfo;
+
+        this.setData({ userInfo });
+        wx.showToast({ title: '头像更新成功', icon: 'success' });
+      } else {
+        wx.showToast({ title: res?.message || '保存失败', icon: 'none' });
+      }
+    } catch (err) {
+      console.error('保存头像失败', err);
+      wx.showToast({ title: '保存失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
   },
 
   // 检查管理员访问权限

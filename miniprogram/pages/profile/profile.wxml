@@ -1,12 +1,13 @@
 <view class="container">
   <view class="user-card">
-    <view class="user-info">
+    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
       <image class="avatar" src="{{userInfo.avatarUrl || '/images/avatar.png'}}" mode="aspectFill"></image>
-      <view class="user-detail">
-        <view class="nickname">{{staffName}}</view>
-        <view class="phone">{{maskedPhone}}</view>
-        <view class="role-tag">{{roleText}}</view>
-      </view>
+    </button>
+
+    <view class="user-detail">
+      <view class="nickname">{{staffName}}</view>
+      <view class="phone">{{maskedPhone}}</view>
+      <view class="role-tag">{{roleText}}</view>
     </view>
   </view>
 

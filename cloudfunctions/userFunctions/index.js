@@ -156,6 +156,44 @@ const getPhoneNumber = async (event) => {
 };
 
 /**
+ * 更新用户头像
+ * @param {Object} event - 事件对象，包含头像URL
+ * @param {string} openid - 用户唯一标识
+ * @returns {Object} 更新结果
+ */
+const updateAvatar = async (event, openid) => {
+  const { avatarUrl } = event;
+
+  if (!avatarUrl) {
+    return { success: false, error: '请选择头像' };
+  }
+
+  try {
+    const userRes = await db.collection('users').where({
+      _openid: openid
+    }).get();
+
+    if (userRes.data.length === 0) {
+      return { success: false, error: '用户不存在' };
+    }
+
+    const user = userRes.data[0];
+
+    await db.collection('users').doc(user._id).update({
+      data: {
+        userInfo: { avatarUrl },
+        updateTime: new Date()
+      }
+    });
+
+    return { success: true, message: '头像更新成功' };
+  } catch (e) {
+    console.error('更新头像失败', e);
+    return { success: false, error: '更新失败：' + (e.errMsg || e.message) };
+  }
+};
+
+/**
  * 检查用户是否为管理员
  * @param {string} openid - 用户唯一标识
  * @returns {boolean} 是否为管理员
@@ -345,6 +383,8 @@ exports.main = async (event, context) => {
       return await getOpenId();
     case "getPhoneNumber":
       return await getPhoneNumber(event);
+    case "updateAvatar":
+      return await updateAvatar(event, openid);
     case "verifyAndBindPhone":
       return await verifyAndBindPhone(event, openid);
     case "getStaffList":
