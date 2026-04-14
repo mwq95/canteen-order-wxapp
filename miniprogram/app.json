@@ -1,7 +1,6 @@
 {
   "pages": [
     "pages/auth/auth",
-    "pages/index/index",
     "pages/order/order",
     "pages/history/history",
     "pages/profile/profile",
