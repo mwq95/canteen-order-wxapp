@@ -1,0 +1,19 @@
+{
+  "triggers": [
+    {
+      "name": "breakfastReminder",
+      "type": "timer",
+      "config": "0 30 7 * * * *"
+    },
+    {
+      "name": "lunchReminder",
+      "type": "timer",
+      "config": "0 30 11 * * * *"
+    },
+    {
+      "name": "dinnerReminder",
+      "type": "timer",
+      "config": "0 0 17 * * * *"
+    }
+  ]
+}

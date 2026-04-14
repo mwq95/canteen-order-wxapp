@@ -426,42 +426,15 @@ Page({
       return;
     }
 
-    // 检查是否配置了订阅消息模板ID 且 用户开启了订餐提醒
-    const templateId = config.getSubscribeMessageTemplateId();
-    if (templateId && templateId !== '您的订阅消息模板ID' && app.globalData.subscribeOrderReminder !== false) {
-      this.requestSubscribeMessageAndSubmit(mealType, selections);
-    } else {
-      this.doSubmitOrder(mealType, selections);
-    }
-  },
-
-  /**
-   * 请求订阅消息授权并提交订单
-   * @param {string} mealType - 餐次类型
-   * @param {Array} selections - 选中的菜品列表
-   */
-  requestSubscribeMessageAndSubmit(mealType, selections) {
-    const templateId = config.getSubscribeMessageTemplateId();
-    wx.requestSubscribeMessage({
-      tmplIds: [templateId],
-      success: (res) => {
-        console.log('订阅消息授权', res);
-        this.doSubmitOrder(mealType, selections, true);
-      },
-      fail: (err) => {
-        console.log('订阅消息授权失败', err);
-        this.doSubmitOrder(mealType, selections, false);
-      }
-    });
+    this.doSubmitOrder(mealType, selections);
   },
 
   /**
    * 执行订单提交操作
    * @param {string} mealType - 餐次类型
    * @param {Array} selections - 选中的菜品列表
-   * @param {boolean} hasSubscribed - 用户是否同意订阅消息
    */
-  doSubmitOrder(mealType, selections, hasSubscribed = false) {
+  doSubmitOrder(mealType, selections) {
     wx.showLoading({ title: '提交中...' });
 
     const db = wx.cloud.database();
@@ -500,10 +473,6 @@ Page({
 
       getApp().notifyOrderChange();
 
-      if (hasSubscribed && !existingOrder.orderId) {
-        this.sendSubscribeMessage(mealType, selections);
-      }
-
       // 重新加载数据以刷新界面
       this.loadData();
     }).catch(err => {
@@ -512,29 +481,6 @@ Page({
         title: '提交失败',
         icon: 'none'
       });
-    });
-  },
-
-  /**
-   * 发送订阅消息通知
-   * @param {string} mealType - 餐次类型
-   * @param {Array} selections - 选中的菜品列表
-   */
-  sendSubscribeMessage(mealType, selections) {
-    const templateId = config.getSubscribeMessageTemplateId();
-    const dishNames = selections.join('、');
-    
-    callCloudFunction('sendSubscribeMessage', {
-      templateId: templateId,
-      data: {
-        thing1: { value: `${this.data.selectedDate} ${mealType}` },
-        thing2: { value: dishNames },
-        thing3: { value: '请按时用餐' }
-      }
-    }).then(res => {
-      console.log('订阅消息发送结果', res);
-    }).catch(err => {
-      console.error('发送订阅消息失败', err);
     });
   },
 

@@ -10,7 +10,7 @@
         <text class="setting-icon">📋</text>
         <view class="setting-text">
           <text class="setting-name">订餐提醒</text>
-          <text class="setting-desc">订餐成功后收到确认通知</text>
+          <text class="setting-desc">每晚20:00提醒预订明天的餐</text>
         </view>
       </view>
       <switch checked="{{orderReminder}}" bindchange="onOrderReminderChange" color="#1890FF"/>
@@ -21,7 +21,7 @@
         <text class="setting-icon">🍽️</text>
         <view class="setting-text">
           <text class="setting-name">用餐提醒</text>
-          <text class="setting-desc">开饭时间到达前收到提醒</text>
+          <text class="setting-desc">开饭前提醒按时用餐</text>
         </view>
       </view>
       <switch checked="{{mealReminder}}" bindchange="onMealReminderChange" color="#1890FF"/>
@@ -31,7 +31,8 @@
   <view class="tips-card">
     <text class="tips-title">温馨提示</text>
     <text class="tips-text">1. 开启提醒需要您授权微信订阅消息权限</text>
-    <text class="tips-text">2. 如未授权，首次触发时会弹出授权弹窗</text>
-    <text class="tips-text">3. 您可以在微信设置中管理订阅消息</text>
+    <text class="tips-text">2. 订餐提醒：每晚20:00发送，仅提醒未订餐的用户</text>
+    <text class="tips-text">3. 用餐提醒：早餐7:30、午餐11:30、晚餐17:00</text>
+    <text class="tips-text">4. 您可以在微信设置中管理订阅消息</text>
   </view>
 </view>
