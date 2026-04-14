@@ -1,35 +1,45 @@
 .container {
-  padding: 20rpx;
   min-height: 100vh;
+  padding: 20rpx 30rpx;
+  background-color: #f5f7fa;
+  box-sizing: border-box;
 }
 
 .date-nav {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
-}
-
-.nav-btn {
-  width: 80rpx;
-  height: 80rpx;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  background: #f0f0f0;
-  border-radius: 50%;
-  font-size: 36rpx;
-  color: #666;
+  align-items: center;
+  padding: 20rpx 0;
+  margin-bottom: 30rpx;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(24, 144, 255, 0.3);
 }
 
-.date-display {
-  font-size: 32rpx;
-  color: #1890FF;
+.date-nav-btn {
+  width: 80rpx;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.date-nav-arrow {
+  font-size: 36rpx;
+  color: #ffffff;
   font-weight: bold;
+}
+
+.date-nav-text {
+  flex: 1;
+  text-align: center;
+}
+
+.date-nav-text text {
+  font-size: 34rpx;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 2rpx;
 }
 
 .loading, .empty {

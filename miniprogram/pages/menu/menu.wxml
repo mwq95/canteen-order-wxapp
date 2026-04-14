@@ -1,11 +1,13 @@
 <view class="container">
   <view class="date-nav">
-    <view class="nav-btn" bindtap="prevDay">
-      <text>←</text>
+    <view class="date-nav-btn" bindtap="prevDay">
+      <text class="date-nav-arrow">←</text>
     </view>
-    <view class="date-display">{{selectedDateStr}}</view>
-    <view class="nav-btn" bindtap="nextDay">
-      <text>→</text>
+    <view class="date-nav-text">
+      <text>{{selectedDateStr}}</text>
+    </view>
+    <view class="date-nav-btn" bindtap="nextDay">
+      <text class="date-nav-arrow">→</text>
     </view>
   </view>
 
@@ -18,11 +20,11 @@
       <view class="meal-title">{{item.type}}</view>
       <button wx:if="{{!isPast}}" class="add-btn" data-index="{{mealIndex}}" bindtap="showAddDish">+ 添加菜品</button>
     </view>
-    
+
     <view wx:if="{{item.dishes.length === 0}}" class="empty-dishes">
       <text>暂无菜品</text>
     </view>
-    
+
     <view wx:else class="dish-list">
       <view class="dish-item" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name" wx:for-index="dishIndex">
         <view class="dish-info">

@@ -1,8 +1,14 @@
 <view class="container">
-  <view class="date-picker">
-    <view class="arrow" bindtap="prevDay">◀</view>
-    <view class="date-text">{{selectedDateStr}}</view>
-    <view class="arrow" bindtap="nextDay">▶</view>
+  <view class="date-nav">
+    <view class="date-nav-btn" bindtap="prevDay">
+      <text class="date-nav-arrow">←</text>
+    </view>
+    <view class="date-nav-text">
+      <text>{{selectedDateStr}}</text>
+    </view>
+    <view class="date-nav-btn" bindtap="nextDay">
+      <text class="date-nav-arrow">→</text>
+    </view>
   </view>
 
   <view wx:if="{{loading}}" class="loading">
@@ -10,7 +16,6 @@
   </view>
 
   <view wx:else>
-    <!-- 菜品评价 -->
     <view class="section eval-section">
       <view class="section-title">
         菜品评价
@@ -53,7 +58,6 @@
     </view>
   </view>
 
-  <!-- 评论弹窗 -->
   <view wx:if="{{showCommentModal}}" class="modal-mask" bindtap="closeCommentModal">
     <view class="modal-content" catchtap="stopPropagation">
       <view class="modal-header">

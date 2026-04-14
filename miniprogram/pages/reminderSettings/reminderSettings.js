@@ -7,8 +7,8 @@ const config = require('../../config.js');
 
 Page({
   data: {
-    orderReminder: true,
-    mealReminder: true
+    orderReminder: false,
+    mealReminder: false
   },
 
   onLoad() {
@@ -18,13 +18,13 @@ Page({
   loadSettings() {
     const db = wx.cloud.database();
     db.collection('users').where({
-      phone: app.globalData.phone || app.globalData.openid
+      _openid: app.globalData.openid
     }).get().then(res => {
       if (res.data.length > 0) {
         const user = res.data[0];
         this.setData({
-          orderReminder: user.subscribeOrderReminder !== false,
-          mealReminder: user.subscribeMealReminder !== false
+          orderReminder: user.subscribeOrderReminder === true,
+          mealReminder: user.subscribeMealReminder === true
         });
       }
     });
@@ -51,8 +51,8 @@ Page({
   },
 
   requestSubscribeAndSave(type) {
-    const templateId = type === 'order' 
-      ? config.getOrderReminderTemplateId() 
+    const templateId = type === 'order'
+      ? config.getOrderReminderTemplateId()
       : config.getMealReminderTemplateId();
 
     if (!templateId) {
@@ -97,7 +97,7 @@ Page({
   saveSetting(data) {
     const db = wx.cloud.database();
     db.collection('users').where({
-      phone: app.globalData.phone || app.globalData.openid
+      _openid: app.globalData.openid
     }).update({
       data: {
         ...data,
@@ -110,6 +110,9 @@ Page({
       if (data.subscribeMealReminder !== undefined) {
         app.globalData.subscribeMealReminder = data.subscribeMealReminder;
       }
+    }).catch(err => {
+      console.error('保存提醒设置失败', err);
+      wx.showToast({ title: '保存失败', icon: 'none' });
     });
   }
 });

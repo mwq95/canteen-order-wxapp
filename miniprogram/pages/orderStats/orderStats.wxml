@@ -5,25 +5,35 @@
 
   <view class="stats-card">
     <view class="stats-header">
-      <text class="stats-label">📅 近30天</text>
+      <text class="stats-label">近30天</text>
       <text class="stats-date">{{thirtyDayRange}}</text>
     </view>
-    <view class="stats-row single">
+    <view class="stats-row">
       <view class="stat-item">
-        <text class="stat-num">{{thirtyDayCount}}</text>
-        <text class="stat-label">次</text>
+        <text class="stat-num">{{thirtyDayMealCount}}</text>
+        <text class="stat-label">用餐次数</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num">{{thirtyDayOrderCount}}</text>
+        <text class="stat-label">订餐次数</text>
       </view>
     </view>
   </view>
 
   <view class="stats-card highlight">
     <view class="stats-header">
-      <text class="stats-label">🏆 总计</text>
+      <text class="stats-label">总计</text>
     </view>
-    <view class="stats-row single">
+    <view class="stats-row">
       <view class="stat-item">
-        <text class="stat-num total-big">{{totalCount}}</text>
-        <text class="stat-label">次</text>
+        <text class="stat-num total-big">{{totalMealCount}}</text>
+        <text class="stat-label">用餐次数</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num total-big">{{totalOrderCount}}</text>
+        <text class="stat-label">订餐次数</text>
       </view>
     </view>
   </view>
