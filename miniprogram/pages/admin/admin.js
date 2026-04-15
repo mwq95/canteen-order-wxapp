@@ -78,5 +78,12 @@ Page({
     wx.navigateTo({
       url: '/pages/feedbackList/feedbackList'
     });
+  },
+
+  // 跳转到数据导出页面
+  goToDataExport() {
+    wx.navigateTo({
+      url: '/pages/dataExport/dataExport'
+    });
   }
 });

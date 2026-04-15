@@ -32,5 +32,9 @@
       <view class="menu-icon">👥</view>
       <view class="menu-text">用户管理</view>
     </view>
+    <view wx:if="{{isAdmin}}" class="menu-item" bindtap="goToDataExport">
+      <view class="menu-icon">📥</view>
+      <view class="menu-text">数据导出</view>
+    </view>
   </view>
 </view>
