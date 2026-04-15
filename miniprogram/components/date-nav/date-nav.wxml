@@ -1,0 +1,13 @@
+<view class="date-nav">
+  <view class="date-nav-btn" bindtap="prevDay">
+    <text class="date-nav-arrow">←</text>
+  </view>
+  <picker mode="date" value="{{date}}" bindchange="onDatePick" class="date-picker">
+    <view class="date-nav-text">
+      <text>{{dateStr}}</text>
+    </view>
+  </picker>
+  <view class="date-nav-btn" bindtap="nextDay">
+    <text class="date-nav-arrow">→</text>
+  </view>
+</view>

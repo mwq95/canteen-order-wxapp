@@ -1,0 +1,94 @@
+<view class="container">
+  <view class="top-bar">
+    <view class="search-bar">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索菜品名称..."
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+      />
+      <text wx:if="{{searchKeyword}}" class="clear-icon" bindtap="clearSearch">✕</text>
+    </view>
+    <view class="add-btn" bindtap="onAddDish">+</view>
+  </view>
+
+  <view wx:if="{{searchKeyword && filteredDishList.length > 0}}" class="result-tip">
+    共找到 {{filteredDishList.length}} 条结果
+  </view>
+
+  <view class="dish-section-header" wx:if="{{filteredDishList.length > 0}}">
+    <view class="select-all" bindtap="toggleSelectAll">
+      <text class="checkbox {{isAllSelected ? 'checked' : ''}}">✓</text>
+      <text class="select-all-text">全选</text>
+    </view>
+    <text class="dish-count">共 {{filteredDishList.length}} 道菜</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{filteredDishList.length === 0}}" class="empty">
+    <text wx:if="{{searchKeyword}}" class="empty-search">未找到"{{searchKeyword}}"的相关结果</text>
+    <text wx:else class="empty-list">暂无菜品</text>
+    <view wx:if="{{searchKeyword}}" class="empty-action" bindtap="clearSearch">清除搜索</view>
+    <view wx:else class="empty-action" bindtap="onAddDish">添加菜品</view>
+  </view>
+
+  <view wx:else class="dish-list">
+    <view class="dish-card" wx:for="{{filteredDishList}}" wx:key="_id">
+      <view class="checkbox {{selectedIds[item._id] ? 'checked' : ''}}" bindtap="toggleSelect" data-id="{{item._id}}">
+        <text wx:if="{{selectedIds[item._id]}}">✓</text>
+      </view>
+
+      <view class="dish-info" bindtap="toggleSelect" data-id="{{item._id}}">
+        <view class="dish-header">
+          <view class="dish-name">{{item.name}}</view>
+          <view class="tag usage-tag">使用 {{item.usageCount || 0}} 次</view>
+        </view>
+        <view class="dish-detail">
+          <text class="time-text">添加于 {{item.createTimeStr}}</text>
+        </view>
+      </view>
+
+      <view class="dish-actions">
+        <text class="action-delete" bindtap="onDeleteDish" data-id="{{item._id}}" data-name="{{item.name}}">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{selectedCount > 0}}" class="batch-bar">
+    <text class="selected-tip">已选择 {{selectedCount}}/{{filteredDishList.length}} 项</text>
+    <view class="batch-actions">
+      <text class="batch-btn cancel-btn" bindtap="cancelSelect">取消</text>
+      <text class="batch-btn batch-delete" bindtap="batchDelete">删除</text>
+    </view>
+  </view>
+
+  <view wx:if="{{showModal}}" class="modal-mask" bindtap="onCancelModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">添加菜品</view>
+      </view>
+
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">菜品名称</view>
+          <input
+            class="form-input"
+            placeholder="请输入菜品名称"
+            value="{{dishName}}"
+            bindinput="onDishNameInput"
+          />
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" bindtap="onCancelModal">取消</button>
+        <button class="modal-btn modal-btn-confirm" bindtap="onConfirmModal">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

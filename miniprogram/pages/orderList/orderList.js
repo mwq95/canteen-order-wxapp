@@ -6,11 +6,7 @@ const dateUtil = require('../../utils/dateUtil.js');
 
 Page({
   data: {
-    // 选中的日期
     selectedDate: '',
-    // 选中日期的中文显示
-    selectedDateStr: '',
-    // 是否显示详情
     showDetail: false,
     // 选中的餐次类型
     selectedMealType: '',
@@ -29,33 +25,17 @@ Page({
     this.loadOrders();
   },
 
-  // 初始化日期
   initDate() {
     const now = new Date();
     this.setData({
-      selectedDate: dateUtil.formatDate(now),
-      selectedDateStr: dateUtil.formatDateChinese(now)
+      selectedDate: dateUtil.formatDate(now)
     });
   },
 
-  // 切换到前一天
-  prevDay() {
-    const current = dateUtil.prevDay(this.data.selectedDate);
+  onDateChange(e) {
+    const { date } = e.detail;
     this.setData({
-      selectedDate: dateUtil.formatDate(current),
-      selectedDateStr: dateUtil.formatDateChinese(current),
-      loading: true,
-      showDetail: false
-    });
-    this.loadOrders();
-  },
-
-  // 切换到后一天
-  nextDay() {
-    const current = dateUtil.nextDay(this.data.selectedDate);
-    this.setData({
-      selectedDate: dateUtil.formatDate(current),
-      selectedDateStr: dateUtil.formatDateChinese(current),
+      selectedDate: date,
       loading: true,
       showDetail: false
     });

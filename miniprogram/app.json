@@ -11,6 +11,7 @@
     "pages/orderList/orderList",
     "pages/settings/settings",
     "pages/userManage/userManage",
+    "pages/dishManage/dishManage",
     "pages/reminderSettings/reminderSettings",
     "pages/orderStats/orderStats",
     "pages/help/help",

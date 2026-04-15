@@ -1,15 +1,5 @@
 <view class="container">
-  <view class="date-nav">
-    <view class="date-nav-btn" bindtap="prevDay">
-      <text class="date-nav-arrow">←</text>
-    </view>
-    <view class="date-nav-text">
-      <text>{{selectedDateStr}}</text>
-    </view>
-    <view class="date-nav-btn" bindtap="nextDay">
-      <text class="date-nav-arrow">→</text>
-    </view>
-  </view>
+  <date-nav date="{{selectedDate}}" formatType="short" bind:change="onDateChange" />
 
   <view wx:if="{{isPast}}" class="past-tip">
     <text>过去的日期不能修改菜单</text>
@@ -41,14 +31,48 @@
 
   <view wx:if="{{showAddDishModal}}" class="modal-mask" bindtap="cancelAddDish">
     <view class="modal-content" catchtap="stopPropagation">
-      <view class="modal-title">添加菜品</view>
-      <view class="modal-input-group">
-        <text class="label">菜品名称</text>
-        <input class="input" placeholder="请输入菜品名称" value="{{newDishName}}" bindinput="onDishNameInput" />
+      <view class="modal-header">
+        <view class="modal-title">添加菜品</view>
+        <text class="modal-close" bindtap="cancelAddDish">✕</text>
       </view>
-      <view class="modal-actions">
-        <button class="modal-btn cancel-btn" bindtap="cancelAddDish">取消</button>
-        <button class="modal-btn confirm-btn" bindtap="addDish">确定</button>
+      
+      <view class="search-section">
+        <view class="search-box">
+          <text class="search-icon">🔍</text>
+          <input 
+            class="search-input" 
+            placeholder="搜索或输入新菜品..." 
+            value="{{dishSearchKeyword}}"
+            bindinput="onDishSearch"
+          />
+          <text wx:if="{{dishSearchKeyword}}" class="clear-icon" bindtap="clearDishSearch">✕</text>
+        </view>
+      </view>
+
+      <view class="dish-select-list">
+        <view wx:if="{{filteredDishList.length > 0}}" class="dish-options">
+          <view 
+            class="dish-option" 
+            wx:for="{{filteredDishList}}" 
+            wx:key="_id"
+            data-name="{{item.name}}"
+            bindtap="selectDish"
+          >
+            <text class="dish-option-name">{{item.name}}</text>
+            <text class="dish-option-count">使用{{item.usageCount || 0}}次</text>
+          </view>
+        </view>
+        
+        <view wx:else class="no-dish-tip">
+          <text wx:if="{{dishSearchKeyword}}">未找到"{{dishSearchKeyword}}"</text>
+          <text wx:else>暂无菜品记录</text>
+        </view>
+      </view>
+
+      <view wx:if="{{dishSearchKeyword}}" class="add-new-section">
+        <button class="add-new-btn" bindtap="addNewDish">
+          + 添加新菜品"{{dishSearchKeyword}}"
+        </button>
       </view>
     </view>
   </view>

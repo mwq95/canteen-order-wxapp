@@ -15,16 +15,9 @@ const { callCloudFunction } = require('../../utils/httpUtil.js');
 const app = getApp();
 
 Page({
-  /**
-   * 页面数据
-   */
   data: {
-    // 日期相关
-    selectedDate: '',           // 当前选择的日期 YYYY-MM-DD
-    selectedDateStr: '',        // 当前选择的日期中文显示
-    
-    // 菜单数据（包含选中状态）
-    menuData: null,             // 当日菜单数据 { date, meals: [{ type, dishes: [{ name, selected }] }] }
+    selectedDate: '',
+    menuData: null,
     
     // 订单数据 - 每顿独立管理
     orders: {
@@ -102,38 +95,17 @@ Page({
     }, 1000);
   },
 
-  /**
-   * 初始化日期为今天
-   */
   initDate() {
     const now = new Date();
     this.setData({
-      selectedDate: dateUtil.formatDate(now),
-      selectedDateStr: dateUtil.formatDateChinese(now)
+      selectedDate: dateUtil.formatDate(now)
     });
   },
 
-  /**
-   * 切换到前一天
-   */
-  prevDay() {
-    const current = dateUtil.prevDay(this.data.selectedDate);
+  onDateChange(e) {
+    const { date } = e.detail;
     this.setData({
-      selectedDate: dateUtil.formatDate(current),
-      selectedDateStr: dateUtil.formatDateChinese(current),
-      loading: true
-    });
-    this.loadData();
-  },
-
-  /**
-   * 切换到后一天
-   */
-  nextDay() {
-    const current = dateUtil.nextDay(this.data.selectedDate);
-    this.setData({
-      selectedDate: dateUtil.formatDate(current),
-      selectedDateStr: dateUtil.formatDateChinese(current),
+      selectedDate: date,
       loading: true
     });
     this.loadData();

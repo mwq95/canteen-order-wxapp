@@ -1,0 +1,47 @@
+.date-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20rpx 0;
+  margin-bottom: 30rpx;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(24, 144, 255, 0.3);
+}
+
+.date-nav-btn {
+  width: 80rpx;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.date-nav-arrow {
+  font-size: 36rpx;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.date-picker {
+  flex: 1;
+}
+
+.date-nav-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.date-nav-text text {
+  font-size: 34rpx;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.date-icon {
+  font-size: 28rpx;
+  opacity: 0.8;
+}

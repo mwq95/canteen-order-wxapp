@@ -1,7 +1,3 @@
-/*
- * 菜单管理页面 - 管理员编辑每日菜单
- */
-
 const dateUtil = require('../../utils/dateUtil.js');
 const auth = require('../../utils/auth.js');
 const initUtil = require('../../utils/initUtil.js');
@@ -9,34 +5,26 @@ const { callCloudFunction } = require('../../utils/httpUtil.js');
 
 Page({
   data: {
-    // 选中的日期
     selectedDate: '',
-    // 选中日期的中文显示
-    selectedDateStr: '',
-    // 是否为过去的日期
     isPast: false,
-    // 餐次数据
     meals: [
       { type: '早餐', dishes: [] },
       { type: '午餐', dishes: [] },
       { type: '晚餐', dishes: [] }
     ],
-    // 现有菜单ID
     existingMenuId: null,
-    // 新菜品名称
-    newDishName: '',
-    // 当前餐次索引
+    showAddDishModal: false,
     currentMealIndex: 0,
-    // 是否显示添加菜品弹窗
-    showAddDishModal: false
+    allDishList: [],
+    filteredDishList: [],
+    dishSearchKeyword: ''
   },
 
-  // 页面加载时调用
   onLoad() {
     this.initDate();
+    this.loadDishList();
   },
 
-  // 页面显示时调用
   async onShow() {
     if (auth.isInitializing()) {
       await initUtil.waitForAppInit();
@@ -44,42 +32,26 @@ Page({
     auth.checkPageAccess('menu');
   },
 
-  // 初始化日期
   initDate() {
     const now = new Date();
     this.setData({
       selectedDate: dateUtil.formatDate(now),
-      selectedDateStr: dateUtil.formatDateChineseShort(now),
       isPast: false
     });
     this.loadMenu();
   },
 
-  // 切换到前一天
-  prevDay() {
-    const current = dateUtil.prevDay(this.data.selectedDate);
-    const isPast = dateUtil.isPast(dateUtil.formatDate(current));
+  onDateChange(e) {
+    const { date, direction } = e.detail;
+    const isPast = direction === 'prev' ? dateUtil.isPast(date) : false;
     
     this.setData({
-      selectedDate: dateUtil.formatDate(current),
-      selectedDateStr: dateUtil.formatDateChineseShort(current),
+      selectedDate: date,
       isPast: isPast
     });
     this.loadMenu();
   },
 
-  // 切换到后一天
-  nextDay() {
-    const current = dateUtil.nextDay(this.data.selectedDate);
-    this.setData({
-      selectedDate: dateUtil.formatDate(current),
-      selectedDateStr: dateUtil.formatDateChineseShort(current),
-      isPast: false
-    });
-    this.loadMenu();
-  },
-
-  // 加载菜单数据
   loadMenu() {
     const db = wx.cloud.database();
     db.collection('menus').where({
@@ -105,7 +77,19 @@ Page({
     });
   },
 
-  // 显示添加菜品弹窗
+  loadDishList() {
+    callCloudFunction('dishFunctions', { type: 'getDishList' }).then(res => {
+      if (res.success) {
+        this.setData({
+          allDishList: res.data || [],
+          filteredDishList: res.data || []
+        });
+      }
+    }).catch(err => {
+      console.error('加载菜品列表失败', err);
+    });
+  },
+
   showAddDish(e) {
     if (this.data.isPast) {
       wx.showToast({
@@ -119,39 +103,91 @@ Page({
     this.setData({
       currentMealIndex: mealIndex,
       showAddDishModal: true,
-      newDishName: ''
+      dishSearchKeyword: '',
+      filteredDishList: this.data.allDishList
     });
   },
 
-  // 菜品名称输入
-  onDishNameInput(e) {
-    this.setData({ newDishName: e.detail.value });
-  },
-
-  // 添加菜品
-  addDish() {
-    if (!this.data.newDishName.trim()) {
-      wx.showToast({
-        title: '请输入菜品名称',
-        icon: 'none'
-      });
+  onDishSearch(e) {
+    const keyword = e.detail.value.trim();
+    this.setData({ dishSearchKeyword: keyword });
+    
+    if (!keyword) {
+      this.setData({ filteredDishList: this.data.allDishList });
       return;
     }
 
-    const meals = [...this.data.meals];
-    const dish = {
-      name: this.data.newDishName.trim()
-    };
-    meals[this.data.currentMealIndex].dishes.push(dish);
+    const filtered = this.data.allDishList.filter(item =>
+      item.name.toLowerCase().includes(keyword.toLowerCase())
+    );
+    this.setData({ filteredDishList: filtered });
+  },
 
+  clearDishSearch() {
     this.setData({
-      meals,
-      showAddDishModal: false,
-      newDishName: ''
+      dishSearchKeyword: '',
+      filteredDishList: this.data.allDishList
     });
   },
 
-  // 删除菜品
+  selectDish(e) {
+    const name = e.currentTarget.dataset.name;
+    this.addDishToMeal(name);
+  },
+
+  addNewDish() {
+    const name = this.data.dishSearchKeyword.trim();
+    if (!name) {
+      wx.showToast({ title: '请输入菜品名称', icon: 'none' });
+      return;
+    }
+
+    const existing = this.data.allDishList.find(
+      item => item.name.toLowerCase() === name.toLowerCase()
+    );
+    
+    if (existing) {
+      this.addDishToMeal(existing.name);
+      return;
+    }
+
+    wx.showLoading({ title: '添加中...' });
+    callCloudFunction('dishFunctions', {
+      type: 'addDish',
+      name: name
+    }).then(res => {
+      wx.hideLoading();
+      if (res.success) {
+        this.loadDishList();
+        this.addDishToMeal(name);
+      } else {
+        wx.showToast({ title: res.error || '添加失败', icon: 'none' });
+      }
+    }).catch(err => {
+      wx.hideLoading();
+      console.error('添加新菜品失败', err);
+      wx.showToast({ title: '添加失败', icon: 'none' });
+    });
+  },
+
+  addDishToMeal(name) {
+    const meals = [...this.data.meals];
+    const currentMeal = meals[this.data.currentMealIndex];
+    
+    const exists = currentMeal.dishes.some(d => d.name === name);
+    if (exists) {
+      wx.showToast({ title: '该菜品已添加', icon: 'none' });
+      return;
+    }
+
+    currentMeal.dishes.push({ name });
+    this.setData({
+      meals,
+      showAddDishModal: false,
+      dishSearchKeyword: ''
+    });
+  },
+
   deleteDish(e) {
     if (this.data.isPast) {
       wx.showToast({
@@ -175,17 +211,27 @@ Page({
     });
   },
 
-  // 取消添加菜品
   cancelAddDish() {
     this.setData({
       showAddDishModal: false,
-      newDishName: ''
+      dishSearchKeyword: '',
+      filteredDishList: this.data.allDishList
     });
   },
 
-  // 保存菜单
+  stopPropagation() {},
+
   saveMenu() {
     const { selectedDate, meals } = this.data;
+
+    const allDishes = [];
+    meals.forEach(meal => {
+      meal.dishes.forEach(dish => {
+        if (!allDishes.includes(dish.name)) {
+          allDishes.push(dish.name);
+        }
+      });
+    });
 
     wx.showLoading({ title: '保存中...' });
 
@@ -194,24 +240,29 @@ Page({
       date: selectedDate,
       meals: meals
     }).then(res => {
-      wx.hideLoading();
-      
       if (res.success) {
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success'
-        });
+        if (allDishes.length > 0) {
+          return callCloudFunction('dishFunctions', {
+            type: 'updateDishUsage',
+            dishNames: allDishes
+          });
+        }
+        return { success: true };
       } else {
-        wx.showToast({
-          title: res.error || '保存失败',
-          icon: 'none'
-        });
+        throw new Error(res.error || '保存失败');
       }
+    }).then(() => {
+      wx.hideLoading();
+      wx.showToast({
+        title: '保存成功',
+        icon: 'success'
+      });
+      this.loadDishList();
     }).catch(err => {
       wx.hideLoading();
       console.error('保存菜单失败', err);
       wx.showToast({
-        title: '保存失败',
+        title: err.message || '保存失败',
         icon: 'none'
       });
     });

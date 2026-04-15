@@ -40,7 +40,12 @@ Page({
     });
   },
 
-  // 跳转到统计页面
+  goToDishManage() {
+    wx.navigateTo({
+      url: '/pages/dishManage/dishManage'
+    });
+  },
+
   goToStatistics() {
     wx.navigateTo({
       url: '/pages/statistics/statistics'

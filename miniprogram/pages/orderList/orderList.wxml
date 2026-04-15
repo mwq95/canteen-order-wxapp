@@ -1,15 +1,5 @@
 <view class="container">
-  <view class="date-nav">
-    <view class="date-nav-btn" bindtap="prevDay">
-      <text class="date-nav-arrow">←</text>
-    </view>
-    <view class="date-nav-text">
-      <text>{{selectedDateStr}}</text>
-    </view>
-    <view class="date-nav-btn" bindtap="nextDay">
-      <text class="date-nav-arrow">→</text>
-    </view>
-  </view>
+  <date-nav date="{{selectedDate}}" bind:change="onDateChange" />
 
   <view wx:if="{{loading}}" class="loading">
     <text>加载中...</text>

@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "我要订餐",
-  "enablePullDownRefresh": true
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "date-nav": "/components/date-nav/date-nav"
+  }
 }
