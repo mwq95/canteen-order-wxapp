@@ -51,6 +51,7 @@
         <text class="th">餐次</text>
         <text class="th">姓名</text>
         <text class="th">菜品</text>
+        <text class="th">订单状态</text>
       </view>
       <view class="table-body">
         <view class="tr" wx:for="{{previewData}}" wx:key="index">
@@ -58,6 +59,8 @@
           <text class="td">{{item.mealType}}</text>
           <text class="td">{{item.userName}}</text>
           <text class="td dish-list">{{item.dishes}}</text>
+          <text class="td dish-list">{{item.status}}</text>
+
         </view>
       </view>
     </view>

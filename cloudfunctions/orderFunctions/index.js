@@ -40,7 +40,19 @@ const getMenu = async (event) => {
 const submitOrder = async (event) => {
   const wxContext = cloud.getWXContext();
   const { date, mealType, dishes, phone, existingOrderId } = event;
-  
+
+  let staffName = '';
+  try {
+    const userRes = await db.collection('users').where({
+      _openid: wxContext.OPENID
+    }).get();
+    if (userRes.data && userRes.data.length > 0) {
+      staffName = userRes.data[0].staffName || userRes.data[0].name || '';
+    }
+  } catch (e) {
+    console.error('获取用户信息失败', e);
+  }
+
   const orderData = {
     date,
     mealType,
@@ -49,7 +61,8 @@ const submitOrder = async (event) => {
     status: 'pending',
     createTime: db.serverDate(),
     updateTime: db.serverDate(),
-    _openid: wxContext.OPENID
+    _openid: wxContext.OPENID,
+    staffName
   };
 
   if (existingOrderId) {

@@ -1,0 +1,6 @@
+{
+  "type": "exportOrderData",
+  "startDate": "2026-04-01",
+  "endDate": "2026-04-15",
+  "format": "excel"
+}

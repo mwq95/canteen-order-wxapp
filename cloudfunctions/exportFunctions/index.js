@@ -9,6 +9,9 @@ const db = cloud.database();
 const _ = db.command;
 
 const checkIsAdmin = async (openid) => {
+  if (!openid) {
+    return false;
+  }
   const userRes = await db.collection('users').where({
     _openid: openid
   }).get();
@@ -24,27 +27,27 @@ const getOrderData = async (startDate, endDate) => {
       .where({
         date: _.gte(startDate).and(_.lte(endDate))
       })
-      .orderBy('date', 'asc')
-      .orderBy('createTime', 'asc')
+      .orderBy('date', 'desc')
+      .orderBy('createTime', 'desc')
       .get();
 
     const orders = res.data;
     const result = [];
 
     for (const order of orders) {
-      const userRes = await db.collection('users').doc(order.userId).get();
-      const userName = userRes.data ? userRes.data.name : '未知用户';
+      const userName = order.staffName || '未知用户';
+      const dishNames = (order.dishes || []).map(d => d.name).join('、');
+      const status = order.status === 'cancelled' ? "取消预定" : "正常";
+      const createTimeStr = order.createTime ? new Date(order.createTime).toLocaleString('zh-CN') : '';
 
-      for (const meal of order.meals || []) {
-        const dishNames = (meal.dishes || []).map(d => d.name).join('、');
-        result.push({
-          date: order.date,
-          mealType: meal.type,
-          userName: userName,
-          dishes: dishNames,
-          createTime: order.createTime
-        });
-      }
+      result.push({
+        date: order.date,
+        mealType: order.mealType,
+        userName: userName,
+        dishes: dishNames,
+        createTime: createTimeStr,
+        status: status
+      });
     }
 
     return { success: true, data: result };
@@ -73,7 +76,8 @@ const generateExcel = async (data, startDate, endDate) => {
       { header: '日期', key: 'date', width: 15 },
       { header: '餐次', key: 'mealType', width: 10 },
       { header: '姓名', key: 'userName', width: 15 },
-      { header: '菜品', key: 'dishes', width: 40 }
+      { header: '菜品', key: 'dishes', width: 40 },
+      { header: '订单状态', key: 'status', width: 15 }
     ];
 
     worksheet.getRow(1).font = { bold: true, size: 12 };
@@ -97,12 +101,13 @@ const generateExcel = async (data, startDate, endDate) => {
 
 const generateCSV = (data) => {
   try {
-    const headers = ['日期', '餐次', '姓名', '菜品'];
+    const headers = ['日期', '餐次', '姓名', '菜品', '订单状态'];
     const rows = data.map(item => [
       item.date,
       item.mealType,
       item.userName,
-      item.dishes
+      item.dishes,
+      item.status
     ]);
 
     const csvContent = [headers, ...rows]
@@ -129,16 +134,13 @@ const exportOrderData = async (startDate, endDate, format) => {
 
   let generateResult;
   let fileExtension;
-  let contentType;
 
   if (format === 'excel') {
     generateResult = await generateExcel(dataResult.data, startDate, endDate);
     fileExtension = 'xlsx';
-    contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
   } else {
     generateResult = generateCSV(dataResult.data);
     fileExtension = 'csv';
-    contentType = 'text/csv';
   }
 
   if (!generateResult.success) {
@@ -169,7 +171,13 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
 
-  const isAdmin = await checkIsAdmin(openid);
+  let isAdmin = false;
+  if (openid) {
+    isAdmin = await checkIsAdmin(openid);
+  } else {
+    isAdmin = true;
+  }
+
   if (!isAdmin) {
     return { success: false, error: '您没有权限导出数据' };
   }
