@@ -27,6 +27,15 @@
 - 📊 **数据导出**：支持导出订餐数据为Excel/CSV格式
 - 🔔 **智能提醒**：自动发送订餐提醒和用餐提醒
 
+### 功能预览
+
+> 📸 屏幕截图即将添加
+> 
+> - 订餐页面
+> - 菜单管理
+> - 订餐名单
+> - 数据导出
+
 ---
 
 ## ✨ 功能特性
@@ -166,15 +175,42 @@ npm install
 2. 开通云开发环境
 3. 记录环境ID
 
-#### 5. 配置环境ID
+#### 5. 配置敏感信息
 
-编辑 `cloudbaserc.json`，将 `envId` 替换为你的云开发环境ID：
+项目使用模板配置文件来管理敏感信息。复制模板文件并填入你的信息：
 
+```bash
+cp cloudbaserc.example.json cloudbaserc.json
+cp project.config.example.json project.config.json
+cp miniprogram/config.example.js miniprogram/config.js
+```
+
+然后编辑各配置文件：
+
+**cloudbaserc.json** - 填入云开发环境ID：
 ```json
 {
   "version": "2.0",
-  "envId": "your-env-id",
+  "envId": "your-cloud-env-id",
   ...
+}
+```
+
+**project.config.json** - 填入微信小程序 AppID：
+```json
+{
+  "appid": "your-app-id",
+  ...
+}
+```
+
+**miniprogram/config.js** - 填入订阅消息模板ID：
+```javascript
+module.exports = {
+  templates: {
+    mealReminder: 'your-meal-reminder-template-id',
+    orderReminder: 'your-order-reminder-template-id'
+  }
 }
 ```
 
@@ -233,12 +269,32 @@ npm run deploy:functions
 
 ### 部署检查清单
 
-- [ ] 已开通云开发环境
-- [ ] 已部署所有云函数
-- [ ] 已配置定时触发器
-- [ ] 已申请订阅消息模板
-- [ ] 已在 staffs 集合中添加管理员记录
-- [ ] 已使用管理员账号完成首次登录
+#### 环境准备
+- [ ] 已注册微信小程序账号（已认证）
+- [ ] 已开通微信云开发环境
+- [ ] 已复制并配置所有模板文件（cloudbaserc.json、project.config.json、config.js）
+
+#### 云开发配置
+- [ ] 已在微信开发者工具中初始化云开发环境
+- [ ] 已部署所有云函数（9个云函数模块）
+- [ ] 已配置定时触发器（mealReminder、orderReminder）
+- [ ] 已在云数据库中创建初始集合（首次运行自动创建）
+
+#### 小程序配置
+- [ ] 已在微信公众平台申请订阅消息模板（用餐提醒、订餐提醒）
+- [ ] 已将模板ID填入 miniprogram/config.js
+- [ ] 已在微信公众平台配置服务器域名（如需要）
+
+#### 管理员设置
+- [ ] 已在云数据库 staffs 集合中添加管理员记录
+- [ ] 已使用管理员手机号完成首次登录验证
+- [ ] 已在管理后台配置各餐次的截止时间和开饭时间
+
+#### 测试验证
+- [ ] 普通用户可以正常订餐
+- [ ] 厨房工作人员可以管理菜单和查看订餐名单
+- [ ] 管理员可以管理用户和导出数据
+- [ ] 定时提醒功能正常工作
 
 ---
 
@@ -273,48 +329,73 @@ npm run deploy:functions
 
 ## 🔧 配置说明
 
-### 敏感信息说明
+### 敏感信息管理
 
-本项目包含敏感配置文件，这些文件已被 ` .gitignore` 排除，不会提交到仓库。首次使用时需要手动配置：
+⚠️ **重要**：本项目使用模板文件管理敏感配置，实际配置文件已被 `.gitignore` 排除，不会提交到 Git 仓库。
 
-| 文件 | 说明 | 模板文件 |
-|------|------|----------|
-| `cloudbaserc.json` | 云开发环境ID | `cloudbaserc.example.json` |
-| `project.config.json` | 小程序 AppID | `project.config.example.json` |
-| `miniprogram/config.js` | 订阅消息模板ID | `miniprogram/config.example.js` |
+#### 配置文件对照表
 
-**配置步骤**：
+| 配置文件 | 模板文件 | 说明 | 获取方式 |
+|---------|---------|------|---------|
+| `cloudbaserc.json` | `cloudbaserc.example.json` | 云开发环境ID | 微信开发者工具 - 云开发 - 环境设置 |
+| `project.config.json` | `project.config.example.json` | 小程序 AppID | [微信公众平台](https://mp.weixin.qq.com/) - 开发管理 |
+| `miniprogram/config.js` | `miniprogram/config.example.js` | 订阅消息模板ID | [微信公众平台](https://mp.weixin.qq.com/) - 功能 - 订阅消息 |
 
-1. 复制模板配置文件：
+#### 快速配置
+
 ```bash
+# 1. 复制所有模板文件
 cp cloudbaserc.example.json cloudbaserc.json
 cp project.config.example.json project.config.json
 cp miniprogram/config.example.js miniprogram/config.js
+
+# 2. 编辑配置文件（使用你喜欢的编辑器）
+# 填入你的实际配置信息
 ```
 
-2. 编辑各配置文件，填入你的信息：
-   - `cloudbaserc.json`：填入云开发环境ID
-   - `project.config.json`：填入微信小程序 AppID
-   - `miniprogram/config.js`：填入订阅消息模板ID
+#### 详细配置说明
 
-### 订阅消息模板配置
+**1. 云开发环境配置 (`cloudbaserc.json`)**
 
-编辑 `miniprogram/config.js`：
+```json
+{
+  "version": "2.0",
+  "envId": "your-cloud-env-id-here",  // 替换为你的环境ID
+  "functionRoot": "./cloudfunctions",
+  "functions": [...]
+}
+```
+
+**2. 小程序配置 (`project.config.json`)**
+
+```json
+{
+  "appid": "wx1234567890abcdef",  // 替换为你的小程序 AppID
+  "projectname": "canteen-order-wxapp",
+  ...
+}
+```
+
+**3. 订阅消息配置 (`miniprogram/config.js`)**
+
+在微信公众平台申请以下两个订阅消息模板：
+- **用餐提醒模板**（模板关键词：用餐时间、菜品、温馨提示）
+- **订餐提醒模板**（模板关键词：提醒类型、提醒内容、操作指引）
 
 ```javascript
 module.exports = {
   templates: {
-    mealReminder: '用餐提醒模板ID',
-    orderReminder: '订餐提醒模板ID'
+    mealReminder: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  // 用餐提醒模板ID
+    orderReminder: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'  // 订餐提醒模板ID
   }
 }
 ```
 
-### 截止时间配置
+### 业务配置
 
-在小程序管理后台的"订餐设置"页面配置各餐次的：
-- 订餐截止时间
-- 开饭时间
+在小程序管理后台的"订餐设置"页面配置：
+- **订餐截止时间**：各餐次的订餐截止时间点
+- **开饭时间**：各餐次的实际开饭时间（用于自动标记订单完成）
 
 ---
 
@@ -357,6 +438,69 @@ module.exports = {
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
+
+---
+
+## ❓ 常见问题
+
+### Q1: 如何添加第一个管理员？
+
+**A**: 首次部署时，需要手动在云数据库 `staffs` 集合中添加一条管理员记录：
+
+```json
+{
+  "name": "管理员姓名",
+  "phone": "13800138000",
+  "role": "admin"
+}
+```
+
+然后使用该手机号在小程序中完成身份验证即可。
+
+### Q2: 订阅消息模板申请被驳回怎么办？
+
+**A**: 微信对订阅消息模板审核较严格，建议：
+- 模板标题选择"用餐提醒"、"订餐提醒"等通用类型
+- 模板关键词选择：时间、内容、温馨提示等
+- 申请理由说明是"单位内部食堂订餐系统使用"
+- 如果通用模板被驳回，可以尝试申请自定义模板
+
+### Q3: 云函数部署失败怎么办？
+
+**A**: 
+1. 检查 `cloudbaserc.json` 中的 `envId` 是否正确
+2. 确保已安装 Node.js 依赖：`npm install`
+3. 在微信开发者工具中右键云函数目录，选择"上传并部署：云端安装依赖"
+4. 检查云开发控制台中的错误日志
+
+### Q4: 如何修改定时提醒时间？
+
+**A**: 编辑 `cloudbaserc.json` 中的 triggers 配置，修改 Cron 表达式后重新部署云函数：
+
+```json
+{
+  "name": "breakfastReminder",
+  "type": "timer",
+  "config": "0 30 7 * * * *"  // 每天7:30
+}
+```
+
+Cron 表达式格式：`秒 分 时 日 月 周 年`
+
+### Q5: 数据导出功能无法使用？
+
+**A**: 
+1. 确保 `exportFunctions` 云函数已正确部署
+2. 检查云存储空间是否充足
+3. 单次导出日期范围不要超过31天
+4. 检查浏览器是否允许下载文件
+
+### Q6: 如何备份数据？
+
+**A**: 
+1. 使用数据导出功能定期导出订单数据
+2. 在云开发控制台中导出数据库集合
+3. 使用云开发的备份功能（如有开通）
 
 ---
 
