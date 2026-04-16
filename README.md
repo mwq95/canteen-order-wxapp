@@ -273,6 +273,30 @@ npm run deploy:functions
 
 ## 🔧 配置说明
 
+### 敏感信息说明
+
+本项目包含敏感配置文件，这些文件已被 ` .gitignore` 排除，不会提交到仓库。首次使用时需要手动配置：
+
+| 文件 | 说明 | 模板文件 |
+|------|------|----------|
+| `cloudbaserc.json` | 云开发环境ID | `cloudbaserc.example.json` |
+| `project.config.json` | 小程序 AppID | `project.config.example.json` |
+| `miniprogram/config.js` | 订阅消息模板ID | `miniprogram/config.example.js` |
+
+**配置步骤**：
+
+1. 复制模板配置文件：
+```bash
+cp cloudbaserc.example.json cloudbaserc.json
+cp project.config.example.json project.config.json
+cp miniprogram/config.example.js miniprogram/config.js
+```
+
+2. 编辑各配置文件，填入你的信息：
+   - `cloudbaserc.json`：填入云开发环境ID
+   - `project.config.json`：填入微信小程序 AppID
+   - `miniprogram/config.js`：填入订阅消息模板ID
+
 ### 订阅消息模板配置
 
 编辑 `miniprogram/config.js`：
