@@ -143,8 +143,8 @@ miniprogram-1/
 #### 1. 克隆项目
 
 ```bash
-git clone https://github.com/your-username/canteen-order-miniprogram.git
-cd canteen-order-miniprogram
+git clone https://github.com/mwq95/canteen-order-wxapp.git
+cd canteen-order-wxapp
 ```
 
 #### 2. 安装依赖
