@@ -5,7 +5,7 @@
 一个基于微信小程序云开发的食堂订餐管理系统
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.6.0-green.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.7.0-green.svg)](package.json)
 [![Platform](https://img.shields.io/badge/platform-WeChat-green.svg)](https://developers.weixin.qq.com/miniprogram/dev/framework/)
 
 [功能特性](#功能特性) • [快速开始](#快速开始) • [部署指南](#部署指南) • [使用文档](#使用文档)
@@ -35,6 +35,50 @@
 > - 菜单管理
 > - 订餐名单
 > - 数据导出
+
+---
+
+## 📝 版本更新日志
+
+### v1.7 版本
+
+#### 功能更新
+
+- **用餐提醒优化**：优化微信订阅消息授权流程，提升用户体验
+
+#### 优化内容
+
+- **授权时机**：订餐成功后延迟 500ms 弹出授权请求
+- **用户反馈**：授权成功/拒绝均有明确提示
+- **文案优化**：明确告知"每次订餐需重新授权"
+- **错误处理**：云函数增加未授权错误处理
+
+### v1.6 版本
+
+#### 功能更新
+
+- **数据导出**：支持按日期范围导出订餐数据（Excel/CSV 格式）
+- **菜品管理**：独立的菜品库管理，支持增删改查和批量操作
+- **定时提醒**：
+  - 订餐提醒：每晚 20:00 自动提醒未订餐用户
+  - 用餐提醒：开饭前自动提醒已订餐用户
+- **多模板订阅消息**：支持订餐提醒和用餐提醒两种模板
+
+#### 数据库更新
+
+- 新增 `dishes` 集合（菜品库）
+
+#### 云函数更新
+
+- 新增 `dishFunctions` 云函数模块（菜品管理）
+- 新增 `exportFunctions` 云函数模块（数据导出）
+- 新增 `mealReminder` 云函数（用餐提醒定时触发）
+- 新增 `orderReminder` 云函数（订餐提醒定时触发）
+
+#### 页面更新
+
+- 新增 `dishManage` 页面（菜品管理）
+- 新增 `dataExport` 页面（数据导出）
 
 ---
 

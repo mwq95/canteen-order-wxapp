@@ -43,7 +43,7 @@ Page({
   onMealReminderChange(e) {
     const value = e.detail.value;
     if (value) {
-      this.requestSubscribeAndSave('meal');
+      this.saveSetting({ subscribeMealReminder: true });
     } else {
       this.saveSetting({ subscribeMealReminder: false });
     }

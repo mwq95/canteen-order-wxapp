@@ -51,8 +51,13 @@ const sendMealReminder = async (openid, mealType, dishes) => {
     
     return { success: true, result };
   } catch (err) {
-    console.error(`发送用餐提醒失败: ${openid}`, err);
-    return { success: false, error: err };
+    if (err.errCode === 43101) {
+      console.warn(`用户 ${openid} 未授权或授权已过期`);
+      return { success: false, error: '用户未授权', code: 'NO_AUTH' };
+    } else {
+      console.error(`发送用餐提醒失败：${openid}`, err);
+      return { success: false, error: err };
+    }
   }
 };
 
@@ -73,7 +78,7 @@ exports.main = async (event, context) => {
     else mealType = '晚餐';
   }
   
-  console.log(`用餐提醒触发: ${today} ${mealType}, TriggerName: ${event.TriggerName || '手动调用'}`);
+  console.log(`用餐提醒触发：${today} ${mealType}, TriggerName: ${event.TriggerName || '手动调用'}`);
   
   try {
     const ordersRes = await db.collection('orders')

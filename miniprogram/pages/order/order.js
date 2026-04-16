@@ -445,6 +445,12 @@ Page({
 
       getApp().notifyOrderChange();
 
+      if (app.globalData.subscribeMealReminder && !existingOrder.orderId) {
+        setTimeout(() => {
+          this.requestMealSubscribeWithFeedback(mealType);
+        }, 500);
+      }
+
       // 重新加载数据以刷新界面
       this.loadData();
     }).catch(err => {
@@ -479,6 +485,38 @@ Page({
         title: '请先上传云函数',
         icon: 'none'
       });
+    });
+  },
+
+  requestMealSubscribeWithFeedback(mealType) {
+    const templateId = config.getMealReminderTemplateId();
+    if (!templateId) {
+      wx.showModal({
+        title: '提示',
+        content: '用餐提醒功能暂未配置，请联系管理员',
+        showCancel: false
+      });
+      return;
+    }
+    wx.requestSubscribeMessage({
+      tmplIds: [templateId],
+      success: (res) => {
+        if (res[templateId] === 'accept') {
+          wx.showToast({
+            title: '已开启用餐提醒',
+            icon: 'success',
+            duration: 1500
+          });
+        } else {
+          wx.showToast({
+            title: '本次不会收到提醒',
+            icon: 'none',
+            duration: 1500
+          });
+        }
+      },
+      fail: () => {
+      }
     });
   }
 });
