@@ -1,0 +1,103 @@
+{
+  "version": "2.0",
+  "envId": "your-cloud-env-id",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "userFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      }
+    },
+    {
+      "name": "configFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      }
+    },
+    {
+      "name": "menuFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      }
+    },
+    {
+      "name": "orderFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      }
+    },
+    {
+      "name": "dishFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      }
+    },
+    {
+      "name": "exportFunctions",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      }
+    },
+    {
+      "name": "sendSubscribeMessage",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      }
+    },
+    {
+      "name": "mealReminder",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      },
+      "triggers": [
+        {
+          "name": "breakfastReminder",
+          "type": "timer",
+          "config": "0 30 7 * * * *"
+        },
+        {
+          "name": "lunchReminder",
+          "type": "timer",
+          "config": "0 30 11 * * * *"
+        },
+        {
+          "name": "dinnerReminder",
+          "type": "timer",
+          "config": "0 0 17 * * * *"
+        }
+      ]
+    },
+    {
+      "name": "orderReminder",
+      "config": {
+        "timeout": 60,
+        "memorySize": 256,
+        "runtime": "Nodejs18.15"
+      },
+      "triggers": [
+        {
+          "name": "orderReminder",
+          "type": "timer",
+          "config": "0 0 20 * * * *"
+        }
+      ]
+    }
+  ]
+}
