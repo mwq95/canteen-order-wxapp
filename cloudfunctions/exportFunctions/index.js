@@ -171,13 +171,11 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
 
-  let isAdmin = false;
-  if (openid) {
-    isAdmin = await checkIsAdmin(openid);
-  } else {
-    isAdmin = true;
+  if (!openid) {
+    return { success: false, error: '无法获取用户身份' };
   }
 
+  const isAdmin = await checkIsAdmin(openid);
   if (!isAdmin) {
     return { success: false, error: '您没有权限导出数据' };
   }
