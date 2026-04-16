@@ -68,9 +68,14 @@ const auth = {
       return true;
     }
 
-    // 用户管理页面只有管理员可访问
-    if (pageType === 'userManage') {
+    // 用户管理、数据导出页面只有管理员可访问
+    if (pageType === 'userManage' || pageType === 'dataExport') {
       return role === 'admin';
+    }
+
+    // 菜品管理页面需要 admin 或 kitchen 角色
+    if (pageType === 'dishManage') {
+      return role === 'admin' || role === 'kitchen';
     }
 
     // 其他管理页面需要 admin 或 kitchen 角色

@@ -22,7 +22,7 @@ Page({
       }, 1500);
       return;
     }
-    if (!auth.isAdmin()) {
+    if (!auth.canAccess('dishManage')) {
       wx.showToast({ title: '无权限访问', icon: 'none' });
       setTimeout(() => {
         wx.switchTab({ url: '/pages/order/order' });
