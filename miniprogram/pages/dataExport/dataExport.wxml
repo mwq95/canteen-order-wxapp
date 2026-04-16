@@ -89,7 +89,7 @@
   <view class="tips-section">
     <view class="tips-title">导出说明</view>
     <view class="tips-list">
-      <text class="tip-item">• 单次导出最多支持31天的数据</text>
+      <text class="tip-item">• 单次导出最多支持3个月的数据</text>
       <text class="tip-item">• 导出文件将保存到手机本地</text>
       <text class="tip-item">• Excel格式支持复杂表格，CSV格式兼容性更好</text>
     </view>

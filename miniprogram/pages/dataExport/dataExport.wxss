@@ -201,6 +201,9 @@
   font-size: 30rpx;
   font-weight: 500;
   border: none;
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .preview-btn {

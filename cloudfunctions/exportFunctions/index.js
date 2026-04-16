@@ -190,8 +190,8 @@ exports.main = async (event, context) => {
   const end = new Date(endDate);
   const diffDays = (end - start) / (1000 * 60 * 60 * 24);
 
-  if (diffDays > 31) {
-    return { success: false, error: '单次导出最多支持31天的数据' };
+  if (diffDays > 93) {
+    return { success: false, error: '单次导出最多支持3个月的数据' };
   }
 
   switch (event.type) {
