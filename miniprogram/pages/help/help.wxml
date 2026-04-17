@@ -13,7 +13,7 @@
 2. 选择日期查看当日菜单
 3. 点击菜品进行选择（选中会高亮显示）
 4. 点击底部「订餐」按钮提交
-5. 订餐成功后会收到微信通知（如已开启）</view>
+5. 订餐成功后可选择开启用餐提醒</view>
     </view>
 
     <view class="help-item">
@@ -35,7 +35,32 @@
       <view class="help-q">如何对餐品进行评价？</view>
       <view class="help-a">• 开饭时间后，订单状态变为「已完成」
 • 此时会出现「评价」按钮
-• 点击即可进入评价页面打分和留言</view>
+• 点击即可进入评价页面，对每道菜单独打分和留言
+• 评价由日期+餐次+菜名+手机号唯一确定</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何提交意见建议？</view>
+      <view class="help-a">• 进入「我的」→「意见建议」
+• 输入您的建议或反馈（最多500字）
+• 提交后管理员和厨房工作人员可查看
+• 您的建议将帮助我们改进服务</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何设置提醒？</view>
+      <view class="help-a">• 进入「我的」→「提醒设置」
+• 订餐提醒：每晚 20:00 提醒未订餐用户
+• 用餐提醒：开饭前提醒已订餐用户
+• 注意：用餐提醒每次订餐需重新授权</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何查看订餐统计？</view>
+      <view class="help-a">• 进入「我的」→「订餐统计」
+• 查看近 30 天订餐次数
+• 查看总计订餐次数
+• 了解个人订餐情况</view>
     </view>
   </view>
 
@@ -47,19 +72,39 @@
       <view class="help-a">• 进入管理后台 → 菜单管理
 • 选择日期添加或编辑当日菜单
 • 为每餐（早/午/晚）添加菜品名称
-• 支持添加多个菜品</view>
+• 支持从菜品库快速选择菜品</view>
     </view>
-  </view>
-
-  <view class="section" wx:if="{{showAdmin}}">
-    <view class="section-title">管理功能</view>
 
     <view class="help-item">
-      <view class="help-q">如何管理人员？</view>
-      <view class="help-a">• 进入管理后台 → 人员管理
-• 点击「添加人员」录入新员工信息
-• 设置员工的角色（管理员/工作人员/厨房）
-• 支持编辑和停用操作</view>
+      <view class="help-q">如何管理菜品库？</view>
+      <view class="help-a">• 进入管理后台 → 菜品管理
+• 添加常用菜品到菜品库
+• 支持搜索、批量选择和批量删除
+• 菜单设置时可快速选择菜品库中的菜品</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何查看订餐名单？</view>
+      <view class="help-a">• 进入管理后台 → 订餐名单
+• 查看每日各餐次的订餐人数
+• 查看每道菜需要准备的份数
+• 点击餐次卡片可查看订单明细</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何查看菜品评价？</view>
+      <view class="help-a">• 进入管理后台 → 菜品评价
+• 按日期查看菜品评价统计
+• 查看每道菜的平均评分和评价人数
+• 支持查看评价文字详情</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何查看意见建议？</view>
+      <view class="help-a">• 进入管理后台 → 意见建议
+• 查看用户提交的意见建议列表
+• 下拉刷新，上拉加载更多
+• 越晚的建议越靠前显示</view>
     </view>
 
     <view class="help-item">
@@ -68,6 +113,27 @@
 • 设置各餐的截止订餐时间
 • 设置各餐的开饭时间
 • 保存后立即生效</view>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{showAdmin}}">
+    <view class="section-title">管理功能</view>
+
+    <view class="help-item">
+      <view class="help-q">如何管理人员？</view>
+      <view class="help-a">• 进入管理后台 → 用户管理
+• 点击「添加人员」录入新员工信息
+• 设置员工的角色（管理员/厨房/普通员工）
+• 支持搜索、编辑、批量选择和批量离职</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">如何导出订餐数据？</view>
+      <view class="help-a">• 进入管理后台 → 数据导出
+• 选择日期范围（最多31天）
+• 预览导出数据（前10条）
+• 选择格式（Excel/CSV）并导出
+• 文件将自动下载到本地</view>
     </view>
 
     <view class="help-item">
@@ -79,7 +145,33 @@
     </view>
   </view>
 
+  <view class="section">
+    <view class="section-title">常见问题</view>
+
+    <view class="help-item">
+      <view class="help-q">为什么用餐提醒每次都要授权？</view>
+      <view class="help-a">• 微信订阅消息为一次性订阅
+• 每次发送提醒都需要用户单独授权
+• 这是微信为减少用户骚扰的设计
+• 每次订餐时选择同意即可收到提醒</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">订单状态说明？</view>
+      <view class="help-a">• 待用餐：已订餐，未到开饭时间
+• 已完成：已过开饭时间，可进行评价
+• 已取消：用户主动取消的订单</view>
+    </view>
+
+    <view class="help-item">
+      <view class="help-q">角色权限说明？</view>
+      <view class="help-a">• 普通员工：订餐、查看订单、评价、提交建议
+• 厨房：普通员工权限 + 菜单管理、订餐名单、菜品管理、评价查看、建议查看
+• 管理员：厨房权限 + 用户管理、数据导出</view>
+    </view>
+  </view>
+
   <view class="footer">
-    <text class="version">版本号：v1.3.0</text>
+    <text class="version">版本号：v1.7.0</text>
   </view>
 </view>
